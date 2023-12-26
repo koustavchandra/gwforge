@@ -1,0 +1,12 @@
+# Proposed ET detector with triangular configuration
+name = 'ET'
+power_spectral_density = PowerSpectralDensity(psd_file='ET_D_psd.txt')
+minimum_frequency = 7
+maximum_frequency = 2048
+length = 10
+latitude = 43 + 37. / 60 + 53.0921 / 3600
+longitude = 10 + 30. / 60 + 16.1878 / 3600
+elevation = 51.884
+xarm_azimuth = 70.5674
+yarm_azimuth = 130.5674
+shape = 'Triangle'

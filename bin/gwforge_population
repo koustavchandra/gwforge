@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+import configparser, argparse, logging, json, h5py, numpy
+from GWForge.conversion import *
+from GWForge import utils
+from GWForge.population.mass import Mass
+from GWForge.population.spin import Spin
+from GWForge.population.redshift import Redshift
+from GWForge.population.extrinsic import Extrinsic
+from lal import YRJUL_SI
+
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(message)s', 
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+# Read configuration from ini file
+config = configparser.ConfigParser()
+parser = argparse.ArgumentParser(description=__doc__)
+
+# Parse command-line arguments
+parser.add_argument('--config-file', 
+                    required=True,
+                    help='Configuration ini file')
+parser.add_argument('--output-file', 
+                    required=True, 
+                    help='HDF5 file to store injection information')
+parser.add_argument('--source-type', 
+                    type=str.lower,
+                    choices=['bbh', 'bns', 'nsbh', 'pbh', 'imbhb', 'imbbh'],
+                    default='bbh',
+                    help='Signal source type [Default: BBH]')
+parser.add_argument('--reference-frequency', 
+                    type=float,
+                    default=5.,
+                    help='Reference frequency [Default: 5Hz]')
+opts = parser.parse_args()
+
+# Read configuration file
+config.read(opts.config_file)
+config.optionxform = utils.custom_optionxform
+# Initialise samples dictionary
+samples = {}
+
+# Generate redshift samples
+logging.info('Generating redshift samples')
+
+# Extract parameters from configuration
+redshift_model = config.get('Redshift', 'redshift-model')
+local_merger_rate_density = config.getfloat('Redshift', 'local-merger-rate-density')
+maximum_redshift = config.getfloat('Redshift', 'maximum-redshift')
+gps_start_time = config.getfloat('Redshift', 'gps_start-time')
+analysis_time = config.getfloat('Redshift', 'analysis-time', fallback=YRJUL_SI)
+cosmology = config.get('Redshift', 'cosmology', fallback='Planck18')
+redshift_parameters = config.get('Redshift', 'redshift-parameters', fallback='{"gamma": 2.7, "kappa": 5.6, "z_peak": 1.9}')
+# Use json.loads to parse the JSON string
+redshift_parameters = json.loads(redshift_parameters.replace("'", "\""))
+time_delay_model = config.get('Redshift', 'time-delay-model', fallback='inverse')
+H0 = config.getfloat('Redshift', 'H0', fallback=None)
+Om0 = config.getfloat('Redshift', 'Om0', fallback=None)
+Ode0 = config.getfloat('Redshift', 'Ode0', fallback=None)
+
+# Create Redshift object and generate samples
+z = Redshift(redshift_model=redshift_model, 
+            local_merger_rate_density=local_merger_rate_density, 
+            maximum_redshift=maximum_redshift, gps_start_time=gps_start_time, 
+            analysis_time=analysis_time,                  
+            cosmology = cosmology, 
+            parameters = redshift_parameters,
+            time_delay_model = time_delay_model,
+            H0=H0, Om0=Om0, Ode0=Ode0)
+
+redshift_samples = z.sample()
+for key in redshift_samples.keys():
+    samples[key] = redshift_samples[key]
+samples['luminosity_distance'] = redshift_to_luminosity_distance(samples['redshift'])
+
+# Generate mass samples
+logging.info('Generating mass samples')
+mass_model = config.get('Mass', 'mass-model')
+parameters = json.loads(config.get('Mass', 'mass-parameters').replace("'", "\""))
+
+# Create Mass object and generate samples
+m = Mass(mass_model=mass_model, 
+         number_of_samples=len(samples['redshift']), 
+         parameters=parameters)
+
+mass_samples = m.sample()
+
+for key in mass_samples.keys():
+    samples[key] = mass_samples[key]
+
+# Generate spin samples
+logging.info('Generating spin samples')
+spin_model = config.get('Spin', 'spin-model')
+try:
+    parameters = json.loads(config.get('Spin', 'spin-parameters').replace("'", "\""))
+except:
+    logging.warning('spin_parameters not provided. Assuming default values')
+    parameters = {}
+
+# Create Spin object and generate samples    
+s = Spin(spin_model = spin_model,
+         number_of_samples=len(samples['redshift']), 
+         parameters=parameters)
+
+spin_samples = s.sample()
+for key in spin_samples.keys():
+    samples[key] = spin_samples[key]
+
+# Generate extrinsic parameter samples
+logging.info('Generating extrinsic parameters')
+if 'Extrinsic' in config:
+    if config.has_option('Extrinsic', 'extrinsic-prior-file'):
+        extrinsic_prior_file = config.get('Extrinsic', 'extrinsic-prior-file')
+    else:
+        logging.warning("No 'extrinsic_prior_file' provided. Using default priors")
+        extrinsic_prior_file = None
+else:
+    logging.warning("No 'extrinsic_prior_file' provided. Using default priors")
+
+# Create Extrinsic object and generate samples    
+e = Extrinsic(number_of_samples = len(samples['redshift']), 
+              prior_file = extrinsic_prior_file)
+
+extrinsic_samples = e.sample()
+for key in extrinsic_samples.keys():
+    samples[key] = extrinsic_samples[key]
+
+# Handle additional calculations for specific source types (e.g., BNS, NSBH)
+if opts.source_type == 'bns' or opts.source_type == 'nsbh':
+    try:
+        eos_file = config.get('EOS', 'eos_file')
+        logging.info('Using {} file to estimate tidal deformability parameter of components'.format(eos_file))
+        samples['lambda_2'] = get_lambda(file=eos_file, source_mass=samples['mass_2_source'])
+        if opts.source_type == 'bns':
+            samples['lambda_1'] = get_lambda(file=eos_file, source_mass=samples['mass_1_source'])
+    except:
+        logging.warning('No EOS provided. Not including tidal deformation parameters')
+
+# Generate all possible parameters of the specified source type
+logging.info('Generating all possible parameters of {}'.format(opts.source_type))
+samples = generate_detector_frame_parameters(samples)
+samples['reference_frequency'] = numpy.ones_like(samples['mass_1']) * opts.reference_frequency
+samples = generate_spin_parameters(samples)
+logging.info('Saving data in {}'.format(opts.output_file))
+with h5py.File(opts.output_file,'w') as f:
+    for key in samples.keys():
+        utils.hdf_append(f, key, samples[key])
+logging.info('Done!')

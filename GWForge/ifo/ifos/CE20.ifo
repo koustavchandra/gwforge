@@ -1,0 +1,11 @@
+# Proposed XG Cosmic Explorer with 20km arms (Gulf of Mexico)
+name = 'CE20'
+power_spectral_density = None
+minimum_frequency = 7
+maximum_frequency = 4096
+length = 40
+latitude = 29
+longitude = -94
+xarm_azimuth = 200
+yarm_azimuth = 290
+elevation = 0

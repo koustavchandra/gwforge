@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+'''
+Estimates power spectrum for data segments
+'''
+import numpy, os, h5py, logging, argparse
+from rich.progress import track
+from pycbc.frame import read_frame
+from pycbc.psd import welch, interpolate, inverse_spectrum_truncation
+import pandas as pd
+from lal import LIGOTimeGPS
+from GWForge.utils import hdf_append
+
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(message)s', 
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--frame-file', 
+                    type=str, 
+                    required=True)
+parser.add_argument('--stride', 
+                    type=int, 
+                    default=512)
+parser.add_argument('--psd-segment-length', 
+                    type=int,
+                    default=16,
+                    help='Segment length in seconds')
+parser.add_argument('--psd-segment-stride', 
+                    type=int,
+                    default=8,
+                    help='Separation between consecutive segments in seconds')
+parser.add_argument('--gps-start-time', 
+                    type=float,
+                    default=None)
+parser.add_argument('--duration', 
+                    type=float, 
+                    default=None)
+parser.add_argument('--output-file',
+                    type=str, 
+                    required=True)
+opts = parser.parse_args()
+
+if not opts.gps_start_time:
+    gps_start_time = LIGOTimeGPS(opts.gps_start_time)
+    
+stride = opts.stride
+gps_end_time = gps_start_time + opts.stride
+psds = []
+logging.info('Reading frame file {}'.format(opts.frame_file))
+logging.info('Estimating PSDs of segments with lengths={}s'.format(psd_segment_length))
+for k in track(range(int((4096-gps_start_time)/opts.stride))):
+    ts = read_frame(location=opts.frame_file, channels='CE40:INJ', start_time=gps_start_time, end_time=gps_end_time)
+    # delta_t = 1./ts.sample_rate
+    segment_length = int(opts.psd_segment_length * ts.sample_rate)
+    segment_stride = int(opts.psd_segment_stride * ts.sample_rate)
+    #estimate psd using welch method
+    estimated_psd = welch(ts.time_slice(gps_start_time, gps_end_time), 
+                          seg_len=segment_length, 
+                          seg_stride = segment_stride, 
+                          avg_method='median-mean')
+    estimated_psd = interpolate(estimated_psd, 1. / ts.duration)
+    estimated_psd = inverse_spectrum_truncation(estimated_psd,
+                                                segment_length, 
+                                                low_frequency_cutoff=7., 
+                                                trunc_method='hann')
+
+    psds.append(estimated_psd.data)
+    gps_start_time = gps_start_time + opts.stride
+    gps_end_time = gps_end_time + opts.stride
+    if gps_end_time > 4096:
+        break
+df = pd.DataFrame()
+df['frequency_array'] = estimated_psd.sample_frequencies
+for k in range(len(psds)):
+    df['psd_{}'.format(k)] = psds[k]
+df.to_csv('{}.csv'.format(opts.output_file), index=False)    
+logging.info('Done!')

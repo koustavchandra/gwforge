@@ -1,0 +1,11 @@
+# Proposed XG Cosmic Explorer with 40km arms (Pacific)
+name = 'CE40'
+power_spectral_density = None
+minimum_frequency = 7
+maximum_frequency = 4096
+length = 40 
+latitude = 46
+longitude = -125
+xarm_azimuth = 260
+yarm_azimuth = 350
+elevation = 0

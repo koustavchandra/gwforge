@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+import configparser, argparse, logging, json, numpy, os, lal
+from GWForge.ifo.detectors import Network
+from GWForge.utils import *
+from gwpy.timeseries import TimeSeries
+from pycbc.types.timeseries import TimeSeries as pycbc_timeseries
+from pycbc.noise.reproduceable import colored_noise
+from pycbc.psd import from_txt
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(message)s', 
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+def load_psd(ifo):
+    try:
+        psd_file = ifo.power_spectral_density.asd_file
+        frequency_array = numpy.loadtxt(psd_file, usecols=(0,))
+    except:
+        psd_file = ifo.power_spectral_density.psd_file
+        frequency_array = numpy.loadtxt(psd_file, usecols=(0,))
+        
+    delta_frequency = 1./16
+    length = int(ifo.sampling_frequency / 2 / delta_frequency) + 1
+    psd = from_txt(filename=psd_file,
+                   low_freq_cutoff=ifo.minimum_frequency,
+                   is_asd_file='asd' in psd_file,
+                   length=length,
+                   delta_f=delta_frequency)
+    
+    return psd
+
+def pycbc_reproducable_noise(ifo, start, end, sampling_frequency, seed=0):
+    logging.info('Generting Gaussian noise from {} to {}s'.format(start, end))
+    psd = load_psd(ifo)
+    noise = colored_noise(psd,
+                          start_time = start,
+                          end_time = end,
+                          seed=seed,
+                          sample_rate=sampling_frequency,
+                          low_frequency_cutoff=ifo.minimum_frequency)
+    epoch = lal.LIGOTimeGPS(noise.sample_times[0])
+    noise = pycbc_timeseries(numpy.asarray(noise), delta_t=1./sampling_frequency, epoch=epoch)
+    return TimeSeries.from_pycbc(noise)
+
+# Read configuration from ini file
+config = configparser.ConfigParser()
+parser = argparse.ArgumentParser(description=__doc__)
+
+parser.add_argument('--config-file', 
+                    required=True,
+                    help='Configuration ini file')
+parser.add_argument('--output-directory', 
+                    required = True,
+                    help='Output directory to store frame files')
+parser.add_argument('--gps-start-time', 
+                    type=int, 
+                    default=None, 
+                    help='GPS start time of data (default: None) (float seconds)')
+parser.add_argument('--gps-end-time', 
+                    type=int, 
+                    default=None, 
+                    help='GPS end time of data (default: None) (float seconds)')
+
+opts = parser.parse_args()
+config.read(opts.config_file)
+
+logging.info('Initialising detector network')
+detectors = json.loads(config.get('IFOS', 'detectors').replace("'", "\""))
+
+try:
+    psd_files = json.loads(config.get('IFOS', 'psd-dict').replace("'", "\""))
+    ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
+except:
+    ifos = Network(ifos=detectors).initialise_ifos()
+
+ifo_directory = {}
+for ifo in ifos:
+    #Create directory if it doesn't exist
+    ifo_directory[ifo.name] = os.path.join(opts.output_directory, ifo.name)
+    if not os.path.exists(ifo_directory[ifo.name]):
+        os.makedirs(ifo_directory[ifo.name])
+    else:
+        logging.warn('{} directory exists. Files may be overwritten!'.format(ifo_directory[ifo.name]))
+        
+if opts.gps_start_time and opts.gps_end_time:
+    gps_start_time = opts.gps_start_time
+    duration = opts.gps_end_time - gps_start_time
+    if duration < 0:
+        raise ValueError('GPS end time must be greater than GPS start time')
+else:            
+    #Default value UTC	Jan 01, 2040 00:00:00
+    gps_start_time = config.getint('IFOS', 
+                                   'gps-start-time', 
+                                   fallback = 1893024018)
+    #Default strain_data will have a value of 4096s 
+    duration = config.getint('IFOS', 
+                             'duration', 
+                             fallback = 4096.)
+
+
+
+#Default strain_data will have sampling frequency of 16384Hz
+sampling_frequency = config.getint('IFOS', 
+                                   'sampling-frequency', 
+                                   fallback = 16384)
+
+#Default is Gaussian Noise. Other option is Zero noise
+noise_type = remove_special_characters(config.get('IFOS', 
+                                                  'noise', 
+                                                  fallback='gaussian').lower())
+
+noise_source = config.get('IFOS', 'noise-type', fallback='pycbc').lower()
+seed = config.getint('IFOS', 'seed', fallback=0)
+scheme = config.get('IFOS', 'fft-scheme', fallback='mkl')
+# MKL screams if size is > 2^24
+from pycbc.fft.backend_support import set_backend
+set_backend([scheme])
+
+duration = split_duration(duration)
+logging.info('Generating noise data of interferometer network')
+for dur in duration:        
+    for ifo in ifos:
+        if 'bilby' in noise_source:
+            if noise_type == 'gaussian':
+                # Replace this by PyCBC noise reproducable
+                ifo.set_strain_data_from_power_spectral_density(sampling_frequency=sampling_frequency,
+                                                                duration=dur,
+                                                                start_time=gps_start_time)
+            elif 'zero' in noise_type:
+                ifo.set_strain_data_from_zero_noise(sampling_frequency=sampling_frequency,
+                                                    duration=dur,
+                                                    start_time=gps_start_time)
+        elif 'pycbc' in noise_source:
+            ifo.sampling_frequency = sampling_frequency
+            if noise_type == 'gaussian':
+                noise = pycbc_reproducable_noise(ifo=ifo, 
+                                                 start=gps_start_time, 
+                                                 end=gps_start_time + dur, 
+                                                 sampling_frequency=sampling_frequency, 
+                                                 seed=0)
+                ifo.strain_data.set_from_gwpy_timeseries(noise)
+            else:
+                raise ValueError('{} is currently not supported'.format(noise))
+        else:
+            raise ValueError('{} is currently not supported'.format(noise))
+        logging.info('Saving {} data'.format(ifo.name))        
+        data = TimeSeries(data=ifo.time_domain_strain, 
+                          times=ifo.time_array, 
+                          channel = '{}:INJ'.format(ifo.name, ifo.sampling_frequency))
+        data.write(target='{}/{}-{}-{}.gwf'.format(ifo_directory[ifo.name],
+                                                   ifo.name, 
+                                                   int(gps_start_time), 
+                                                   int(dur)))
+    gps_start_time = gps_start_time + dur
+logging.info('Done!')

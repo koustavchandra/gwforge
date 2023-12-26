@@ -1,0 +1,260 @@
+#!/usr/bin/env python
+'''
+Creates a Condor DAG for job submission in particular sequence.
+'''
+import numpy, os, logging, argparse, subprocess
+from rich.progress import track
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(message)s', 
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+
+noise='''######################################################################
+# Submit Script for NOISE
+######################################################################
+universe = vanilla
+executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_noise
+arguments = "--config-file {0} --output-directory {1} --gps-start-time {2} --gps-end-time {3}"
+log = {4}/noise-{5}.log
+error = {6}/noise-{7}.err
+output = {8}/noise-{9}.out
+accounting_group = {10}
+notification = NEVER
+request_cpus = 1
+getenv = True
+request_disk = 100MB
+priority = 1000
+machine_count = 1
++InitialRequestMemory = 5000
+request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
+periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
+periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
+queue 
+'''
+
+bbh='''######################################################################
+# Submit Script for BBH
+######################################################################
+universe = vanilla
+executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
+arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
+log = {4}/bbh-{5}.log
+error = {6}/bbh-{7}.err
+output = {8}/bbh-{9}.out
+accounting_group = {10}
+notification = NEVER
+request_cpus = 1
+getenv = True
+request_disk = 100MB
+priority = 1000
+machine_count = 1
++InitialRequestMemory = 5000
+request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
+periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
+periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
+queue 
+'''
+
+bns='''######################################################################
+# Submit Script for BNS
+######################################################################
+universe = vanilla
+executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
+arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
+log = {4}/bns-{5}.log
+error = {6}/bns-{7}.err
+output = {8}/bns-{9}.out
+accounting_group = {10}
+notification = NEVER
+request_cpus = 1
+getenv = True
+request_disk = 100MB
+priority = 1000
+machine_count = 1
++InitialRequestMemory = 5000
+request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
+periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
+periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
+queue 
+'''
+
+nsbh='''######################################################################
+# Submit Script for NSBH
+######################################################################
+universe = vanilla
+executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
+arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
+log = {4}/nsbh-{5}.log
+error = {6}/nsbh-{7}.err
+output = {8}/nsbh-{9}.out
+accounting_group = {10}
+notification = NEVER
+request_cpus = 1
+getenv = True
+request_disk = 100MB
+priority = 1000
+machine_count = 1
++InitialRequestMemory = 5000
+request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
+periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
+periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
+queue 
+'''
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--gps-start-time',                     
+                    type=int, 
+                    required=True, 
+                    help='GPS start time of data (int seconds)')
+parser.add_argument('--gps-end-time', 
+                    type=int, 
+                    required=True, 
+                    help='GPS end time of data (int seconds)')
+parser.add_argument('--output-directory',
+                    type=str,
+                    default='outdir',
+                    help="The output directory. If outdir already exists, an auto-incrementing naming scheme is used",)
+parser.add_argument('--log-directory',
+                    type=str,
+                    help="If given, an alternative path for the log output")
+
+parser.add_argument('--noise-configuration-file',
+                    type=str,
+                    required=True,
+                    help='Path to noise configuration file.')
+
+parser.add_argument('--bbh-configuration-file',
+                    type=str,
+                    default=None,
+                    help='Path to binary black hole configuration file.')
+
+parser.add_argument('--bns-configuration-file',
+                    type=str,
+                    default=None,
+                    help='Path to binary neutron star configuration file.')
+
+parser.add_argument('--nsbh-configuration-file',
+                    type=str,
+                    default=None,
+                    help='Path to neutron star black hole binary configuration file.')
+
+parser.add_argument('--accounting-group',
+                    type=str,
+                    default='ligo.dev.o4.cbc.pe.lalinference',
+                    help="Accounting group user to use (see, https://accounting.ligo.org/user) [default: ligo.dev.o4.cbc.pe.lalinference]")
+
+parser.add_argument('--workflow-name',
+                    type=str, 
+                    default='gwforge',
+                    help='Name of condor dag workflow')
+
+parser.add_argument('--submit-now', 
+                    action='store_true',
+                    help='Submits condor dag now')
+
+opts = parser.parse_args()
+
+logging.info('Creating output, submit and log directory')
+output_directory = opts.output_directory
+if os.path.exists(output_directory):
+    i = 1
+    while(True):
+        new_directory = f'{output_directory}_{i}'
+        if not os.path.exists(new_directory):
+            output_directory = new_directory
+            break
+        i += 1
+else:
+    os.makedirs(output_directory)
+try:
+    submit_directory = os.path.join(output_directory, 'submit')
+    data_directory = os.path.join(output_directory, 'data')
+    os.makedirs(submit_directory)
+    if not opts.log_directory:
+        log_directory = os.path.join(opts.output_directory, 'logs')
+    else:
+        log_directory = opts.log_directory
+    os.makedirs(log_directory)
+
+except:
+    logging.warning('Submit and log directory already exist')
+    
+logging.info('Checking if jobs can be parallelised or not based on gps-start-time and gps-end-time')
+# Parallelise only if duration > 40960
+minimum_duration = 40960
+if (opts.gps_end_time - opts.gps_start_time) <= minimum_duration:
+    time = [opts.gps_start_time, opts.gps_end_time]
+else:
+    number_of_intervals = (opts.gps_end_time - opts.gps_start_time) // minimum_duration
+    # Calculate the time points for each interval
+    time = numpy.arange(opts.gps_start_time, opts.gps_start_time + number_of_intervals * minimum_duration, minimum_duration)
+    # Append the last time point with a duration that is any integer
+    time = numpy.append(time, opts.gps_end_time)
+
+condor_dag_file = os.path.join(output_directory, '{}.condor'.format(opts.workflow_name))
+with open(condor_dag_file, 'w') as dag_file:
+    noise_job_ids = []    
+    for k in track(range(len(time)-1), description='Writing noise submit files'):
+        noise_submit_file = os.path.join(submit_directory,'noise-{}.sub'.format(k))
+        with open(noise_submit_file, 'w') as f:
+            f.write(noise.format(opts.noise_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+        noise_job_id = f'noise_{k}'
+        dag_file.write('JOB {} {}\n'.format(noise_job_id, noise_submit_file))
+        dag_file.write('RETRY {} 3\n'.format(noise_job_id))
+        noise_job_ids.append(noise_job_id)
+
+    bbh_job_ids = []    
+    if opts.bbh_configuration_file:
+
+        for k in track(range(len(time)-1), description='Writing BBH submit files'):
+            bbh_submit_file = os.path.join(submit_directory,'bbh-{}.sub'.format(k))
+            with open(bbh_submit_file, 'w') as f:
+                f.write(bbh.format(opts.bbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+            bbh_job_id = f'bbh_{k}'
+            dag_file.write('JOB {} {}\n'.format(bbh_job_id, bbh_submit_file))
+            dag_file.write('RETRY {} 3\n'.format(bbh_job_id))
+            bbh_job_ids.append(bbh_job_id)
+    
+    bns_job_ids = []
+    if opts.bns_configuration_file:    
+        for k in track(range(len(time)-1), description='Writing BNS submit files'):
+            bns_submit_file = os.path.join(submit_directory,'bns-{}.sub'.format(k))
+            with open(bns_submit_file, 'w') as f:
+                f.write(bns.format(opts.bns_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+            bns_job_id = f'bns_{k}'
+            dag_file.write('JOB {} {}\n'.format(bns_job_id, bns_submit_file))
+            dag_file.write('RETRY {} 3\n'.format(bns_job_id))
+            bns_job_id.append(bns_job_id)
+    
+    nsbh_job_ids = []                
+    if opts.nsbh_configuration_file:    
+        for k in track(range(len(time)-1), description='Writing NSBH submit files'):
+            nsbh_submit_file = os.path.join(submit_directory,'nsbh-{}.sub'.format(k))
+            with open(nsbh_submit_file, 'w') as f:
+                f.write(nsbh.format(opts.nsbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+            nsbh_job_id = f'nsbh_{k}'
+            dag_file.write('JOB {} {}\n'.format(nsbh_job_id, nsbh_submit_file))
+            dag_file.write('RETRY {} 3\n'.format(nsbh_job_id))
+            nsbh_job_ids.append(nsbh_job_id)
+            #Add dependency on noise jobs
+    
+    if bbh_job_ids:
+        #Add dependency on noise jobs
+        for bbh_job_id in bbh_job_ids:
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(noise_job_ids), bbh_job_id))
+    if bns_job_ids:
+        for bns_job_id in bns_job_ids:
+            #Add dependency on bbh jobs
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(bbh_job_ids), bns_job_id))
+    if nsbh_job_ids:
+        for nsbh_job_id in nsbh_job_ids:
+            #Add dependency on bbh jobs
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(bns_job_ids), nsbh_job_id))
+        
+logging.info('Created Condor DAG file {}'.format(condor_dag_file))
+if opts.submit_now:
+    try:
+        subprocess.run(['condor_submit_dag', condor_dag_file], check=True)
+        logging.info('Submitted workflow successfully!')
+    except:
+        logging.error('Error submitting CONDOR DAG')

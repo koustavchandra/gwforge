@@ -1,0 +1,46 @@
+# Compiled files
+*.pyc
+__pycache__
+*.a
+*.o
+*.so
+
+# Other generated files
+*.ipynb_checkpoints
+*.h5
+*.h5.old
+*.err
+*.out
+*.log
+MANIFEST
+*.png
+
+# Mac OSX
+.DS_Store
+
+# Packages/installer info
+*.egg
+*.egg-info
+dist
+build
+eggs
+.eggs
+
+# Sphinx
+docs/api
+docs/_build
+
+# Eclipse editor project files
+.project
+.pydevproject
+.settings
+
+# Pycharm editor project files
+.idea
+
+# Visual Studio Code files
+.vscode
+
+# Floobits project files
+.floo
+.flooignore

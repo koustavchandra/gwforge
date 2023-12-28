@@ -1,11 +1,11 @@
 A lightweight code to generate mock gravitational wave detector data using user-defined population and arbritary detector sensitivity. 
 
 # Installation
-To install this library for development or use follow the instruction [here](https://github.com/koustavchandra/gwforge/blob/main/docs/source/install.md)
+To install this library for development or use, follow the instructions [here](https://github.com/koustavchandra/gwforge/blob/main/docs/source/install.md)
 
 # Documentation
 
-To generate documentation run the following command after git cloning:
+A heavily under-development documentation is accessible [here](https://koustavchandra.github.io/gwforge/)
 
 
 # License

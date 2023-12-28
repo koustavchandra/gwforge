@@ -2,7 +2,7 @@
 '''
 Creates a Condor DAG for job submission in particular sequence.
 '''
-import numpy, os, logging, argparse, subprocess
+import numpy, os, logging, argparse, subprocess, shutil
 from rich.progress import track
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s %(message)s', 
@@ -13,12 +13,12 @@ noise='''######################################################################
 # Submit Script for NOISE
 ######################################################################
 universe = vanilla
-executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_noise
-arguments = "--config-file {0} --output-directory {1} --gps-start-time {2} --gps-end-time {3}"
-log = {4}/noise-{5}.log
-error = {6}/noise-{7}.err
-output = {8}/noise-{9}.out
-accounting_group = {10}
+executable = {0}
+arguments = "--config-file {1} --output-directory {2} --gps-start-time {3} --gps-end-time {4}"
+log = {5}/noise-{6}.log
+error = {7}/noise-{8}.err
+output = {9}/noise-{10}.out
+accounting_group = {11}
 notification = NEVER
 request_cpus = 1
 getenv = True
@@ -36,12 +36,12 @@ bbh='''######################################################################
 # Submit Script for BBH
 ######################################################################
 universe = vanilla
-executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
-arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
-log = {4}/bbh-{5}.log
-error = {6}/bbh-{7}.err
-output = {8}/bbh-{9}.out
-accounting_group = {10}
+executable = {0}
+arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
+log = {5}/bbh-{6}.log
+error = {7}/bbh-{8}.err
+output = {9}/bbh-{10}.out
+accounting_group = {11}
 notification = NEVER
 request_cpus = 1
 getenv = True
@@ -59,12 +59,12 @@ bns='''######################################################################
 # Submit Script for BNS
 ######################################################################
 universe = vanilla
-executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
-arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
-log = {4}/bns-{5}.log
-error = {6}/bns-{7}.err
-output = {8}/bns-{9}.out
-accounting_group = {10}
+executable = {0}
+arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
+log = {5}/bns-{6}.log
+error = {7}/bns-{8}.err
+output = {9}/bns-{10}.out
+accounting_group = {11}
 notification = NEVER
 request_cpus = 1
 getenv = True
@@ -82,12 +82,12 @@ nsbh='''######################################################################
 # Submit Script for NSBH
 ######################################################################
 universe = vanilla
-executable = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/gwforge_inject
-arguments = "--config-file {0} --data-directory {1} --gps-start-time {2} --gps-end-time {3}"
-log = {4}/nsbh-{5}.log
-error = {6}/nsbh-{7}.err
-output = {8}/nsbh-{9}.out
-accounting_group = {10}
+executable = {0}
+arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
+log = {5}/nsbh-{6}.log
+error = {7}/nsbh-{8}.err
+output = {9}/nsbh-{10}.out
+accounting_group = {11}
 notification = NEVER
 request_cpus = 1
 getenv = True
@@ -194,10 +194,13 @@ else:
 condor_dag_file = os.path.join(output_directory, '{}.condor'.format(opts.workflow_name))
 with open(condor_dag_file, 'w') as dag_file:
     noise_job_ids = []    
+    gwforge_noise = shutil.which('gwforge_noise')
+    if gwforge_noise is None:
+        raise ValueError('{} not found!'.format(gwforge_noise))
     for k in track(range(len(time)-1), description='Writing noise submit files'):
         noise_submit_file = os.path.join(submit_directory,'noise-{}.sub'.format(k))
         with open(noise_submit_file, 'w') as f:
-            f.write(noise.format(opts.noise_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+            f.write(noise.format(gwforge_noise, opts.noise_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
         noise_job_id = f'noise_{k}'
         dag_file.write('JOB {} {}\n'.format(noise_job_id, noise_submit_file))
         dag_file.write('RETRY {} 3\n'.format(noise_job_id))
@@ -205,11 +208,13 @@ with open(condor_dag_file, 'w') as dag_file:
 
     bbh_job_ids = []    
     if opts.bbh_configuration_file:
-
+        gwforge_bbh = shutil.which('gwforge_inject')
+        if gwforge_bbh is None:
+            raise ValueError('{} not found!'.format(gwforge_bbh))        
         for k in track(range(len(time)-1), description='Writing BBH submit files'):
             bbh_submit_file = os.path.join(submit_directory,'bbh-{}.sub'.format(k))
             with open(bbh_submit_file, 'w') as f:
-                f.write(bbh.format(opts.bbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+                f.write(bbh.format(gwforge_bbh, opts.bbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
             bbh_job_id = f'bbh_{k}'
             dag_file.write('JOB {} {}\n'.format(bbh_job_id, bbh_submit_file))
             dag_file.write('RETRY {} 3\n'.format(bbh_job_id))
@@ -217,21 +222,27 @@ with open(condor_dag_file, 'w') as dag_file:
     
     bns_job_ids = []
     if opts.bns_configuration_file:    
+        gwforge_bns = shutil.which('gwforge_inject')
+        if gwforge_bns is None:
+            raise ValueError('{} not found!'.format(gwforge_bns))                
         for k in track(range(len(time)-1), description='Writing BNS submit files'):
             bns_submit_file = os.path.join(submit_directory,'bns-{}.sub'.format(k))
             with open(bns_submit_file, 'w') as f:
-                f.write(bns.format(opts.bns_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+                f.write(bns.format(gwforge_bns, opts.bns_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
             bns_job_id = f'bns_{k}'
             dag_file.write('JOB {} {}\n'.format(bns_job_id, bns_submit_file))
             dag_file.write('RETRY {} 3\n'.format(bns_job_id))
             bns_job_id.append(bns_job_id)
     
     nsbh_job_ids = []                
-    if opts.nsbh_configuration_file:    
+    if opts.nsbh_configuration_file:
+        gwforge_nsbh = shutil.which('gwforge_inject')
+        if gwforge_nsbh is None:
+            raise ValueError('{} not found!'.format(gwforge_nsbh))                            
         for k in track(range(len(time)-1), description='Writing NSBH submit files'):
             nsbh_submit_file = os.path.join(submit_directory,'nsbh-{}.sub'.format(k))
             with open(nsbh_submit_file, 'w') as f:
-                f.write(nsbh.format(opts.nsbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
+                f.write(nsbh.format(gwforge_nsbh, opts.nsbh_configuration_file, data_directory, time[k], time[k+1], log_directory, k, log_directory, k, log_directory, k, opts.accounting_group))
             nsbh_job_id = f'nsbh_{k}'
             dag_file.write('JOB {} {}\n'.format(nsbh_job_id, nsbh_submit_file))
             dag_file.write('RETRY {} 3\n'.format(nsbh_job_id))

@@ -85,7 +85,50 @@ def cornerplot(file,
         The path to save the generated corner plot. If not provided, the plot will be displayed.
     '''
     logging.info('Making Corner Plot')    
-    from pesummary.gw.plots import latex_labels
+    GWlatex_labels = {
+    "luminosity_distance": r"$d_{L} [\mathrm{Mpc}]$",
+    "geocent_time": r"$t_{c} [\mathrm{s}]$",
+    "dec": r"$\delta [\mathrm{rad}]$",
+    "ra": r"$\alpha [\mathrm{rad}]$",
+    "a_1": r"$a_{1}$",
+    "a_2": r"$a_{2}$",
+    "phi_jl": r"$\phi_{JL} [\mathrm{rad}]$",
+    "phase": r"$\phi [\mathrm{rad}]$",
+    "psi": r"$\Psi [\mathrm{rad}]$",
+    "iota": r"$\iota [\mathrm{rad}]$",
+    "tilt_1": r"$\theta_{1} [\mathrm{rad}]$",
+    "tilt_2": r"$\theta_{2} [\mathrm{rad}]$",
+    "phi_12": r"$\phi_{12} [\mathrm{rad}]$",
+    "mass_2": r"$m_{2} [M_{\odot}]$",
+    "mass_1": r"$m_{1} [M_{\odot}]$",
+    "total_mass": r"$M [M_{\odot}]$",
+    "chirp_mass": r"$\mathcal{M} [M_{\odot}]$",
+    "spin_1x": r"$S_{1x}$",
+    "spin_1y": r"$S_{1y}$",
+    "spin_1z": r"$S_{1z}$",
+    "spin_2x": r"$S_{2x}$",
+    "spin_2y": r"$S_{2y}$",
+    "spin_2z": r"$S_{2z}$",
+    "chi_p": r"$\chi_{\mathrm{p}}$",
+    "chi_eff": r"$\chi_{\mathrm{eff}}$",
+    "mass_ratio": r"$q$",
+    "symmetric_mass_ratio": r"$\eta$",
+    "inverted_mass_ratio": r"$1/q$",
+    "cos_tilt_1": r"$\cos{\theta_{1}}$",
+    "cos_tilt_2": r"$\cos{\theta_{2}}$",
+    "redshift": r"$z$",
+    "mass_1_source": r"$m_{1}^{\mathrm{source}} [M_{\odot}]$",
+    "mass_2_source": r"$m_{2}^{\mathrm{source}} [M_{\odot}]$",
+    "chirp_mass_source": r"$\mathcal{M}^{\mathrm{source}} [M_{\odot}]$",
+    "total_mass_source": r"$M^{\mathrm{source}} [M_{\odot}]$",
+    "cos_iota": r"$\cos{\iota}$",
+    "theta_jn": r"$\theta_{JN} [\mathrm{rad}]$",
+    "cos_theta_jn": r"$\cos{\theta_{JN}}$",
+    "lambda_1": r"$\lambda_{1}$",
+    "lambda_2": r"$\lambda_{2}$",
+    "lambda_tilde": r"$\tilde{\lambda}$",
+    "delta_lambda": r"$\delta\lambda$"}
+
     from corner import corner
 
     samples = {}
@@ -98,12 +141,12 @@ def cornerplot(file,
     if parameters:
         for parameter in parameters:
             data.append(samples[parameter])
-            labels.append(latex_labels.GWlatex_labels[parameter])
+            labels.append(GWlatex_labels[parameter])
     else:
         parameters = ['mass_1_source', 'mass_2_source', 'chi_eff', 'chi_p', 'theta_jn', 'redshift']
         for parameter in parameters:
             data.append(samples[parameter])
-            labels.append(latex_labels.GWlatex_labels[parameter])
+            labels.append(GWlatex_labels[parameter])
     
     figure = pylab.figure(figsize=(3*len(parameters), 3*len(parameters)))
     defaults_kwargs = dict(

@@ -21,7 +21,7 @@ class Redshift:
                  cosmology = 'Planck18', 
                  parameters = {'gamma' : 2.7, 'kappa': 5.6, 'z_peak':1.9},
                  time_delay_model = 'inverse',
-                 H0=None, Om0=None, Ode0=None):
+                 H0=70, Om0=0.3, Ode0=0.7, Tcmb0=2.725, Ob0=None):
 
         '''
         Initialise the Redshift class
@@ -45,11 +45,15 @@ class Redshift:
         time_delay_model : str, optional
             Implemented PyCBC time delay model to use [Default: inverse]
         H0 : float, optional
-            Hubble constant value for custom LDCM cosmology [Default: None]
+            Hubble constant value for custom LDCM cosmology [Default: 70]
         Om0 : float, optional
-            Matter density parameter value for custom LDCM cosmology [Default: None]
+            Matter density parameter value for custom LDCM cosmology [Default: 0.3]
         Ode0 : float, optional
-            Dark energy density parameter value for custom LDCM cosmology [Default: None]
+            Dark energy density parameter value for custom LDCM cosmology [Default: 0.7]
+        Tcmb0: float, optional
+            Temperature of the CMB z=0 [Default: 2.725]
+        Ob0: float, optional
+            Density of baryonic matter in units of the critical density at z=0. [Default: None]
         '''
         
         self.redshift_model = utils.remove_special_characters(redshift_model.lower())
@@ -60,7 +64,7 @@ class Redshift:
         self.cosmology = cosmology
         self.parameters = parameters
         self.time_delay_model = time_delay_model
-        self.H0, self.Om0, self.Ode0 = H0, Om0, Ode0
+        self.H0, self.Om0, self.Ode0, self.Tcmb0, self.Ob0 = H0, Om0, Ode0, Tcmb0, Ob0
 
     def import_cosmology(self):
         import importlib
@@ -68,11 +72,11 @@ class Redshift:
             from astropy import cosmology
             cosmology = getattr(cosmology, self.cosmology)
             return cosmology
-        except ImportError:
+        except (ImportError, AttributeError):
             if self.H0 is not None and self.Om0 is not None and self.Ode0 is not None:
                 logging.info('Importing FLRW Cosmology with the provided constants')
                 from astropy.cosmology import LambdaCDM
-                return LambdaCDM(H0=self.H0, Om0=self.Om0, Ode0=self.Ode0)
+                return LambdaCDM(H0=self.H0, Om0=self.Om0, Ode0=self.Ode0, Tcmb0=self.Tcmb0, Ob0=self.Ob0)
             else:
                 raise ValueError("Could not import cosmology")
 
@@ -91,8 +95,8 @@ class Redshift:
         '''
         Adapted from pycbc.population.population_models
         
-        Notes:
-        ------
+        Note:
+        
         This function combines the star formation rate, time delay probability, and differential lookback time
         to compute the merger rate density. It uses the specified cosmological model.    
         '''
@@ -119,10 +123,10 @@ class Redshift:
 
     def rate_density(self, elements = 1000):
         '''
-        Adapted from pycbc.population.population_models
+        Adapted from pycbc.population.population_models.
         
         Return:
-        ------
+        -------
         merger rate density : scipy.interpolate.interp1d
         '''
         redshift = numpy.linspace(0, self.maximum_redshift, elements)

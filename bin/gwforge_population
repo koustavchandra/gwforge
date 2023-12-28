@@ -55,9 +55,10 @@ redshift_parameters = config.get('Redshift', 'redshift-parameters', fallback='{"
 # Use json.loads to parse the JSON string
 redshift_parameters = json.loads(redshift_parameters.replace("'", "\""))
 time_delay_model = config.get('Redshift', 'time-delay-model', fallback='inverse')
-H0 = config.getfloat('Redshift', 'H0', fallback=None)
-Om0 = config.getfloat('Redshift', 'Om0', fallback=None)
-Ode0 = config.getfloat('Redshift', 'Ode0', fallback=None)
+H0 = config.getfloat('Redshift', 'H0', fallback=70)
+Om0 = config.getfloat('Redshift', 'Om0', fallback=0.3)
+Ode0 = config.getfloat('Redshift', 'Ode0', fallback=0.7)
+Tcmb0 = config.getfloat('Redshift', 'Tcmb0', fallback=2.735)
 
 # Create Redshift object and generate samples
 z = Redshift(redshift_model=redshift_model, 

@@ -1,8 +1,8 @@
 # Simulating the detector noise
 
-GWForge (at the moment) can generate a realisation of coloured Gaussian noise from a power spectral density and it also generate strain data without any noise at all. 
+GWForge (at the moment) can generate a realisation of coloured Gaussian noise from a power spectral density, and it also generates strain data without any noise at all. 
 
-For example, here is a noise configurattion file for XG detectors:
+For example, here is a noise configuration file for XG detectors:
 ```ini
 [IFOS]
 detectors = ['CE20', 'CE40', 'ET']
@@ -10,11 +10,11 @@ sampling-frequency = 8192
 noise = Gaussian
 fft-scheme = numpy
 ```
-which you can run as follows:
+Which you can run as follows:
 ```bash
 gwforge_noise --gps-start-time 1893024018 --gps-end-time 1893187858 --config-file xg.ini --output-directory data
 ```
-This will generate roughly a day's worth of data for an XG detector network at a sampling frequency of 8192Hz. The strain data will be a realisation of coloured Gaussian noise and the noise power spectrum are read from here:`~/.conda/envs/gwforge-test/lib/python3.9/site-packages/GWForge/ifo/noise_curves`. The generated strain data will be stored as `*.gwf` in the output-directory with names `{IFO}-{GPS-TIME}.gwf` with channel names `{IFO}:INJ`. 
+This will generate roughly a day's worth of data for an XG detector network at a sampling frequency of 8192Hz. The strain data will be a realisation of coloured Gaussian noise, and the noise power spectrum is read from here:`~/.conda/envs/gwforge-test/lib/python3.9/site-packages/GWForge/ifo/noise_curves`. The generated strain data will be stored as `*.gwf` in the output directory with names `{IFO}-{GPS-TIME}.gwf` with channel names `{IFO}:INJ`. 
 
 Here is a short-cut in case you forget:
 ```bash
@@ -25,7 +25,7 @@ and
 ```bash
 FrCheck -i <frame-file>
 ```
-will list the gps start and end time of the frame file.
+Will list the gps start and end time of the frame file.
 
 Alternatively, you can define the configuration file as follows:
 ```ini
@@ -37,21 +37,21 @@ fft-scheme = numpy
 gps-start-time = 1893024018
 duration = 86400
 ```
-and remove the gps option.
+And remove the gps option.
 
 ```{note}
-By default, `gwforge_noise` will use `[pycbc.noise.reproducable](https://pycbc.org/pycbc/latest/html/_modules/pycbc/noise/reproduceable.html)` to generate the strain data. You can use Bilby's method by defining `noise-type=bilby`.
+By default, `gwforge_noise` will use [`pycbc.noise.reproducable`](https://pycbc.org/pycbc/latest/html/_modules/pycbc/noise/reproduceable.html) to generate the strain data. You can use Bilby's method by defining `noise-type=bilby`.
 ```
 
 ```{warning}
-If you are interested in generating strain data without any noise please make sure to define `noise-type=bilby`. 
+If you are interested in generating strain data without any noise, please define `noise-type=bilby`. 
 ```
 
 ```{warning}
-If you have MKL properly configured or you want to use CUDA for FFT you can pass `fft-scheme=mkl` or `fft-scheme=cuda`. It should work but no promises.
+If you have MKL properly configured or you want to use CUDA for FFT you can pass `fft-scheme=mkl` or `fft-scheme=cuda`. It should work, but no promises.
 ```
 
-Finally, you can define your ini file as follows:
+Finally, you can define your configuration file as follows:
 ```
 [IFOS]
 detectors = ['H1', 'L1', 'V1']
@@ -62,4 +62,4 @@ fft-scheme = numpy
 gps-start-time = 1893024018
 duration = 86400
 ```
-by providing Dictionary of PSD files to use.
+by providing a Dictionary of PSD files to use.

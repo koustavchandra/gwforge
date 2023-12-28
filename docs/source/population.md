@@ -1,8 +1,8 @@
 # Simulating the source population
 
-GWForge is capable of simulating a wide range of **binary** source populations (at the moment). This page tells you how you can use them.
+GWForge can simulate a wide range of **binary** source populations (at the moment). This page tells you how you can use them.
 
-The first step in generating a source population is to determine the distribution of sources in luminosity distance $\(D_L\)$ (or equivalently redshift $\(z\))$ and the expected number of signals in the data. So we will start by setting up the `[Redshift]` section.
+The first step in generating a source population is to determine the distribution of sources in luminosity distance $\(D_L\)$ (or equivalently redshift $\(z\))$ and the expected number of signals in the data. So, we will start by setting up the `[Redshift]` section.
 
 ## Redshift
  For this, you need to specify:
@@ -62,7 +62,7 @@ It is important to note that this describes the progenitor formation rate distri
 
 
 ```{note}
-The above implementaion assumes that all compact binary systems are formed by [isolated binary evolution via the common-envelope phase](https://www.frontiersin.org/articles/10.3389/fspas.2020.00038/full). It also adopt a flat-in-log distribution for a time-delay between binary formation and merger.
+The above implementation assumes that all compact binary systems are formed by [isolated binary evolution via the common-envelope phase](https://www.frontiersin.org/articles/10.3389/fspas.2020.00038/full). It also adopts a flat-in-log distribution for a time delay between binary formation and merger.
 ```
 
 ## Mass
@@ -100,19 +100,19 @@ For more details, refer to the following publications:
 </details>
 
 ```{note}
-GWForge overlooks special characters and converts everything to sentence case. So `PowerLaw+Peak` is equivalent to `powerlawpeak`.
+GWForge overlooks special characters and converts everything to lower cases. So `PowerLaw+Peak` is equivalent to `powerlawpeak`.
 ```
 
 ## Spin
-The `[Spin]` section determine the spin distribution of the population. For example:
+The `[Spin]` section determines the spin distribution of the population. For example:
 ```ini
 [Spin]
 spin_model = Beta-Aligned
 spin_parameters = {'minimum_primary_spin' : 0., 'maximum_primary_spin':  0.99, 'minimum_secondary_spin' : 0., 'maximum_secondary_spin' : 0.5, 'mu_chi' : 0.26, 'sigma_squared_chi' : 0.02}
 ```
-defines a quasi-circular (non-precessing) binary population whose spin magnitude are sampled from a beta distribution.
+defines a quasi-circular (non-precessing) binary population whose spin magnitude is sampled from a beta distribution.
 
-Here are the list of currently available spin distribution
+Here is the list of currently available spin distribution
 
 <details>
   <summary>List of spin distribution models</summary>
@@ -128,7 +128,7 @@ Here are the list of currently available spin distribution
   |`Isotropic`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin` | Spin Magnitudes sampled from Uniform distribution + Isotropic distribution of spin angles |
   |`Isotropic-Beta`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi` | Spin Magnitudes sampled from Beta distribution. Isotropic distribution of spin angles
   |`Isotropic-Beta_Gaussian`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t` | Spin magnitudes sampled from Beta distribution. Truncated Gaussian distribution for cosine tilt angles.
-  |`Isotropic-Beta_Gaussian_Uniform`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t, xi_spin` | Spin magnitudes sampled from Beta distribution. Fraction of the binaries are has cosine tilt angles from Truncated Gaussian distribution and rest from uniform distribution between (-1,1)|
+  |`Isotropic-Beta_Gaussian_Uniform`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t, xi_spin` | Spin magnitudes sampled from Beta distribution. A fraction of the binaries have cosine tilt angles from Truncated Gaussian distribution and the rest from a uniform distribution between (-1,1)|
   | `Default` | `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t, xi_spin` | Same as `Isotropic-Beta_Gaussian_Uniform` |
 
 For more details, refer to the following publications:
@@ -139,7 +139,7 @@ For more details, refer to the following publications:
 </details>
 
 ## Extrinsic
-The [Extrinsic] section is designed to handle sky location and binary orientation parameters. You can specify a bilby prior file as input. By default, it assumes an isotropic distribution for sky location and orientation parameters, along with a uniform distribution for the polarization angle.
+The [Extrinsic] section is designed to handle sky location and binary orientation parameters. You can specify a bilby prior file as input. By default, it assumes an isotropic distribution for sky location and orientation parameters and a uniform distribution for the polarization angle.
 
 For example:
 ```ini
@@ -172,4 +172,3 @@ from GWForge.utils import cornerplot
 cornerplot(file='bbh.h5', parameters=['mass_1_source', 'mass_2_source', 'spin_1z','spin_2z',  'redshift'], save='pop.png')
 ```
 This will create a plot called `pop.png` in the current working directory with the parameters. The list of parameters can be found by doing `h5ls -r bbh.h5`. It list all the keys of an HDF5 file.
-

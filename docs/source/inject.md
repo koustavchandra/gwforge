@@ -15,7 +15,7 @@ fft-scheme = numpy
 ```
 Similar to the [Noise](doc:noise), begin by defining the detector network. However, this time, provide the channel name of the Frame files and include the `sampling-frequency` (matching the detector data's sampling frequency) along with a `minimum-frequency`.
 
-You need to specify path to `injection-file`, `injection-type` and `waveform-approximant` as extras.
+You must specify the path to `injection-file`, `injection-type` and `waveform-approximant` as extras.
 
 You can execute it as follows:
 ```bash
@@ -30,10 +30,9 @@ print(td_approximants())
 ```
 
 ```{warning}
-By default GWForge uses Bilby's [`inject_signal`](https://lscsoft.docs.ligo.org/bilby/api/bilby.gw.detector.networks.InterferometerList.html#bilby.gw.detector.networks.InterferometerList.inject_signal) to coherently add the signal in the data. Alternatively, you can just specify `injection-method = pycbc` in `[Injections]` to use PyCBC style of injecting signal. I have incorporated this from [`pycbc.inject`](https://github.com/gwastro/pycbc/blob/master/pycbc/inject/inject.py).
+By default, GWForge uses Bilby's [`inject_signal`](https://lscsoft.docs.ligo.org/bilby/api/bilby.gw.detector.networks.InterferometerList.html#bilby.gw.detector.networks.InterferometerList.inject_signal) to add the signal in the data coherently. Alternatively, you can just specify `injection-method = pycbc` in `[Injections]` to use the PyCBC style of injecting signal. I have incorporated this from [`pycbc.inject`](https://github.com/gwastro/pycbc/blob/master/pycbc/inject/inject.py).
 
 Again, like before you can choose `fft-scheme` to be either `numpy`, `mkl` or `cuda`
 ```
 
 Available `injection-type` (for the moment) are `bbh, bns, nsbh, imbhb, imbbh, pbh`.
-

@@ -1,59 +1,51 @@
-name: GitHub Pages
-
+name: docs_pages_workflow
+ 
+# execute this workflow automatically when a we push to master
 on:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
-  schedule:
-    - cron: "0 0 * * 0"
-
+    branches: [ main ]
+ 
 jobs:
-  deploy:
-    runs-on: ubuntu-20.04
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+ 
+  build_docs_job:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+ 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2.2.1
         with:
-          python-version: "3.9.18"
-
-      - uses: s-weigand/setup-conda@v1
-        with:
-          update-conda: true
-          python-version: "3.10"
-          conda-channels: anaconda, conda-forge
-
+          python-version: 3.9
+ 
       - name: Install dependencies
         run: |
           conda install --file requirements.txt
           python -m pip install .
 
-      - name: Build documentation
+      - name: make the sphinx docs
         run: |
-          cd docs
-          mv Makefile.gh_pages Makefile
-          make clean
-          make html
-          cd ../
-          touch _gh-pages/latest/html/.nojekyll
-          ls
-          ls *
-          ls */*
-          ls ./_gh-pages/latest/html
-          rm -r docs
-          mv _gh-pages/latest/html docs
+          make -C docs clean 
+          # sphinx-apidoc -f -o docs/source . -H Test -e -t docs/source/_templates
+          make -C docs html
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Init new repo in dist folder and commit generated files
+        run: |
+          cd docs/build/html/
+          git init
+          touch .nojekyll
+          git add -A
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m 'deploy'
+
+      - name: Force push to destination branch
+        uses: ad-m/github-push-action@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          branch: gh-pages
+          force: true
+          directory: ./docs/build/html

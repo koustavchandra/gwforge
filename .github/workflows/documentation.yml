@@ -23,7 +23,7 @@ jobs:
  
       - name: Install dependencies
         run: |
-          conda install --file requirements.txt
+          pip install sphinx>=4.2.0 myst-parser>=2.0.0 furo>=2023.9.10 sphinx-math-dollar
           python -m pip install .
 
       - name: make the sphinx docs

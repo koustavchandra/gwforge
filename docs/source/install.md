@@ -30,7 +30,8 @@ You should see output similar to:
 ## 3. Optional: Install Additional Packages
 It is recommended to install lalsuite, lalsimulation, etc. This can be done using:
 ```bash
-conda install -c conda-forge fftw lalsimulation lalsimulation-data lalsuite lalframe lalapps gitpython jupyterlab wget
+conda install -c conda-forge fftw lalsimulation lalsimulation-data lalsuite lalframe lalapps gitpython jupyterlab wget framel
+
 ```
 Adjust the installation based on your specific needs.
 

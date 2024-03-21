@@ -163,7 +163,7 @@ gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
 It should take at most a minute to generate the output file.
 
-A few more example configuration file exist here: `~/.conda/envs/gwforge-test/lib/python3.9/site-packages/GWForge/population/`. Feel free to modify and see what you get.
+A few more example configuration file exist here: `~/.conda/envs/gwforge-venv/lib/python3.9/site-packages/GWForge/population/`. Feel free to modify and see what you get.
 
 ### Naive way to check the population
 You can check the binary parameters of the population by doing the following:

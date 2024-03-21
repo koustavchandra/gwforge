@@ -80,6 +80,21 @@ injection_type = config.get('Injections',
 window_size = 2 if injection_type == 'bbh' else 3
 # Note: For NSBH, the window size is the same as BNS
 
+waveform_approximant = config.get('Injections', 
+                                  'waveform-approximant')
+
+from pycbc.waveform import td_approximants
+if waveform_approximant in td_approximants():
+    logging.info(f'Using {waveform_approximant} for waveform generation')
+else:
+    import sys
+    logging.error(f'{waveform_approximant} does not exist')
+    sys.exit(1)
+    
+# Set the window size based on the injection type
+window_size = 2 if injection_type == 'bbh' else 3
+# Note: For NSBH, the window size is the same as BNS
+
 waveform_approximant = config.get('Injectons', 
                                   'waveform-approximant', 
                                   fallback='IMRPhenomXPHM')

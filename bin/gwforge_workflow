@@ -232,7 +232,7 @@ with open(condor_dag_file, 'w') as dag_file:
             bns_job_id = f'bns_{k}'
             dag_file.write('JOB {} {}\n'.format(bns_job_id, bns_submit_file))
             dag_file.write('RETRY {} 3\n'.format(bns_job_id))
-            bns_job_id.append(bns_job_id)
+            bns_job_ids.append(bns_job_id)
     
     nsbh_job_ids = []                
     if opts.nsbh_configuration_file:

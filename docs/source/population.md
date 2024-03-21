@@ -163,6 +163,11 @@ gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
 It should take at most a minute to generate the output file.
 
+```note
+By default a year gwforge_population generates a year worth of population. If you want some other value, please add the `duration` flag and add a value in seconds.
+Example: `duration=4096`
+```
+
 A few more example configuration file exist here: `~/.conda/envs/gwforge-venv/lib/python3.9/site-packages/GWForge/population/`. Feel free to modify and see what you get.
 
 ### Naive way to check the population

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/ligo/home/ligo.org/koustav.chandra/.conda/envs/gwforge-test/bin/python3.9
 '''
 Inject gravitational wave signals into a network of detectors and save metadata.
 
@@ -95,9 +95,6 @@ else:
 window_size = 2 if injection_type == 'bbh' else 3
 # Note: For NSBH, the window size is the same as BNS
 
-waveform_approximant = config.get('Injectons', 
-                                  'waveform-approximant', 
-                                  fallback='IMRPhenomXPHM')
 try:
     gps_start_time = config.getfloat('Injections', 'gps-start-time')
     gps_end_time = config.getfloat('Injections', 'gps-end-time')
@@ -195,12 +192,6 @@ with h5py.File(injection_file, 'r') as f:
                         data[ifo.name] = TimeSeries(data=ifo.time_domain_strain, 
                                                     times=ifo.time_array, 
                                                     channel=f'{ifo.name}:INJ')
-
-                    logging.info('CE20 SNR: {:.2f}, CE40 SNR: {:.2f}, ET1 SNR: {:.2f} ET2 {:.2f} ET3 {:.2f}'.format(ifos.meta_data['CE20']['matched_filter_SNR'], 
-                                                                                                                    ifos.meta_data['CE40']['matched_filter_SNR'],
-                                                                                                                    ifos.meta_data['ET1']['matched_filter_SNR'],
-                                                                                                                    ifos.meta_data['ET2']['matched_filter_SNR'],
-                                                                                                                    ifos.meta_data['ET3']['matched_filter_SNR']))
                     # Record injection parameters and SNR values
                     for param in parameters:
                         samples[param].append(injection_parameters[param])

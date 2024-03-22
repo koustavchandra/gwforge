@@ -24,7 +24,8 @@ class PyCBCInject:
                  ifos, 
                  data, 
                  injection_parameters,
-                 injection_type = 'bbh', **waveform_arguments):
+                 waveform_arguments,
+                 injection_type = 'bbh', ):
         '''
         Parameters:
         --------------
@@ -72,12 +73,10 @@ class PyCBCInject:
         else:
             raise ValueError('Currently supports only CBC sources')
             
-        self.waveform_arguments = {'waveform_approximant': waveform_arguments.get('waveform_approximant', 'IMRPhenomXPHM'),
-                                   'reference_frequency': waveform_arguments.get('reference_frequency', 7),
-                                   'minimum_frequency': waveform_arguments.get('minimum_frequency', 7)}
+        self.waveform_arguments = waveform_arguments
         
     def get_pycbc_signal(self, ifo, signal_parameters):
-        print(signal_parameters)
+        logging.info(f'Injecting signals with parameters: {signal_parameters}')
         hplus, hcross = get_td_waveform(**signal_parameters, 
                                         approximant= self.waveform_arguments['waveform_approximant'], 
                                         f_lower = self.waveform_arguments['minimum_frequency'], 

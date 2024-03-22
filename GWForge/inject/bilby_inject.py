@@ -7,7 +7,8 @@ class BilbyInject:
                  ifos, 
                  data, 
                  injection_parameters,
-                 injection_type = 'bbh', **waveform_arguments):
+                 waveform_arguments,
+                 injection_type = 'bbh'):
         '''
         Parameters:
         --------------
@@ -47,10 +48,8 @@ class BilbyInject:
         else:
             raise ValueError('Currently supports only CBC sources')
             
-        self.waveform_arguments = {'waveform_approximant': waveform_arguments.get('waveform_approximant', 'IMRPhenomXPHM'),
-                                   'reference_frequency': waveform_arguments.get('reference_frequency', 7),
-                                   'minimum_frequency': waveform_arguments.get('minimum_frequency', 7)}
-
+        self.waveform_arguments = waveform_arguments
+        
     def inject_signal_using_bilby_method(self):
         '''
         Inject a gravitational wave signal into the interferometer network.

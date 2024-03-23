@@ -220,7 +220,7 @@ with h5py.File(injection_file, 'r') as f:
             k = k + 1
         # Save meta data to an HDF5 file        
         logging.info('Saving meta data')
-        meta_data_file = os.path.join(data_directory, 'injections-{}-{:d}.h5'.format(injection_type, opts.gps_start_time))
+        meta_data_file = os.path.join(data_directory, f'injections-{injection_type}-{int(opts.gps_start_time)}.h5')
         with h5py.File(meta_data_file,'w') as f:
             for key in samples.keys():
                 utils.hdf_append(f, key, samples[key])
@@ -279,7 +279,7 @@ with h5py.File(injection_file, 'r') as f:
             l += 1
         
         logging.info('Saving meta data')
-        meta_data_file = os.path.join(data_directory, 'injections-{}-{:d}.h5'.format(injection_type, opts.gps_start_time))
+        meta_data_file = os.path.join(data_directory, f'injections-{injection_type}-{int(opts.gps_start_time)}.h5')
         with h5py.File(meta_data_file,'w') as f:
             for key in injection_parameters.keys():
                 utils.hdf_append(f, key, injection_parameters[key])

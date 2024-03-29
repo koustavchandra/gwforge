@@ -131,12 +131,13 @@ for key in extrinsic_samples.keys():
 if opts.source_type == 'bns' or opts.source_type == 'nsbh':
     try:
         eos_file = config.get('EOS', 'eos_file')
-        logging.info('Using {} file to estimate tidal deformability parameter of components'.format(eos_file))
+        logging.info('Trying {} file to estimate tidal deformability parameter of components'.format(eos_file))
         samples['lambda_2'] = get_lambda(file=eos_file, source_mass=samples['mass_2_source'])
         if opts.source_type == 'bns':
             samples['lambda_1'] = get_lambda(file=eos_file, source_mass=samples['mass_1_source'])
     except:
-        logging.warning('No EOS provided. Not including tidal deformation parameters')
+        logging.warning('Failed to estimate tidal parameters.')
+
 
 # Generate all possible parameters of the specified source type
 logging.info('Generating all possible parameters of {}'.format(opts.source_type))

@@ -31,7 +31,7 @@ maximum-redshift = 30
 cosmology = custom 
 H0 = 70
 Om0 = 0.3
-0de0 = 0.7
+Ode0 = 0.7
 Tcmb0 = 2.735
 ; analysis start time
 gps-start-time = 1893024018
@@ -108,7 +108,7 @@ The `[Spin]` section determines the spin distribution of the population. For exa
 ```ini
 [Spin]
 spin_model = Beta-Aligned
-spin_parameters = {'minimum_primary_spin' : 0., 'maximum_primary_spin':  0.99, 'minimum_secondary_spin' : 0., 'maximum_secondary_spin' : 0.5, 'mu_chi' : 0.26, 'sigma_squared_chi' : 0.02}
+spin_parameters = {'minimum_primary_spin' : 0, 'maximum_primary_spin':  0.99, 'minimum_secondary_spin' : 0, 'maximum_secondary_spin' : 0.5, 'mu_chi' : 0.26, 'sigma_squared_chi' : 0.02}
 ```
 defines a quasi-circular (non-precessing) binary population whose spin magnitude is sampled from a beta distribution.
 

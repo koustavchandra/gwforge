@@ -257,26 +257,29 @@ with h5py.File(injection_file, 'r') as f:
         while(l < len(frame_files[detectors[0]])):
             # Read the frame files only when necessary. Too memory intensive to load all of them at a time
             logging.info('Reading network data')
-            data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
-            read = False
-            # # select all injections that lie between the start and end time
-            end = data[detectors[0]].epoch.value + data[detectors[0]].duration.value
-            indices = numpy.where((start <=f['geocent_time'][:]) & (end >= f['geocent_time'][:]))
-            # # set the start to end for next iteration
-            start = end
-            for key, value in utils.pycbc_labels.items():
-                try:
-                    injection_parameters[value] = f[key][indices]
-                except:
-                    continue
-            ifos = PyCBCInject(ifos=network, 
-                               data=data, 
-                               injection_parameters=injection_parameters, 
-                               waveform_arguments=waveform_arguments).inject_signal_using_pycbc_method()
-            for ifo in ifos:
-                utils.save_frame_files(ifo=ifo, start_time=ifo.start_time, duration=utils.split_duration(ifo.duration), ifo_directory=ifo_directory[ifo.name])
-                read = True
-            l += 1
+            try:
+                data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
+                read = False
+                # # select all injections that lie between the start and end time
+                end = data[detectors[0]].epoch.value + data[detectors[0]].duration.value
+                indices = numpy.where((start <=f['geocent_time'][:]) & (end >= f['geocent_time'][:]))
+                # # set the start to end for next iteration
+                start = end
+                for key, value in utils.pycbc_labels.items():
+                    try:
+                        injection_parameters[value] = f[key][indices]
+                    except:
+                        continue
+                ifos = PyCBCInject(ifos=network, 
+                                data=data, 
+                                injection_parameters=injection_parameters, 
+                                waveform_arguments=waveform_arguments).inject_signal_using_pycbc_method()
+                for ifo in ifos:
+                    utils.save_frame_files(ifo=ifo, start_time=ifo.start_time, duration=utils.split_duration(ifo.duration), ifo_directory=ifo_directory[ifo.name])
+                    read = True
+                l += 1
+            except:
+                l += 1
         
         logging.info('Saving meta data')
         meta_data_file = os.path.join(data_directory, f'injections-{injection_type}-{int(opts.gps_start_time)}.h5')

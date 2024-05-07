@@ -107,8 +107,8 @@ GWForge overlooks special characters and converts everything to lower cases. So 
 The `[Spin]` section determines the spin distribution of the population. For example:
 ```ini
 [Spin]
-spin_model = Beta-Aligned
-spin_parameters = {'minimum_primary_spin' : 0, 'maximum_primary_spin':  0.99, 'minimum_secondary_spin' : 0, 'maximum_secondary_spin' : 0.5, 'mu_chi' : 0.26, 'sigma_squared_chi' : 0.02}
+spin-model = Beta-Aligned
+spin-parameters = {'minimum_primary_spin' : 0, 'maximum_primary_spin':  0.99, 'minimum_secondary_spin' : 0, 'maximum_secondary_spin' : 0.5, 'mu_chi' : 0.26, 'sigma_squared_chi' : 0.02}
 ```
 defines a quasi-circular (non-precessing) binary population whose spin magnitude is sampled from a beta distribution.
 
@@ -161,11 +161,11 @@ To generate the binary parameters for the population, execute the following:
 ```bash
 gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
-It should take at most a minute to generate the output file.
+It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH. For other options, please check `gwforge_population --help`. Please note that the waveform approximant that you use for your waveform generation supports tidal parameters if the source-type is bns or nsbh.
 
 ```note
 By default a year gwforge_population generates a year worth of population. If you want some other value, please add the `duration` flag and add a value in seconds.
-Example: `duration=4096`
+Example: `duration=4096`. Please note that the population generated should be greater than the number of signals injected.
 ```
 
 A few more example configuration file exist here: `~/.conda/envs/gwforge-venv/lib/python3.9/site-packages/GWForge/population/`. Feel free to modify and see what you get.

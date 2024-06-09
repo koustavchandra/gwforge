@@ -5,13 +5,6 @@ logging.basicConfig(level = logging.INFO,
                     format = '%(asctime)s %(message)s',
                     datefmt = '%Y-%m-%d %H:%M:%S')
 
-import bilby, numpy, logging, os
-from bilby.gw.detector.psd import PowerSpectralDensity as psd
-
-logging.basicConfig(level = logging.INFO,
-                    format = '%(asctime)s %(message)s',
-                    datefmt = '%Y-%m-%d %H:%M:%S')
-
 class IFO:
    '''
    Usage:

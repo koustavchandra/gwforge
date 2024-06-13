@@ -1,0 +1,152 @@
+gwforge.GWForge.utils
+=====================
+
+.. py:module:: gwforge.GWForge.utils
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.utils.pycbc_labels
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.utils.remove_special_characters
+   gwforge.GWForge.utils.hdf_append
+   gwforge.GWForge.utils.cornerplot
+   gwforge.GWForge.utils.split_duration
+   gwforge.GWForge.utils.find_frame_files
+   gwforge.GWForge.utils.filter_times_by_frame_files
+   gwforge.GWForge.utils.generate_frame_file_sublists
+   gwforge.GWForge.utils.update_ET_channels
+   gwforge.GWForge.utils.save_frame_files
+   gwforge.GWForge.utils.custom_optionxform
+
+
+Module Contents
+---------------
+
+.. py:function:: remove_special_characters(input_string, characters_to_remove=['+', '-', '_', ' ', '#'])
+
+   Remove specified special characters from a given input string.
+
+   :param input_string: The input string from which to remove special characters.
+   :type input_string: str
+   :param characters_to_remove: A list of special characters to remove from the input string. Defaults to ["+", "-", "_", " "].
+   :type characters_to_remove: list of str, optional
+
+   :returns: The input string with specified special characters removed.
+   :rtype: str
+
+
+.. py:function:: hdf_append(f, key, value)
+
+   Append a value to an HDF5 dataset or create a new dataset if the key does not exist.
+
+   Parameters:
+   ----------
+   f : (h5py.File)
+       An HDF5 file object.
+   key : (str)
+       The key to identify the dataset within the HDF5 file.
+   value : (float or numpy.ndarray)
+       The value to be appended to the dataset.
+
+   If the dataset with the specified key already exists, the function appends the given value to the existing dataset.
+   If the dataset does not exist, a new dataset is created with the specified key, and the value is stored.
+
+   Note: The function ensures that the stored value is a 1-dimensional array.
+
+
+.. py:function:: cornerplot(file, parameters=None, save=None)
+
+   Create a corner plot from samples stored in an HDF5 file.
+
+   :param file: The path to the HDF5 file containing samples.
+   :type file: str
+   :param parameters: A list of parameters for which to create the corner plot. If not provided,
+                      default parameters ['mass_1_source', 'mass_2_source', 'chi_eff', 'chi_p', 'theta_jn', 'redshift']
+                      will be used.
+   :type parameters: list of str, optional
+   :param save: The path to save the generated corner plot. If not provided, the plot will be displayed.
+   :type save: str, optional
+
+
+.. py:function:: split_duration(duration, size=4096.0)
+
+   Split a duration into chunks of a specified size.
+
+   Parameters:
+   -----------
+   - duration: int
+       The total duration to split
+   - size: int
+       The size of each chunk [Default:4096]
+
+   Returns:
+   list: A list containing chunks of the specified size.
+
+
+.. py:function:: find_frame_files(directory, filePattern='*gwf', start_time=None, end_time=None)
+
+   Get a list of frame files within a given directory optionally filtered by time range
+   Parameters:
+   -----------
+   directory : str
+       Path to frames directory
+   filepattern : str
+       A Unix shell-style wildcard pattern to match files. [Default *gwf]
+   start_time : float
+       GPS start time for time range filter
+   end_time : float
+       GPS end time for time range filter
+
+
+.. py:function:: filter_times_by_frame_files(times, frame_files)
+
+   Filter a list of injections based on frame file availability
+
+   Parameters:
+   -----------
+   times: list
+       List of tc
+   frame_files:
+       List of frame files
+
+
+.. py:function:: generate_frame_file_sublists(frame_files, window_size=3)
+
+   Generate sublists of frame files with a specified window size.
+
+   Parameters:
+   -----------
+   frame_files: list
+       A list of file paths representing frame files.
+   window_size: int, optional
+       The size of the sliding window to create sublists. [Defaults: 3]
+
+   Returns:
+   --------
+   list: A list of sublists containing frame file paths.
+
+   Example:
+   --------
+   >>> frame_files = ['file1.gwf', 'file2.gwf', 'file3.gwf', 'file4.gwf']
+   >>> generate_frame_file_sublists(frame_files, window_size=2)
+   [['file1.gwf', 'file2.gwf'], ['file2.gwf', 'file3.gwf'], ['file3.gwf', 'file4.gwf']]
+
+
+.. py:function:: update_ET_channels(channel_dict)
+
+.. py:function:: save_frame_files(ifo, start_time, duration, ifo_directory)
+
+.. py:function:: custom_optionxform(option)
+
+.. py:data:: pycbc_labels
+

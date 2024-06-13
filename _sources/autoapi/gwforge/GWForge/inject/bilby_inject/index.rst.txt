@@ -1,0 +1,126 @@
+gwforge.GWForge.inject.bilby_inject
+===================================
+
+.. py:module:: gwforge.GWForge.inject.bilby_inject
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.bilby_inject.Network
+   gwforge.GWForge.inject.bilby_inject.BilbyInject
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.bilby_inject.generate_detector_frame_parameters
+   gwforge.GWForge.inject.bilby_inject.get_lambda
+   gwforge.GWForge.inject.bilby_inject.get_safe_signal_durations
+
+
+Module Contents
+---------------
+
+.. py:class:: Network(ifos, psd_files=None)
+
+   Bases: :py:obj:`IFO`
+
+
+   Usage:
+   ------
+   >>> ifos = Network(ifos = ['ET', 'CE20', 'CE40'])
+   >>> ifos.initialise_network()
+
+
+   .. py:method:: initialise_network()
+
+      Returns:
+      --------
+      ifos: bilby.gw.detector.InterferometerList
+
+
+
+   .. py:attribute:: initialize_network
+
+
+   .. py:attribute:: initialise_ifos
+
+
+   .. py:attribute:: initialize_ifos
+
+
+.. py:function:: generate_detector_frame_parameters(samples)
+
+   Generate detector frame parameters
+   :param sample:
+   :type sample: dict, pandas.DataFrame
+
+   :returns: **output_sample**
+   :rtype: dict, pandas.DataFrame
+
+
+.. py:function:: get_lambda(file, source_mass)
+
+   Retrieve Lambda (tidal deformability) for a given source mass from a data file.
+
+   :param file: The path to the data file containing mass and Lambda information.
+   :type file: str
+   :param source_mass: The mass for which to retrieve the corresponding Lambda.
+   :type source_mass: float
+
+   :returns: The Lambda value interpolated for the given source mass.
+   :rtype: float
+
+
+.. py:function:: get_safe_signal_durations(mass_1, mass_2, spin_1z, spin_2z, waveform_minimum_frequency, safety=1.1, approximant='IMRPhenomXPHM')
+
+   Calculate the safe signal durations for gravitational waveforms.
+
+   Parameters:
+   -----------
+   mass_1: float or array-like
+       The mass of the primary compact object(s) in solar masses.
+   mass_2: float or array-like
+       The mass of the secondary compact object(s) in solar masses.
+   spin_1z: float or array-like
+       The z-component of the spin of the primary compact object(s).
+   spin_2z: (float or array-like)
+       The z-component of the spin of the secondary compact object(s).
+   waveform_minimum_frequency (float):
+       The minimum frequency of the gravitational waveform.
+   safety (float, optional):
+       A safety factor to adjust the calculated durations. [Default: 1.1]
+   approximant (str, optional):
+       The waveform approximant to use. [Default: 'IMRPhenomXPHM']
+
+   Returns:
+   --------
+   float or array-like:
+       The safe signal durations in seconds.
+
+   Raises:
+   -------
+   ValueError:
+       If any of the input arrays (mass_1, mass_2, spin_1z, spin_2z) is not a float array.
+   RuntimeError:
+       If the provided waveform approximant is not supported.
+
+
+.. py:class:: BilbyInject(ifos, data, injection_parameters, waveform_arguments, injection_type='bbh')
+
+   .. py:method:: inject_signal_using_bilby_method()
+
+      Inject a gravitational wave signal into the interferometer network.
+      using bilby methods
+      Returns:
+      -------
+      Network: bilby.gw.detectors.InterferometerList
+          Injected interferometer network
+
+
+

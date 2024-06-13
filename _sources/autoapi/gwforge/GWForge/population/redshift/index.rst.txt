@@ -1,0 +1,65 @@
+gwforge.GWForge.population.redshift
+===================================
+
+.. py:module:: gwforge.GWForge.population.redshift
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.redshift.Redshift
+
+
+Module Contents
+---------------
+
+.. py:class:: Redshift(redshift_model, local_merger_rate_density, maximum_redshift, gps_start_time, analysis_time=YRJUL_SI, cosmology='Planck18', parameters={'gamma': 2.7, 'kappa': 5.6, 'z_peak': 1.9}, time_delay_model='inverse', H0=70, Om0=0.3, Ode0=0.7, Tcmb0=2.725, Ob0=None)
+
+   .. py:method:: import_cosmology()
+
+
+   .. py:method:: differential_lookback_time(redshift)
+
+      Derivative of lookback time t(z)
+      See Eq.(A3) of <arXiv:2011.02717v3>
+
+
+
+   .. py:method:: transform()
+
+      Adapted from pycbc.population.population_models
+
+      Note:
+
+      This function combines the star formation rate, time delay probability, and differential lookback time
+      to compute the merger rate density. It uses the specified cosmological model.
+
+
+
+   .. py:method:: rate_density(elements=1000)
+
+      Adapted from pycbc.population.population_models.
+
+      Return:
+      -------
+      merger rate density : scipy.interpolate.interp1d
+
+
+
+   .. py:method:: average_time_between_signals()
+
+      Calculates the average time interval between two signals of same type
+
+
+
+   .. py:method:: sample()
+
+      Return:
+      -------
+      parameters : dict
+          dictionary of redshift, time_interval, tc
+
+
+

@@ -1,0 +1,28 @@
+gwforge.GWForge.population.extrinsic
+====================================
+
+.. py:module:: gwforge.GWForge.population.extrinsic
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.extrinsic.Extrinsic
+
+
+Module Contents
+---------------
+
+.. py:class:: Extrinsic(number_of_samples, prior_file=None, inclination_distribution=None)
+
+   .. py:method:: schutz_inclination_prob(inclination)
+
+      See Eq. (25) of https://arxiv.org/pdf/1102.5421.pdf
+
+
+
+   .. py:method:: sample()
+
+

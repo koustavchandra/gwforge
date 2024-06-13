@@ -1,0 +1,54 @@
+gwforge.GWForge.population.mass
+===============================
+
+.. py:module:: gwforge.GWForge.population.mass
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.choices
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.Mass
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.notch_filter
+   gwforge.GWForge.population.mass.low_pass_filter
+
+
+Module Contents
+---------------
+
+.. py:function:: notch_filter(val, parameters)
+
+.. py:function:: low_pass_filter(val, parameters)
+
+.. py:data:: choices
+   :value: ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 'DoubleGaussian',...
+
+
+.. py:class:: Mass(mass_model, number_of_samples, parameters={'alpha': 3.37, 'beta': 0.76, 'delta_m': 5.23, 'mmin': 4.89, 'mmax': 88.81, 'lam': 0.04, 'mpp': 33.6, 'sigpp': 4.59})
+
+   .. py:method:: sample()
+
+      Generate mass distribution samples based on the chosen parameterised model and its parameters.
+
+      Returns:
+      --------
+          dict: A dictionary containing source frame mass distribution samples.
+
+
+

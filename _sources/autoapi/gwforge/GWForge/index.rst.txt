@@ -1,0 +1,27 @@
+gwforge.GWForge
+===============
+
+.. py:module:: gwforge.GWForge
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/gwforge/GWForge/ifo/index
+   /autoapi/gwforge/GWForge/inject/index
+   /autoapi/gwforge/GWForge/population/index
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/gwforge/GWForge/conversion/index
+   /autoapi/gwforge/GWForge/utils/index
+
+

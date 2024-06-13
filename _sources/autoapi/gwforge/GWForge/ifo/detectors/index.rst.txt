@@ -1,0 +1,79 @@
+gwforge.GWForge.ifo.detectors
+=============================
+
+.. py:module:: gwforge.GWForge.ifo.detectors
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.detectors.IFO
+   gwforge.GWForge.ifo.detectors.Network
+
+
+Module Contents
+---------------
+
+.. py:class:: IFO(name, psd_file=None, asharp=None)
+
+   Usage:
+   -----
+   >>> ifo = IFO(name='H1', asharp=True)
+   >>> ifo.initialise_ifo(seed=42)
+
+   >>> ifo = IFO(name='ET')
+   >>> ifo.initialize_ifo()
+
+
+   .. py:method:: initialise_ifo(seed=None)
+
+      Initialise the interferometer with optional random seed.
+
+      Parameters:
+      -----------
+      seed : int (optional)
+         The random seed for initialisation. [Default: None]
+
+      Returns:
+      --------
+        ifo: bilby.gw.detector.Intereferometer
+
+      Raises:
+      -------
+        ValueError: If the interferometer is not implemented.
+
+
+
+   .. py:attribute:: initialize_ifo
+
+
+.. py:class:: Network(ifos, psd_files=None)
+
+   Bases: :py:obj:`IFO`
+
+
+   Usage:
+   ------
+   >>> ifos = Network(ifos = ['ET', 'CE20', 'CE40'])
+   >>> ifos.initialise_network()
+
+
+   .. py:method:: initialise_network()
+
+      Returns:
+      --------
+      ifos: bilby.gw.detector.InterferometerList
+
+
+
+   .. py:attribute:: initialize_network
+
+
+   .. py:attribute:: initialise_ifos
+
+
+   .. py:attribute:: initialize_ifos
+
+

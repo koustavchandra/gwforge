@@ -109,7 +109,13 @@ noise_type = remove_special_characters(config.get('IFOS',
                                                   fallback='gaussian').lower())
 
 noise_source = config.get('IFOS', 'noise-type', fallback='pycbc').lower()
-seed = config.getint('IFOS', 'seed', fallback=0)
+
+# Use different seeds for noise generation for different detectors
+try:
+    ifo_seeds = json.loads(config.get('IFOS', 'ifo-seeds').replace("'", "\""))
+except:
+    ifo_seeds = {ifo.name: k for k, ifo in enumerate(ifos)}
+
 scheme = config.get('IFOS', 'fft-scheme', fallback='mkl')
 # MKL screams if size is > 2^24
 from pycbc.fft.backend_support import set_backend
@@ -136,7 +142,7 @@ for dur in duration:
                                                  start=gps_start_time, 
                                                  end=gps_start_time + dur, 
                                                  sampling_frequency=sampling_frequency, 
-                                                 seed=0)
+                                                 seed=ifo_seeds[ifo.name])
                 ifo.strain_data.set_from_gwpy_timeseries(noise)
             else:
                 raise ValueError('{} is currently not supported'.format(noise))
@@ -145,10 +151,11 @@ for dur in duration:
         logging.info('Saving {} data'.format(ifo.name))        
         data = TimeSeries(data=ifo.time_domain_strain, 
                           times=ifo.time_array, 
+                          name=f'{ifo.name}:INJ',
                           channel = '{}:INJ'.format(ifo.name, ifo.sampling_frequency))
-        data.write(target='{}/{}-{}-{}.gwf'.format(ifo_directory[ifo.name],
+        data.write(target='{}/{}-{}-{}.h5'.format(ifo_directory[ifo.name],
                                                    ifo.name, 
                                                    int(gps_start_time), 
-                                                   int(dur)))
+                                                   int(dur)), overwrite=True)
     gps_start_time = gps_start_time + dur
 logging.info('Done!')

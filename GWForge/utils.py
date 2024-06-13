@@ -296,6 +296,7 @@ def save_frame_files(ifo, start_time, duration, ifo_directory):
     # Create a TimeSeries object for the interferometer data    
     data = TimeSeries(data=ifo.time_domain_strain, 
                       times=ifo.time_array,
+                      name=f'{ifo.name}:INJ',
                       channel=f'{ifo.name}:INJ')
     # Iterate through the provided durations
     for dur in duration:
@@ -303,7 +304,7 @@ def save_frame_files(ifo, start_time, duration, ifo_directory):
         # Crop the data based on the start and end times
         save_data = data.crop(start=start_time, end=end)
         # Write the cropped data to a frame file
-        save_data.write(target=os.path.join(ifo_directory, f'{ifo.name}-{int(start_time)}-{int(dur)}.gwf'))
+        save_data.write(target=os.path.join(ifo_directory, f'{ifo.name}-{int(start_time)}-{int(dur)}.h5'), overwrite=True)
         # Delete the cropped data to free up memory
         del save_data
         # Update the start time for the next iteration

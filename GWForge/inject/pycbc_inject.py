@@ -56,8 +56,8 @@ class PyCBCInject:
             add_detector_on_earth(name=ifo.name,
                                   longitude=ifo.longitude_radians,
                                   latitude=ifo.latitude_radians,
-                                  yangle=numpy.deg2rad(270 + ifo.xarm_azimuth), 
-                                  xangle=numpy.deg2rad(270 + ifo.yarm_azimuth), 
+                                  yangle=numpy.deg2rad(360 - ifo.xarm_azimuth), 
+                                  xangle=numpy.deg2rad(360 - ifo.yarm_azimuth), 
                                   height=0,
                                   xlength=ifo.length * 1e3, 
                                   ylength=ifo.length * 1e3)            

@@ -12,7 +12,17 @@ This command sets up a Conda environment named gwforge-venv with Python 3.9.18 a
 conda activate gwforge-venv
 ```
 
-## 2. Install GWForge
+## 2. Install Optional dependencies
+
+It is recommended to install lalsuite, lalsimulation, etc. This can be done using:
+```bash
+conda install -c conda-forge fftw lalsimulation lalsimulation-data lalsuite lalframe lalapps gitpython jupyterlab wget framel
+
+```
+Adjust the installation based on your specific needs.
+
+## 3. Finally install the package itself
+
 Proceed to install gwforge and its dependencies:
 ```bash
 pip install git+https://github.com/koustavchandra/gwforge.git
@@ -27,11 +37,15 @@ You should see output similar to:
 ~/.conda/envs/gwforge-venv/bin/pip
 ```
 
-## 3. Optional: Install Additional Packages
-It is recommended to install lalsuite, lalsimulation, etc. This can be done using:
-```bash
-conda install -c conda-forge fftw lalsimulation lalsimulation-data lalsuite lalframe lalapps gitpython jupyterlab wget framel
+### Installation on macOS and Windows
 
-```
-Adjust the installation based on your specific needs.
+If you are installing `gwforge` on macOS or Windows, you may encounter issues with the dependencies, particularly `htcondor`, which is not available for these systems. In such cases, please follow the steps below:
 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/koustavchandra/gwforge.git
+   cd gwforge
+   ```
+2. Install the package using the modified `requirements.txt`:
+  `pip install .`
+By customizing the installation process, you can ensure compatibility with your operating system.

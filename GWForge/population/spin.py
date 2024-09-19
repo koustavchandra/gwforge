@@ -7,8 +7,7 @@ logging.basicConfig(level = logging.INFO,
                     datefmt = '%Y-%m-%d %H:%M:%S')
 
 choices = ['Non-spinning', 
-           'Aligned', 'Aligned-Bilby','Aligned-Uniform', 'Beta-Aligned', 'Aligned-Gaussian-Uniform', 
-           'Isotropic', 'Isotropic-Bilby', 'Isotropic-Beta', 'Isotropic-Beta_Gaussian', 'Isotropic-Beta_Gaussian_Uniform', 
+           'Aligned', 'Aligned-Bilby','Aligned-Uniform', 'Beta-Aligned', 'Aligned-Gaussian-Uniform',  'Isotropic-Bilby', 'Isotropic-Beta', 'Isotropic-Beta_Gaussian', 'Isotropic-Beta_Gaussian_Uniform', 
            'Default']
 
 class Spin:
@@ -102,7 +101,7 @@ class Spin:
         
             elif 'isotropic' in self.spin_model:
                 logging.info('Generating spin samples from Isotropic Spin Distribution')
-                if 'bilby' in self.spin_model or 'isotropic' == self.spin_model:                
+                if 'bilby' in self.spin_model:                
                     a_1 = bilby.gw.prior.Uniform(minimum=self.parameters['minimum_primary_spin'], 
                                                  maximum=self.parameters['maximum_primary_spin'], name = 'a_1')
                     a_2 = bilby.gw.prior.Uniform(minimum=self.parameters['minimum_secondary_spin'], 

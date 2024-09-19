@@ -157,12 +157,15 @@ class Mass:
                 samples['mass_1_source'] = prior.sample(self.number_of_samples)
                 samples['mass_2_source'] = prior.sample(self.number_of_samples)
             elif 'powerlaw' in self.mass_model:
-                mass_prior = bilby.core.prior.analytical.PowerLaw(alpha=self.parameters['alpha_1'],
+                mass_prior = bilby.core.prior.analytical.PowerLaw(alpha=self.parameters['alpha'],
                                                                   minimum=self.parameters['mmin'],
                                                                   maximum=self.parameters['mmax'])
                 
-                samples['mass_1_source'] = prior.sample(self.number_of_samples)
-                samples['mass_2_source'] = prior.sample(self.number_of_samples)
+                samples['mass_1_source'] = mass_prior.sample(self.number_of_samples)
+                samples['mass_2_source'] = mass_prior.sample(self.number_of_samples)
+            elif 'fixed' in self.mass_model:
+                samples['mass_1_source'] = numpy.ones(self.number_of_samples) * self.parameters['primary_mass']
+                samples['mass_2_source'] = samples['mass_1_source'] * (self.parameters['mass_ratio'] if self.parameters['mass_ratio'] < 1 else 1 / self.parameters['mass_ratio'])
             else:
                 raise ValueError('{} is not implemented in gwpopulation. Please choose from {}'.format(self.mass_model, choices))
         

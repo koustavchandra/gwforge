@@ -1,7 +1,7 @@
 # Proposed ET detector with triangular configuration
 name = 'ET'
 power_spectral_density = PowerSpectralDensity(psd_file='ET_D_psd.txt')
-minimum_frequency = 7
+minimum_frequency = 4
 maximum_frequency = 2048
 length = 10
 latitude = 43 + 37. / 60 + 53.0921 / 3600

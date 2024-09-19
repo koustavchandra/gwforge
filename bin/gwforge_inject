@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/ligo/home/ligo.org/koustav.chandra/.conda/envs/gwforge-venv/bin/python3.9
 '''
 Inject gravitational wave signals into a network of detectors and save metadata.
 
@@ -66,7 +66,7 @@ sampling_frequency = config.getfloat('IFOS',
                                      'sampling-frequency', 
                                      fallback=8192)
 
-minimum_frequency = config.getfloat('IFOS', 'minimum-frequency', fallback=7)
+minimum_frequency = config.getfloat('Injection', 'waveform-minimum-frequency', fallback=3)
 
 # Log information about frame files and injections
 logging.info('Loading injections')

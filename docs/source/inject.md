@@ -5,15 +5,15 @@ If you intend to inject signals into the data, follow these steps:
 detectors = ['CE20', 'CE40', 'ET']
 channel-dict = {'CE20':'CE20:INJ', 'CE40':'CE40:INJ', 'ET':'ET:INJ'}
 sampling-frequency = 8192
-minimum-frequency = 6
 
 [Injections]
 injection-file = bbh.h5
 injection-type = bbh
-waveform-approximant = IMRPhenomXPHM
+waveform-approximant = IMRPhenomXO4a
 fft-scheme = numpy
+waveform-minimum-frequency = 3
 ```
-Similar to the [Noise](doc:noise), begin by defining the detector network. However, this time, provide the channel name of the Frame files and include the `sampling-frequency` (matching the detector data's sampling frequency) along with a `minimum-frequency`.
+Similar to the [Noise](doc:noise), begin by defining the detector network. However, this time, provide the channel name of the Frame files and include the `sampling-frequency` (matching the detector data's sampling frequency) along with a `waveform-minimum-frequency` for the signals.
 
 You must specify the path to `injection-file`, `injection-type` and `waveform-approximant` as extras.
 

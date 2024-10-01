@@ -46,7 +46,7 @@ class Mass:
             dict: A dictionary containing source frame mass distribution samples.
         '''
         samples = {}
-        try: # Implemented GWPopulation Models
+        if self.mass_model in ['powerlawpeak', 'multipeak', 'brokenpowerlaw']: # Implemented GWPopulation Models
             if 'powerlawpeak' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
                 model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
@@ -75,28 +75,36 @@ class Mass:
                                                          minimum=numpy.min(mass_ratio), 
                                                          maximum=numpy.max(mass_ratio), 
                                                          name='mass_ratio')
-            
-            samples['mass_1_source'] = primary_mass_prior.sample(self.number_of_samples)
-            samples['mass_ratio'] = mass_ratio_prior.sample(self.number_of_samples)
+            mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
+            mass_prior['mass_ratio'] = mass_ratio_prior
+            mass_prior['mass_1_source'] = primary_mass_prior
+            prior_samples = mass_prior.sample(self.number_of_samples)
+            samples['mass_1_source'] = prior_samples['mass_1_source']
+            samples['mass_ratio'] = prior_samples['mass_ratio']
                 
-        except:
-            logging.warn('Parameterised mass model does not exist in gwpopulation')
+        else:
+            logging.warning('Parameterised mass model does not exist in gwpopulation')
             logging.info('Generating samples using {} model'.format(self.mass_model))
+
+            mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
             if 'uniformsecondary' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
                 model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
-                mass_parameters = {param: self.parameters[param] for param in self.parameters if param not in ('beta', 'minimum_secondary_mass', 'maximum_secondary_mass')}
+                mass_parameters = {param: self.parameters[param] for param in self.parameters if param not in ('beta', 'minimum_secondary_mass', 'maximum_secondary_mass', 'minimum_mass_ratio')}
                 mass1 = model.m1s
                 prob_mass_1 = model.p_m1({'mass_1': mass1}, **mass_parameters)
                 primary_mass_prior = bilby.core.prior.Interped(mass1, prob_mass_1, 
                                                            minimum=numpy.min(mass1), 
                                                            maximum=numpy.max(mass1), 
                                                            name='mass_1_source')
-                samples['mass_1_source'] = primary_mass_prior.sample(self.number_of_samples)
-                secondar_mass_prior = bilby.core.prior.analytical.Uniform(minimum=self.parameters['minimum_secondary_mass'],
+                secondary_mass_prior = bilby.core.prior.analytical.Uniform(minimum=self.parameters['minimum_secondary_mass'],
                                                                           maximum=self.parameters['maximum_secondary_mass'],
                                                                           name='mass_2_source')
-                samples['mass_2_source'] = secondar_mass_prior.sample(self.number_of_samples)
+                # Waveform limitations + Population synthesis limitations: https://arxiv.org/abs/2009.06655
+                minimum_mass_ratio = self.parameters.get('minimum_mass_ratio', 0.02)
+                mass_prior['mass_ratio'] = bilby.gw.prior.Constraint(minimum=minimum_mass_ratio, maximum=1, name='mass_ratio')
+                mass_prior['mass_1_source'] = primary_mass_prior
+                mass_prior['mass_2_source'] = secondary_mass_prior
             
             elif 'doublegaussian' in self.mass_model:
                 '''
@@ -114,16 +122,19 @@ class Mass:
                                                                         maximum=self.parameters['mmax'])
                 prob_2 = prior_2.prob(mass) * (1- self.parameters['breaking_fraction'])
                 prob = prob_1 + prob_2
-                mass_prior = bilby.core.prior.Interped(mass, prob, 
-                                                       minimum=numpy.min(mass), 
-                                                        maximum=numpy.max(mass))
-                samples['mass_1_source'] = mass_prior.sample(self.number_of_samples)
-                samples['mass_2_source'] = mass_prior.sample(self.number_of_samples)
-            
+                prior = bilby.core.prior.Interped(mass, prob, 
+                                                  minimum=numpy.min(mass), 
+                                                  maximum=numpy.max(mass))
+                mass_prior['mass_1_source'] = prior
+                mass_prior['mass_2_source'] = prior
+                mass_prior['mass_ratio'] = bilby.gw.prior.Constraint(minimum=0.5, maximum=1, name='mass_ratio')
+                            
             elif 'lognormal' in self.mass_model or 'loggaussian' in self.mass_model:
-                mass_prior = bilby.core.prior.analytical.LogNormal(mu=self.parameters['mu'], sigma=self.parameters['sigma'])
-                samples['mass_1_source'] = mass_prior.sample(self.number_of_samples)
-                samples['mass_2_source'] = mass_prior.sample(self.number_of_samples)
+                prior = bilby.core.prior.analytical.LogNormal(mu=self.parameters['mu'], sigma=self.parameters['sigma'])
+                mass_prior['mass_1_source'] = prior
+                mass_prior['mass_2_source'] = prior
+                #Chosen based on waveform limitation
+                mass_prior['mass_ratio'] = bilby.gw.prior.Constraint(minimum=self.parameters.get('minimum_mass_ratio', 0.056), maximum=1, name='mass_ratio')
             
             elif 'dip' in self.mass_model:
                 '''
@@ -153,22 +164,32 @@ class Mass:
                     low_pass_filter(val=mass[mass > self.parameters['gamma_high']], parameters=self.parameters)
                 )
                 prior = bilby.core.prior.Interped(mass, prob, minimum=numpy.min(mass), maximum=numpy.max(mass))
-            
-                samples['mass_1_source'] = prior.sample(self.number_of_samples)
-                samples['mass_2_source'] = prior.sample(self.number_of_samples)
+                mass_prior['mass_1_source'] = prior
+                mass_prior['mass_2_source'] = prior
+
             elif 'powerlaw' in self.mass_model:
-                mass_prior = bilby.core.prior.analytical.PowerLaw(alpha=self.parameters['alpha'],
+                prior = bilby.core.prior.analytical.PowerLaw(alpha=self.parameters['alpha'],
                                                                   minimum=self.parameters['mmin'],
                                                                   maximum=self.parameters['mmax'])
+
+                minimum_mass_ratio = self.parameters.get('minimum_mass_ratio', 0.056)
+                mass_prior['mass_ratio'] = bilby.gw.prior.Constraint(minimum=minimum_mass_ratio, maximum=1, name='mass_ratio')
+                mass_prior['mass_1_source'] = prior
+                mass_prior['mass_2_source'] = prior
+
+                prior_samples = mass_prior.sample(self.number_of_samples)
+                samples['mass_1_source'] = prior_samples['mass_1_source']
+                samples['mass_2_source'] = prior_samples['mass_2_source']
                 
-                samples['mass_1_source'] = mass_prior.sample(self.number_of_samples)
-                samples['mass_2_source'] = mass_prior.sample(self.number_of_samples)
             elif 'fixed' in self.mass_model:
                 samples['mass_1_source'] = numpy.ones(self.number_of_samples) * self.parameters['primary_mass']
                 samples['mass_2_source'] = samples['mass_1_source'] * (self.parameters['mass_ratio'] if self.parameters['mass_ratio'] < 1 else 1 / self.parameters['mass_ratio'])
             else:
                 raise ValueError('{} is not implemented in gwpopulation. Please choose from {}'.format(self.mass_model, choices))
-        
+
+            prior_samples = mass_prior.sample(self.number_of_samples)
+            samples['mass_1_source'] = prior_samples['mass_1_source']
+            samples['mass_2_source'] = prior_samples['mass_2_source']
         # Generate all source frame mass parameters from samples
         samples = conversion.generate_mass_parameters(samples, source=True)
         return samples

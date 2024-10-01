@@ -110,11 +110,15 @@ class PyCBCInject:
         for ifo in self.ifos:
             #convert it into pycbc time-series
             strain = ifo.strain_data.to_pycbc_timeseries()
-            for k in track(range(len(self.injection_parameters['mass1'])), description='Injecting signals in {}'.format(ifo.name)):  
-                signal_parameters = {key: self.injection_parameters[key][k] for key in self.injection_parameters.keys()}
-                strain = self.inject(ifo=ifo,
-                                     strain=strain, 
-                                     signal_parameters=signal_parameters)
+            for k in track(range(len(self.injection_parameters['mass1'])), description='Injecting signals in {}'.format(ifo.name)): 
+                try: 
+                    signal_parameters = {key: self.injection_parameters[key][k] for key in self.injection_parameters.keys()}
+                    strain = self.inject(ifo=ifo,
+                                        strain=strain, 
+                                        signal_parameters=signal_parameters)
+                except:
+                    logging.warning('Failed to inject signal for {} with parameters: {}'.format(ifo.name, signal_parameters))
+                    continue
             strain = TimeSeries.from_pycbc(strain)
             ifo.strain_data.set_from_gwpy_timeseries(strain)
         return self.ifos

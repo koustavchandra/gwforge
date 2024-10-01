@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/ligo/home/ligo.org/koustav.chandra/.conda/envs/gwforge-venv/bin/python3.9
 '''
 Creates a Condor DAG for job submission in particular sequence.
 '''
@@ -7,7 +7,7 @@ from rich.progress import track
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s %(message)s', 
                     datefmt='%Y-%m-%d %H:%M:%S')
-
+from GWForge.utils import split_odd_even
 
 noise='''######################################################################
 # Submit Script for NOISE
@@ -181,7 +181,7 @@ except:
     
 logging.info('Checking if jobs can be parallelised or not based on gps-start-time and gps-end-time')
 # Parallelise only if duration > 40960
-minimum_duration = 40960
+minimum_duration = 4096 * 6
 if (opts.gps_end_time - opts.gps_start_time) <= minimum_duration:
     time = [opts.gps_start_time, opts.gps_end_time]
 else:
@@ -248,19 +248,37 @@ with open(condor_dag_file, 'w') as dag_file:
             dag_file.write('RETRY {} 3\n'.format(bns_job_id))
             bns_job_ids.append(bns_job_id)
                 
-    
+    # Split odd and even BBH, NSBH, and BNS jobs
+    bbh_odd, bbh_even = split_odd_even(bbh_job_ids)
+    nsbh_odd, nsbh_even = split_odd_even(nsbh_job_ids)
+    bns_odd, bns_even = split_odd_even(bns_job_ids)
+
+    # Handle BBH jobs: odd first, then even
     if bbh_job_ids:
-        #Add dependency on noise jobs
-        for bbh_job_id in bbh_job_ids:
+        # Add odd jobs first
+        for bbh_job_id in bbh_odd:
             dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(noise_job_ids), bbh_job_id))
+        # Add even jobs after odd jobs
+        for bbh_job_id in bbh_even:
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(bbh_odd), bbh_job_id))
+
+    # Handle NSBH jobs: odd first, then even
     if nsbh_job_ids:
-        for nsbh_job_id in nsbh_job_ids:
-            #Add dependency on bbh jobs
+        # Add odd jobs first
+        for nsbh_job_id in nsbh_odd:
             dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(bbh_job_ids), nsbh_job_id))
+        # Add even jobs after odd jobs
+        for nsbh_job_id in nsbh_even:
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(nsbh_odd), nsbh_job_id))
+
+    # Handle BNS jobs: odd first, then even
     if bns_job_ids:
-        for bns_job_id in bns_job_ids:
-            #Add dependency on bbh jobs
+        # Add odd jobs first
+        for bns_job_id in bns_odd:
             dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(nsbh_job_ids), bns_job_id))
+        # Add even jobs after odd jobs
+        for bns_job_id in bns_even:
+            dag_file.write('PARENT {} CHILD {}\n'.format(" ".join(bns_odd), bns_job_id))
 
 logging.info('Created Condor DAG file {}'.format(condor_dag_file))
 if opts.submit_now:

@@ -147,13 +147,30 @@ For example:
 ```
 will use the second.
 
-## EOS
-The `[EOS]` section accepts an `eos-file` from which it reads the mass and tidal parameters. By default it uses SLy EOS but you can specify as follows:
+## EOS (Equation of State)
+
+The `[EOS]` section allows specifying an `eos-file` that provides the mass and tidal parameters for a neutron star equation of state. By default, the SLy EOS (Skyrme-Lyon) is used, but you can override this by specifying a different `eos-file` in the following way:
+
 ```ini
 [EOS]
 eos-file = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/GWForge/inject/eos_tables/TOVSeq_SLy.dat
 ```
-provided it is consistent with how Rahul likes to define them.
+provided it is consistent with how Rahul likes to define them. You can find examples of `eos-tables` in the [GWForge repository](https://github.com/koustavchandra/gwforge/tree/main/GWForge/inject/eos_tables).
+
+
+**Structure of eos-file**
+The EOS tables are structured in columns, where each column corresponds to different physical parameters. Below is a breakdown of few of these columns:
+
+`C`: Compactness of neutron star.
+
+`Mb`: Baryonic mass in solar masses
+
+`M`: Mass in solar mass units
+
+`R`: Radius in solar mass units
+
+`kl` : Second love number
+
 
 ### Generating the population.
 

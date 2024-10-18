@@ -118,6 +118,7 @@ if 'Extrinsic' in config:
         extrinsic_prior_file = None
 else:
     logging.warning("No 'extrinsic_prior_file' provided. Using default priors")
+    extrinsic_prior_file = None
 
 # Create Extrinsic object and generate samples    
 e = Extrinsic(number_of_samples = len(samples['redshift']), 

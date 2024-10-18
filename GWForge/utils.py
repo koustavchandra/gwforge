@@ -1,4 +1,4 @@
-import numpy, pylab, scipy, h5py, logging, os, fnmatch
+import numpy, pylab, scipy, h5py, logging, os, fnmatch, bilby
 from scipy.interpolate import interp1d
 import seaborn as sns
 sns.set_context('talk') 
@@ -331,3 +331,11 @@ pycbc_labels = {'mass_1': 'mass1',
                 'theta_jn' : 'inclination',
                 'phase' : 'coa_phase',
                 'luminosity_distance': 'distance'}
+
+# TODO: Remove this dependency in future versions.
+reference_prior_dict = {'ra' : bilby.core.prior.analytical.Uniform(name='ra', minimum=0, maximum=2 * numpy.pi, boundary='periodic'),
+                        'dec' : bilby.core.prior.analytical.Uniform(name='dec', minimum=0, maximum=numpy.pi, boundary='periodic'),
+                        'theta_jn' : bilby.core.prior.analytical.Uniform(name='theta_jn', minimum=0, maximum=numpy.pi, boundary='periodic'),
+                        'psi' : bilby.core.prior.analytical.Uniform(name='psi', minimum=0, maximum=numpy.pi, boundary='periodic'),
+                        'luminosity_distance' : bilby.gw.prior.UniformSourceFrame(name='luminosity_distance', minimum=10, maximum=1000),
+                        'phase' : bilby.core.prior.analytical.Uniform(name='phase', minimum=0, maximum=2 * numpy.pi, boundary='periodic')}

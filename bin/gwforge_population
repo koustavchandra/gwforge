@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO,
 
 # Read configuration from ini file
 config = configparser.ConfigParser()
-parser = argparse.ArgumentParser(description=__doc__)
+parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 # Parse command-line arguments
 parser.add_argument('--config-file', 
@@ -24,15 +24,18 @@ parser.add_argument('--config-file',
 parser.add_argument('--output-file', 
                     required=True, 
                     help='HDF5 file to store injection information')
+parser.add_argument('--save-config',
+		    action='store_true',
+		    help='If provided, saves settings from config file in the group "config" in the output HDF5 file (uses configparser)')
 parser.add_argument('--source-type', 
                     type=str.lower,
                     choices=['bbh', 'bns', 'nsbh', 'pbh', 'imbhb', 'imbbh'],
                     default='bbh',
-                    help='Signal source type [Default: BBH]')
+                    help='Signal source type')
 parser.add_argument('--reference-frequency', 
                     type=float,
                     default=5.,
-                    help='Reference frequency [Default: 5Hz]')
+                    help='Reference frequency (in Hz)')
 opts = parser.parse_args()
 
 # Read configuration file
@@ -146,7 +149,16 @@ samples = generate_detector_frame_parameters(samples)
 samples['reference_frequency'] = numpy.ones_like(samples['mass_1']) * opts.reference_frequency
 samples = generate_spin_parameters(samples)
 logging.info('Saving data in {}'.format(opts.output_file))
+
 with h5py.File(opts.output_file,'w') as f:
     for key in samples.keys():
         utils.hdf_append(f, key, samples[key])
+
+    if opts.save_config:
+        # Save configuration settings in a "config" group
+        config_group = f.create_group("config")
+        for section in config.sections():
+            section_group = config_group.create_group(section)
+            for key, value in config[section].items():
+                section_group.attrs[key] = value
 logging.info('Done!')

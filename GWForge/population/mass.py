@@ -49,13 +49,13 @@ class Mass:
         if self.mass_model in ['powerlawpeak', 'multipeak', 'brokenpowerlaw']: # Implemented GWPopulation Models
             if 'powerlawpeak' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
-                model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000), mmin=self.parameters['mmin'], mmax=self.parameters['mmax'])
+                model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
             elif 'multipeak' in self.mass_model:
                 from gwpopulation.models.mass import MultiPeakSmoothedMassDistribution
-                model = MultiPeakSmoothedMassDistribution(normalization_shape=(1000, 1000), mmin=self.parameters['mmin'], mmax=self.parameters['mmax'])
+                model = MultiPeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
             elif 'brokenpowerlaw' in self.mass_model:
                 from gwpopulation.models.mass import BrokenPowerLawSmoothedMassDistribution
-                model = BrokenPowerLawSmoothedMassDistribution(normalization_shape=(1000, 1000), mmin=self.parameters['mmin'], mmax=self.parameters['mmax'])
+                model = BrokenPowerLawSmoothedMassDistribution(normalization_shape=(1000, 1000))
                 
             mass1, mass_ratio = model.m1s, model.qs
             
@@ -89,7 +89,7 @@ class Mass:
             mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
             if 'uniformsecondary' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
-                model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000), mmin=self.parameters['mmin'], mmax=self.parameters['mmax'])
+                model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
                 mass_parameters = {param: self.parameters[param] for param in self.parameters if param not in ('beta', 'minimum_secondary_mass', 'maximum_secondary_mass', 'minimum_mass_ratio')}
                 mass1 = model.m1s
                 prob_mass_1 = model.p_m1({'mass_1': mass1}, **mass_parameters)

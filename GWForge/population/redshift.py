@@ -172,7 +172,7 @@ class Redshift:
 
         rate_density = self.rate_density()
         dataset = {'redshift' : model.zs}
-        prob = rate_density(dataset)
+        prob = rate_density(dataset['redshift'])
         prior = bilby.core.prior.Interped(xx=dataset['redshift'], yy=prob, 
                                           minimum=0.,maximum=self.maximum_redshift, name='redshift')
         average_time_interval = self.average_time_between_signals()

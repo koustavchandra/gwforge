@@ -81,7 +81,7 @@ class Spin:
                     chi_1 = bilby.gw.prior.Uniform(name='chi_1', 
                                                    minimum=self.parameters['minimum_primary_spin'], 
                                                    maximum=self.parameters['maximum_primary_spin'])
-                    chi_2 = bilby.gw.prior.Uniform(name='chi_1', 
+                    chi_2 = bilby.gw.prior.Uniform(name='chi_2', 
                                                    minimum=self.parameters['minimum_secondary_spin'], 
                                                    maximum=self.parameters['maximum_secondary_spin'])
                 elif 'beta' in self.spin_model:

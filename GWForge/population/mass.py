@@ -15,7 +15,7 @@ def low_pass_filter(val, parameters):
     return 1./(1 + (val / parameters['mmax']) ** parameters['n'])
 
 choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
-           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw']
+           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components']
 class Mass:
     def __init__(self, 
                  mass_model, 
@@ -184,12 +184,21 @@ class Mass:
             elif 'fixed' in self.mass_model:
                 samples['mass_1_source'] = numpy.ones(self.number_of_samples) * self.parameters['primary_mass']
                 samples['mass_2_source'] = samples['mass_1_source'] * (self.parameters['mass_ratio'] if self.parameters['mass_ratio'] < 1 else 1 / self.parameters['mass_ratio'])
+            elif self.mass_model == 'uniformcomponents':
+                mass_prior['mass_1_source'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['mmin'], maximum=self.parameters['mmax'], name='mass_1_source')
+                mass_prior['mass_2_source'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['mmin'], maximum=self.parameters['mmax'], name='mass_2_source')
             else:
                 raise ValueError('{} is not implemented in gwpopulation. Please choose from {}'.format(self.mass_model, choices))
 
             prior_samples = mass_prior.sample(self.number_of_samples)
             samples['mass_1_source'] = prior_samples['mass_1_source']
             samples['mass_2_source'] = prior_samples['mass_2_source']
+            
+            if self.mass_model == 'uniformcomponents':
+                m1_tmp = samples['mass_1_source']
+                m2_tmp = samples['mass_2_source']
+                samples['mass_1_source'] = numpy.where(m1_tmp > m2_tmp, m1_tmp, m2_tmp)
+                samples['mass_2_source'] = numpy.where(m1_tmp > m2_tmp, m2_tmp, m1_tmp)
         # Generate all source frame mass parameters from samples
         samples = conversion.generate_mass_parameters(samples, source=True)
         return samples

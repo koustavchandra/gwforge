@@ -169,8 +169,10 @@ class Redshift:
             model = PowerLawRedshift(z_max=self.maximum_redshift)
         else:
             raise ValueError('Redshift model {} is not implemented in GWPopulation')
+
+        rate_density = self.rate_density()
         dataset = {'redshift' : model.zs}
-        prob = model.probability(dataset, **self.parameters)
+        prob = rate_density(dataset['redshift'])
         prior = bilby.core.prior.Interped(xx=dataset['redshift'], yy=prob, 
                                           minimum=0.,maximum=self.maximum_redshift, name='redshift')
         average_time_interval = self.average_time_between_signals()

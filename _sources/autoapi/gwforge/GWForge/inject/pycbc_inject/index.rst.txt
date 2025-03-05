@@ -1,0 +1,58 @@
+gwforge.GWForge.inject.pycbc_inject
+===================================
+
+.. py:module:: gwforge.GWForge.inject.pycbc_inject
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.pycbc_inject.injection_func_map
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.pycbc_inject.PyCBCInject
+
+
+Module Contents
+---------------
+
+.. py:data:: injection_func_map
+
+.. py:class:: PyCBCInject(ifos, data, injection_parameters, waveform_arguments, injection_type='bbh')
+
+   .. py:attribute:: ifos
+
+
+   .. py:attribute:: injection_parameters
+
+
+   .. py:attribute:: injection_type
+      :value: ''
+
+
+
+   .. py:attribute:: waveform_arguments
+
+
+   .. py:method:: get_pycbc_signal(ifo, signal_parameters)
+
+
+   .. py:method:: inject(ifo, strain, signal_parameters)
+
+
+   .. py:method:: inject_signal_using_pycbc_method()
+
+      Inject a gravitational wave signal into the ifo network using
+      pycbc methods
+      Returns:
+      -------
+
+
+

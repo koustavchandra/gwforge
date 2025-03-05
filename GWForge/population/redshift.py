@@ -142,13 +142,20 @@ class Redshift:
         merger_rate_density = merger_rate_density / merger_rate_density[0] * self.local_merger_rate_density  # Normalize & Rescale
         return interp1d(redshift, merger_rate_density)
 
-    def average_time_between_signals(self):
+    def coalescence_rate(self):
         '''
-        Calculates the average time interval between two signals of same type
+        Calculates the merger rate from rate_density function. Uses pycbc.population.population_models.coalescence_rate
         '''
         rate_density = self.rate_density()
         # this PyCBC function returns an interpolation function ---> merger rate at maximum redshift    
         merger_rate = population_models.coalescence_rate(rate_den=rate_density, maxz=self.maximum_redshift)
+        return merger_rate
+
+    def average_time_between_signals(self):
+        '''
+        Calculates the average time interval between two signals of same type
+        '''
+        merger_rate = self.coalescence_rate()
         # The following returns the average time delay. See Eq. (7) of <Phys. Rev. D 93, 024018 (2016)>
         return 1 / population_models.total_rate_upto_redshift(z=self.maximum_redshift, merger_rate=merger_rate) * YRJUL_SI    
 
@@ -170,9 +177,9 @@ class Redshift:
         else:
             raise ValueError('Redshift model {} is not implemented in GWPopulation')
 
-        rate_density = self.rate_density()
+        rate = self.coalescence_rate()
         dataset = {'redshift' : model.zs}
-        prob = rate_density(dataset['redshift'])
+        prob = rate(dataset['redshift'])
         prior = bilby.core.prior.Interped(xx=dataset['redshift'], yy=prob, 
                                           minimum=0.,maximum=self.maximum_redshift, name='redshift')
         average_time_interval = self.average_time_between_signals()

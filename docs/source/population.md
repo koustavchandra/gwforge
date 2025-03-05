@@ -88,7 +88,7 @@ The currently available mass distribution models and their parameters are:
   |`DoubleGaussian`| `mu_1, sigma_1, mu_2, sigma_2, breaking_fraction, mmin, mmax` | Truncated Gaussian distribution for primary and secondary
   |`LogNormal`| `mu, sigma` | Log-normal distribution with mean mu and width sigma for primary and secondary | 
   |`PowerLawDipBreak`|`mmin, mmax, alpha_1, alpha_2, gamma_low, gamma_high, eta_low, eta_high, A, n` | Extension of power law break model |
-  |`PowerLaw`| `alpha_1, mmin, mmax`  | Power law with bounds and alpha, spectral index for primary and secondary |      
+  |`PowerLaw`| `alpha, mmin, mmax`  | Power law with bounds and alpha, spectral index for primary and secondary |      
 
 The parameter names are heavily dependent on gwpopulation and bilby. Thus, it is essential to keep track of definition changes.
 

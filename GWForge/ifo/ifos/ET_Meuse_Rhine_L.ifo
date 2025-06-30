@@ -1,0 +1,11 @@
+# Proposed XG Einstein Telescope with 15km L-shaped arms (Meuse-Rhine)
+name = 'ET-Meuse'
+power_spectral_density = None
+minimum_frequency = 2
+maximum_frequency = 2048
+length = 15
+latitude = 50. + 43./60 + 23./3600
+longitude = 5. + 55./60 + 14./3600
+elevation = 409
+xarm_azimuth = 0.
+yarm_azimuth = 90.

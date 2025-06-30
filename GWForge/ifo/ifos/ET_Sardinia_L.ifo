@@ -1,12 +1,11 @@
-# Proposed ET detector with triangular configuration
-name = 'ET'
+# Proposed XG Einstein Telescope with 15km L-shaped arms (Saridinia)
+name = 'ET-Sardinia'
 power_spectral_density = None
 minimum_frequency = 2
 maximum_frequency = 2048
-length = 10
+length = 15
 latitude = 40. + 31./60
 longitude = 9. + 25./60
 elevation = 51.884
-xarm_azimuth = 70.5674
-yarm_azimuth = 130.5674
-shape = 'Triangle'
+xarm_azimuth = 0.
+yarm_azimuth = 90.

@@ -1,0 +1,52 @@
+gwforge.GWForge.population.spin
+===============================
+
+.. py:module:: gwforge.GWForge.population.spin
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.spin.choices
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.spin.Spin
+
+
+Module Contents
+---------------
+
+.. py:data:: choices
+   :value: ['Non-spinning', 'Aligned', 'Aligned-Bilby', 'Aligned-Uniform', 'Beta-Aligned',...
+
+
+.. py:class:: Spin(spin_model, number_of_samples, parameters={})
+
+   .. py:attribute:: spin_model
+      :value: ''
+
+
+
+   .. py:attribute:: number_of_samples
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:method:: sample()
+
+      Generate spin distribution samples based on the chosen parameterised model and its parameters.
+
+      Returns:
+      --------
+          dict: A dictionary containing spin distribution samples.
+
+
+

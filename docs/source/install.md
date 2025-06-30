@@ -5,7 +5,7 @@ GWForge is currently available only from source. Follow the steps below for the 
 ## 1. Create Conda Environment:
 
 ```bash
-conda create --name gwforge-venv python=3.9.18
+conda create --name gwforge-venv python=3.11
 ```
 This command sets up a Conda environment named gwforge-venv with Python 3.9.18 and basic packages. To activate the Conda environment, use:
 ```bash

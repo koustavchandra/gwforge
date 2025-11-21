@@ -33,6 +33,8 @@ choices = [
 ]
 
 
+choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
+           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q']
 class Mass:
     def __init__(
         self,
@@ -297,29 +299,18 @@ class Mass:
                 mass_prior["mass_2_source"] = prior
 
                 prior_samples = mass_prior.sample(self.number_of_samples)
-                samples["mass_1_source"] = prior_samples["mass_1_source"]
-                samples["mass_2_source"] = prior_samples["mass_2_source"]
-
-            elif "fixed" in self.mass_model:
-                samples["mass_1_source"] = (
-                    numpy.ones(self.number_of_samples) * self.parameters["primary_mass"]
-                )
-                samples["mass_2_source"] = samples["mass_1_source"] * (
-                    self.parameters["mass_ratio"]
-                    if self.parameters["mass_ratio"] < 1
-                    else 1 / self.parameters["mass_ratio"]
-                )
-            elif self.mass_model == "uniformcomponents":
-                mass_prior["mass_1_source"] = bilby.core.prior.analytical.Uniform(
-                    minimum=self.parameters["mmin"],
-                    maximum=self.parameters["mmax"],
-                    name="mass_1_source",
-                )
-                mass_prior["mass_2_source"] = bilby.core.prior.analytical.Uniform(
-                    minimum=self.parameters["mmin"],
-                    maximum=self.parameters["mmax"],
-                    name="mass_2_source",
-                )
+                samples['mass_1_source'] = prior_samples['mass_1_source']
+                samples['mass_2_source'] = prior_samples['mass_2_source']
+                
+            elif 'fixed' in self.mass_model:
+                samples['mass_1_source'] = numpy.ones(self.number_of_samples) * self.parameters['primary_mass']
+                samples['mass_2_source'] = samples['mass_1_source'] * (self.parameters['mass_ratio'] if self.parameters['mass_ratio'] < 1 else 1 / self.parameters['mass_ratio'])
+            elif self.mass_model == 'uniformcomponents':
+                mass_prior['mass_1_source'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['mmin'], maximum=self.parameters['mmax'], name='mass_1_source')
+                mass_prior['mass_2_source'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['mmin'], maximum=self.parameters['mmax'], name='mass_2_source')
+            elif self.mass_model == 'uniformmq':
+                mass_prior['total_mass_source'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['minimum_total_mass'], maximum=self.parameters['maximum_total_mass'], name='total_mass_source')
+                mass_prior['mass_ratio'] = bilby.core.prior.analytical.Uniform(minimum=self.parameters['minimum_mass_ratio'], maximum=self.parameters['maximum_mass_ratio'], name='mass_ratio')
             else:
                 raise ValueError(
                     "{} is not implemented in gwpopulation. Please choose from {}".format(

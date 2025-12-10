@@ -141,8 +141,8 @@ class Redshift:
                 redshift=z, **self.parameters
             )
         else:
-            raise ValueError("Redshift model {} is not implemented in GWPopulation")
-
+            raise ValueError(f'Redshift model {self.redshift_model} is not implemented in GWPopulation')
+    
         return (
             psi_of_z
             * population_models.p_tau(tau=time_delay, td_model=self.time_delay_model)

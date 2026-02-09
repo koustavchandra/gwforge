@@ -1,6 +1,6 @@
 """ Power Law + Dip + Break models. None are reviewed."""
 from gwpopulation.utils import powerlaw, truncnorm
-from pairing import _IdenticalPairingMassDistribution
+from .pairing import _IdenticalPairingMassDistribution
 
 def power_law_dip_break_1d(mass, 
                            A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax,

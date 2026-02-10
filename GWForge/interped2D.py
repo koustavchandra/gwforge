@@ -1,4 +1,5 @@
 from scipy.interpolate import RegularGridInterpolator
+import numpy as np
 from bilby.core.prior import Prior
 
 # Generic 2D interpolated prior class

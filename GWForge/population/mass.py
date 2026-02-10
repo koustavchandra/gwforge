@@ -30,28 +30,21 @@ choices = [
     "PowerLawDipBreak",
     "PowerLaw",
     "Uniform_components",
+    'Uniform_M_q', 'FullPop_GWTC4'
 ]
 
 
 choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
-           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q']
+           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q', 'FullPop_GWTC4']
 class Mass:
-    def __init__(
-        self,
-        mass_model,
-        number_of_samples,
-        parameters={
-            "alpha": 3.37,
-            "beta": 0.76,
-            "delta_m": 5.23,
-            "mmin": 4.89,
-            "mmax": 88.81,
-            "lam": 0.04,
-            "mpp": 33.60,
-            "sigpp": 4.59,
-        },
-    ):
-        """
+    def __init__(self, 
+                 mass_model, 
+                 number_of_samples,
+                 parameters = {'alpha':3.37, 'beta': 0.76, 'delta_m':5.23, 
+                               'mmin':4.89, 'mmax':88.81, 'lam':0.04, 'mpp': 33.60, 
+                               'sigpp':4.59},
+                 max_iterations=10000):
+        '''
         Parameters:
         ----------
         mass_model : str
@@ -60,12 +53,13 @@ class Mass:
             The number of samples to generate. [Ideal: Exactly same as redshift samples]
         parameters: (dict, optional)
             A dictionary of model parameters. Default is provided assuming PowerLawPeak
-        """.format(
-            choices
-        )
+        max_iterations: (int, optional)
+            Maximum number of iterations for rejection sampling (if applicable) used in FullPop_GWTC4 model. Default is 10000.
+        '''.format(choices)
         self.mass_model = utils.remove_special_characters(mass_model.lower())
         self.number_of_samples = number_of_samples
         self.parameters = parameters
+        self.max_iterations = max_iterations
 
     def sample(self):
         """
@@ -83,76 +77,65 @@ class Mass:
         ]:  # Implemented GWPopulation Models
             if "powerlawpeak" in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
-
-                model = SinglePeakSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
-                )
-            elif "multipeak" in self.mass_model:
+                model = SinglePeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
+            elif 'multipeak' in self.mass_model:
                 from gwpopulation.models.mass import MultiPeakSmoothedMassDistribution
-
-                model = MultiPeakSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
-                )
-            elif "brokenpowerlaw" in self.mass_model:
-                from gwpopulation.models.mass import (
-                    BrokenPowerLawSmoothedMassDistribution,
-                )
-
-                model = BrokenPowerLawSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
-                )
-
+                model = MultiPeakSmoothedMassDistribution(normalization_shape=(1000, 1000))
+            elif 'brokenpowerlaw' in self.mass_model:
+                from gwpopulation.models.mass import BrokenPowerLawSmoothedMassDistribution
+                model = BrokenPowerLawSmoothedMassDistribution(normalization_shape=(1000, 1000))
+                
             mass1, mass_ratio = model.m1s, model.qs
-
+            
             # Create dictionaries for supported parameters
-            mass_parameters = {
-                param: self.parameters[param]
-                for param in self.parameters
-                if param not in ("beta")
-            }
-            mass_ratio_parameters = {
-                param: self.parameters[param]
-                for param in self.parameters
-                if param in ("beta", "mmin", "delta_m")
-            }
-
-            prob_mass_1 = model.p_m1({"mass_1": mass1}, **mass_parameters)
-            prob_mass_ratio = model.p_q(
-                {"mass_ratio": mass_ratio, "mass_1": mass1}, **mass_ratio_parameters
-            )
-
-            primary_mass_prior = bilby.core.prior.Interped(
-                mass1,
-                prob_mass_1,
-                minimum=numpy.min(mass1),
-                maximum=numpy.max(mass1),
-                name="mass_1_source",
-            )
-
-            mass_ratio_prior = bilby.core.prior.Interped(
-                mass_ratio,
-                prob_mass_ratio,
-                minimum=numpy.min(mass_ratio),
-                maximum=numpy.max(mass_ratio),
-                name="mass_ratio",
-            )
-            mass_prior = bilby.gw.prior.BBHPriorDict(
-                dictionary=utils.reference_prior_dict
-            )
-            mass_prior["mass_ratio"] = mass_ratio_prior
-            mass_prior["mass_1_source"] = primary_mass_prior
+            mass_parameters = {param: self.parameters[param] for param in self.parameters if param not in ('beta')}
+            mass_ratio_parameters = {param:self.parameters[param] for param in self.parameters if param in ('beta', 'mmin', 'delta_m')}
+            
+            prob_mass_1 = model.p_m1({'mass_1': mass1}, **mass_parameters)
+            prob_mass_ratio = model.p_q({'mass_ratio': mass_ratio, 'mass_1' : mass1}, **mass_ratio_parameters)
+            
+            primary_mass_prior = bilby.core.prior.Interped(mass1, prob_mass_1, 
+                                                           minimum=numpy.min(mass1), 
+                                                           maximum=numpy.max(mass1), 
+                                                           name='mass_1_source')
+            
+            mass_ratio_prior = bilby.core.prior.Interped(mass_ratio, prob_mass_ratio, 
+                                                         minimum=numpy.min(mass_ratio), 
+                                                         maximum=numpy.max(mass_ratio), 
+                                                         name='mass_ratio')
+            mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
+            mass_prior['mass_ratio'] = mass_ratio_prior
+            mass_prior['mass_1_source'] = primary_mass_prior
             prior_samples = mass_prior.sample(self.number_of_samples)
-            samples["mass_1_source"] = prior_samples["mass_1_source"]
-            samples["mass_ratio"] = prior_samples["mass_ratio"]
+            samples['mass_1_source'] = prior_samples['mass_1_source']
+            samples['mass_ratio'] = prior_samples['mass_ratio']
 
+        elif self.mass_model == 'fullpopgwtc4':
+            logging.info('Generating samples using {} model'.format(self.mass_model))
+            mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
+
+            from .pdb_mass_sampler import sample_notch_filter_binned_pairing_masses
+            m1_samples, m2_samples, acceptance_rate = sample_notch_filter_binned_pairing_masses(
+                n_samples=self.number_of_samples,
+                max_iterations=self.max_iterations,
+                verbose=True,
+                **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
+                                                                                            'NSmin', 'NSmax', 
+                                                                                            'BHmin', 'BHmax', 
+                                                                                            'UPPERmin', 'UPPERmax', 
+                                                                                            'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
+                                                                                            'alpha_1', 'alpha_2', 'alpha_dip',
+                                                                                            'mu1', 'sig1', 'mix1', 
+                                                                                            'mu2', 'sig2', 'mix2',
+                                                                                            'beta_pair_1', 'beta_pair_2', 
+                                                                                            'mbreak', 'mmin', 'mmax')})
+            samples['mass_1_source'] = m1_samples
+            samples['mass_2_source'] = m2_samples
+            logging.info(f"Rejection sampling acceptance rate: {acceptance_rate:.4f}")
         else:
-            logging.warning("Parameterised mass model does not exist in gwpopulation")
-            logging.info("Generating samples using {} model".format(self.mass_model))
-
-            mass_prior = bilby.gw.prior.BBHPriorDict(
-                dictionary=utils.reference_prior_dict
-            )
-            if "uniformsecondary" in self.mass_model:
+            logging.warning('Parameterised mass model does not exist in gwpopulation')
+                
+            if 'uniformsecondary' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution
 
                 model = SinglePeakSmoothedMassDistribution(

@@ -36,6 +36,7 @@ choices = [
 
 choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
            'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q', 'FullPop_GWTC4']
+sampler_choices = ['importance_m1_m2', 'importance_m1_q', 'rejection', 'lint']
 class Mass:
     def __init__(self, 
                  mass_model, 
@@ -43,7 +44,7 @@ class Mass:
                  parameters = {'alpha':3.37, 'beta': 0.76, 'delta_m':5.23, 
                                'mmin':4.89, 'mmax':88.81, 'lam':0.04, 'mpp': 33.60, 
                                'sigpp':4.59},
-                 max_iterations=10000):
+                 full_pop_sampler = 'importance_m1_m2'):
         '''
         Parameters:
         ----------
@@ -59,9 +60,9 @@ class Mass:
         self.mass_model = utils.remove_special_characters(mass_model.lower())
         self.number_of_samples = number_of_samples
         self.parameters = parameters
-        self.max_iterations = max_iterations
+        self.full_pop_sampler = full_pop_sampler
 
-    def sample(self):
+    def sample(self, **sampler_kwargs):
         """
         Generate mass distribution samples based on the chosen parameterised model and its parameters.
 
@@ -114,24 +115,76 @@ class Mass:
             logging.info('Generating samples using {} model'.format(self.mass_model))
             mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
 
-            from .pdb_mass_sampler import sample_notch_filter_binned_pairing_masses
-            m1_samples, m2_samples, acceptance_rate = sample_notch_filter_binned_pairing_masses(
-                n_samples=self.number_of_samples,
-                max_iterations=self.max_iterations,
-                verbose=True,
-                **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
-                                                                                            'NSmin', 'NSmax', 
-                                                                                            'BHmin', 'BHmax', 
-                                                                                            'UPPERmin', 'UPPERmax', 
-                                                                                            'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
-                                                                                            'alpha_1', 'alpha_2', 'alpha_dip',
-                                                                                            'mu1', 'sig1', 'mix1', 
-                                                                                            'mu2', 'sig2', 'mix2',
-                                                                                            'beta_pair_1', 'beta_pair_2', 
-                                                                                            'mbreak', 'mmin', 'mmax')})
+            if self.full_pop_sampler == 'rejection':
+                from .pdb_mass_sampler import rejection_sampling_uniform_grid
+                m1_samples, m2_samples, acceptance_rate = rejection_sampling_uniform_grid(
+                    n_samples=self.number_of_samples,
+                    verbose=True,
+                    **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
+                                                                                                'NSmin', 'NSmax', 
+                                                                                                'BHmin', 'BHmax', 
+                                                                                                'UPPERmin', 'UPPERmax', 
+                                                                                                'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
+                                                                                                'alpha_1', 'alpha_2', 'alpha_dip',
+                                                                                                'mu1', 'sig1', 'mix1', 
+                                                                                                'mu2', 'sig2', 'mix2',
+                                                                                                'beta_pair_1', 'beta_pair_2', 
+                                                                                                'mbreak', 'mmin', 'mmax')}, 
+                    **sampler_kwargs)
+                logging.info(f"Rejection sampling acceptance rate: {acceptance_rate:.4f}")
+            
+            elif self.full_pop_sampler == 'importance_m1_m2':
+                from .pdb_mass_sampler import importance_sampling_m1_m2_prop
+                m1_samples, m2_samples, ess = importance_sampling_m1_m2_prop(
+                    n_samples=self.number_of_samples,
+                    verbose=True,
+                    **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
+                                                                                                'NSmin', 'NSmax', 
+                                                                                                'BHmin', 'BHmax', 
+                                                                                                'UPPERmin', 'UPPERmax', 
+                                                                                                'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
+                                                                                                'alpha_1', 'alpha_2', 'alpha_dip',
+                                                                                                'mu1', 'sig1', 'mix1', 
+                                                                                                'mu2', 'sig2', 'mix2',
+                                                                                                'beta_pair_1', 'beta_pair_2', 
+                                                                                                'mbreak', 'mmin', 'mmax')}, 
+                    **sampler_kwargs)
+            elif self.full_pop_sampler == 'importance_m1_q':
+                from .pdb_mass_sampler import importance_sampling_m1_q_prop
+                m1_samples, m2_samples, ess = importance_sampling_m1_q_prop(
+                    n_samples=self.number_of_samples,
+                    verbose=True,
+                    **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
+                                                                                                'NSmin', 'NSmax', 
+                                                                                                'BHmin', 'BHmax', 
+                                                                                                'UPPERmin', 'UPPERmax', 
+                                                                                                'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
+                                                                                                'alpha_1', 'alpha_2', 'alpha_dip',
+                                                                                                'mu1', 'sig1', 'mix1', 
+                                                                                                'mu2', 'sig2', 'mix2',
+                                                                                                'beta_pair_1', 'beta_pair_2', 
+                                                                                                'mbreak', 'mmin', 'mmax')}, 
+                    **sampler_kwargs)
+            elif self.full_pop_sampler == 'lint':
+                from .pdb_mass_sampler import lintsampling
+                m1_samples, m2_samples = lintsampling(
+                    n_samples=self.number_of_samples,
+                    verbose=True,
+                    **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
+                                                                                                'NSmin', 'NSmax', 
+                                                                                                'BHmin', 'BHmax', 
+                                                                                                'UPPERmin', 'UPPERmax', 
+                                                                                                'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
+                                                                                                'alpha_1', 'alpha_2', 'alpha_dip',
+                                                                                                'mu1', 'sig1', 'mix1', 
+                                                                                                'mu2', 'sig2', 'mix2',
+                                                                                                'beta_pair_1', 'beta_pair_2', 
+                                                                                                'mbreak', 'mmin', 'mmax')}, 
+                    **sampler_kwargs)
+            else:
+                raise ValueError(f'{self.full_pop_sampler} sampler not available. Please choose from {sampler_choices}.')
             samples['mass_1_source'] = m1_samples
             samples['mass_2_source'] = m2_samples
-            logging.info(f"Rejection sampling acceptance rate: {acceptance_rate:.4f}")
         else:
             logging.warning('Parameterised mass model does not exist in gwpopulation')
                 

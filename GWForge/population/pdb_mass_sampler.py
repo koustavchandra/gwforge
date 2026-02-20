@@ -6,17 +6,18 @@ NotchFilterBinnedPairingMassDistribution population model.
 """
 
 import sys
-import numpy as np
+import numpy
 from gwpopulation.utils import powerlaw
 from tqdm import tqdm
 import configparser
 from pathlib import Path
+import bilby
 
 # Import from GWForge
 from GWForge.population.pdb_external import NotchFilterBinnedPairingMassDistribution
 
 
-def sample_notch_filter_binned_pairing_masses(
+def rejection_sampling_uniform_grid(
     n_samples,
     A, A2, NSmin, NSmax, BHmin, BHmax,
     UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5,
@@ -124,9 +125,9 @@ def sample_notch_filter_binned_pairing_masses(
     
     # Estimate maximum of the probability density for rejection sampling
     # Sample a large grid to find approximate maximum
-    test_m1 = np.linspace(mmin, mmax, 100)
-    test_m2 = np.linspace(mmin, mmax, 100)
-    test_m1_grid, test_m2_grid = np.meshgrid(test_m1, test_m2)
+    test_m1 = numpy.linspace(mmin, mmax, 100)
+    test_m2 = numpy.linspace(mmin, mmax, 100)
+    test_m1_grid, test_m2_grid = numpy.meshgrid(test_m1, test_m2)
     
     # Enforce m1 >= m2 constraint
     valid = test_m1_grid >= test_m2_grid
@@ -142,7 +143,7 @@ def sample_notch_filter_binned_pairing_masses(
     # Compute joint probability using the model
     joint_prob = model(test_dataset, **hyperparams)
     
-    p_max = np.max(joint_prob)
+    p_max = numpy.max(joint_prob)
     if p_max <= 0:
         raise ValueError("Maximum probability is non-positive. Check hyperparameters.")
     
@@ -160,10 +161,10 @@ def sample_notch_filter_binned_pairing_masses(
         n_proposals = max(100, int(2 * (n_samples - len(m1_accepted))))
         
         # Sample m1 uniformly from [mmin, mmax]
-        m1_proposal = np.random.uniform(mmin, mmax, n_proposals)
+        m1_proposal = numpy.random.uniform(mmin, mmax, n_proposals)
         
         # Sample m2 uniformly from [mmin, m1] to ensure m1 >= m2
-        m2_proposal = np.random.uniform(mmin, m1_proposal)
+        m2_proposal = numpy.random.uniform(mmin, m1_proposal)
         
         # Create dataset dict for model evaluation
         dataset = {
@@ -175,7 +176,7 @@ def sample_notch_filter_binned_pairing_masses(
         joint_prob = model(dataset, **hyperparams)
         
         # Acceptance test with uniform random numbers
-        u = np.random.uniform(0, 1, len(m1_proposal))
+        u = numpy.random.uniform(0, 1, len(m1_proposal))
         acceptance_threshold = joint_prob / p_max
         accepted = u < acceptance_threshold
         
@@ -183,7 +184,7 @@ def sample_notch_filter_binned_pairing_masses(
         m1_accepted.extend(m1_proposal[accepted])
         m2_accepted.extend(m2_proposal[accepted])
         
-        n_accepted = np.sum(accepted)
+        n_accepted = numpy.sum(accepted)
         total_proposals += len(m1_proposal)
         iteration += 1
         
@@ -196,8 +197,8 @@ def sample_notch_filter_binned_pairing_masses(
               f"after {max_iterations} iterations.")
     
     # Convert to arrays - return however many samples were obtained
-    m1_samples = np.array(m1_accepted)
-    m2_samples = np.array(m2_accepted)
+    m1_samples = numpy.array(m1_accepted)
+    m2_samples = numpy.array(m2_accepted)
     
     actual_samples = len(m1_samples)
     acceptance_rate = actual_samples / total_proposals if total_proposals > 0 else 0
@@ -210,68 +211,330 @@ def sample_notch_filter_binned_pairing_masses(
     
     return m1_samples, m2_samples, acceptance_rate
 
+def importance_sampling_m1_m2_prop(
+    n_samples,
+    A, A2, NSmin, NSmax, BHmin, BHmax,
+    UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5,
+    alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2,
+    beta_pair_1, beta_pair_2, mbreak,
+    mmin=0.5, mmax=350.0,
+    oversample_factor=5,
+    verbose=False
+):
+    """
+    Sample binary masses using importance sampling instead of rejection sampling.
+    """
 
-# Example usage
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
 
-    # Load hyperparameters from INI file
-    cfg = configparser.ConfigParser()
-    # preserve key case from INI (case-sensitive keys)
-    cfg.optionxform = str
-    ini_path = Path(__file__).with_name('pdb_hyperpars.ini')
-    if not ini_path.exists():
-        raise FileNotFoundError(f"INI file not found: {ini_path}")
-    cfg.read(ini_path)
-    sec = cfg['hyperparameters']
+    hyperparams = {
+        'A': A, 'A2': A2, 'NSmin': NSmin, 'NSmax': NSmax, 'BHmin': BHmin, 'BHmax': BHmax,
+        'UPPERmin': UPPERmin, 'UPPERmax': UPPERmax,
+        'n0': n0, 'n1': n1, 'n2': n2, 'n3': n3, 'n4': n4, 'n5': n5,
+        'alpha_1': alpha_1, 'alpha_2': alpha_2, 'alpha_dip': alpha_dip,
+        'mu1': mu1, 'sig1': sig1, 'mix1': mix1, 'mu2': mu2, 'sig2': sig2, 'mix2': mix2,
+        'beta_pair_1': beta_pair_1, 'beta_pair_2': beta_pair_2, 'mbreak': mbreak,
+    }
 
-    # Load entire INI section as float-valued hyperparameters dictionary
-    hyperparams = {k: float(v) for k, v in sec.items()}
-    print("Loaded hyperparameters from INI file:", hyperparams)
+    # ---- Build 1D proposal p(m) ----
+    hyperpars_subset = {k: hyperparams[k] for k in [
+        'alpha_1', 'alpha_dip', 'alpha_2',
+        'NSmin', 'NSmax', 'BHmin', 'BHmax',
+        'UPPERmin', 'UPPERmax',
+        'n0', 'n1', 'n2', 'n3', 'n4', 'n5',
+        'mix1', 'mu1', 'sig1', 'mix2', 'mu2', 'sig2',
+        'A', 'A2'
+    ]}
 
-    # Control parameters (use defaults if not provided in INI)
-    n_samples = 1000
-    max_iterations = 10000
-    mmin = float(sec.get('mmin', 0.5))
-    mmax = float(sec.get('mmax', 350.0))
-    verbose = sec.get('verbose', 'True').lower() in ('1', 'true', 'yes', 'on')
+    m_input = numpy.linspace(mmin, mmax, int(1e4))
+    p_m = model.p_m(m_input, **hyperpars_subset)
 
-    print(f"Sampling {n_samples} binary masses from NotchFilterBinnedPairingMassDistribution...")
-    m1, m2, acc_rate = sample_notch_filter_binned_pairing_masses(
-        n_samples=n_samples,
-        max_iterations=max_iterations,
-        verbose=verbose,
-        **hyperparams,
+    prob_m = bilby.core.prior.Interped(
+        m_input, p_m,
+        minimum=mmin,
+        maximum=mmax
     )
 
-    # Plot the samples if any
-    if len(m1) > 0:
-        fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+    # ---- Draw proposals ----
+    N_prop = oversample_factor * n_samples
 
-        # m1 distribution
-        axes[0].hist(m1, bins=30, alpha=0.7, edgecolor='black')
-        axes[0].set_xlabel('Primary Mass (M_sun)')
-        axes[0].set_ylabel('Count')
-        axes[0].set_title('Primary Mass Distribution')
+    if verbose:
+        print(f"Drawing {N_prop} proposal samples...")
 
-        # m2 distribution
-        axes[1].hist(m2, bins=30, alpha=0.7, edgecolor='black')
-        axes[1].set_xlabel('Secondary Mass (M_sun)')
-        axes[1].set_ylabel('Count')
-        axes[1].set_title('Secondary Mass Distribution')
+    m1_prop = prob_m.sample(N_prop)
+    m2_prop = prob_m.sample(N_prop)
 
-        # m1 vs m2 scatter
-        axes[2].scatter(m1, m2, alpha=0.5, s=10)
-        axes[2].plot([hyperparams['NSmin'], mmax],
-                     [hyperparams['NSmin'], mmax], 'r--', label='m1 = m2')
-        axes[2].set_xlabel('Primary Mass (M_sun)')
-        axes[2].set_ylabel('Secondary Mass (M_sun)')
-        axes[2].set_title('Mass Ratio Distribution')
-        axes[2].legend()
-        axes[2].set_aspect('equal')
+    # enforce m1 >= m2
+    valid = m1_prop >= m2_prop
+    m1_prop = m1_prop[valid]
+    m2_prop = m2_prop[valid]
 
-        plt.tight_layout()
-        plt.savefig('mass_samples_visualization.png', dpi=150, bbox_inches='tight')
-        print("Saved visualization to 'mass_samples_visualization.png'")
-    else:
-        print("No samples were generated.")
+    if len(m1_prop) < n_samples:
+        raise RuntimeError("Not enough valid proposals — increase oversample_factor")
+
+    dataset = {
+        'mass_1': m1_prop,
+        'mass_2': m2_prop,
+    }
+
+    # ---- Evaluate true joint PDF ----
+    joint_prob = model(dataset, **hyperparams)
+
+    # ---- Evaluate proposal density q(m1,m2) ----
+    q_m1 = prob_m.prob(m1_prop)
+    q_m2 = prob_m.prob(m2_prop)
+    proposal_prob = q_m1 * q_m2
+
+    # Avoid division by zero
+    mask = proposal_prob > 0
+    joint_prob = joint_prob[mask]
+    proposal_prob = proposal_prob[mask]
+    m1_prop = m1_prop[mask]
+    m2_prop = m2_prop[mask]
+
+    weights = joint_prob / proposal_prob
+    weights /= numpy.sum(weights)
+
+    # ---- Resample according to weights ----
+    rng = numpy.random.default_rng()
+    indices = rng.choice(len(weights), size=n_samples, replace=True, p=weights)
+
+    m1_samples = m1_prop[indices]
+    m2_samples = m2_prop[indices]
+
+    # ---- Effective sample size ----
+    ess = 1.0 / numpy.sum(weights**2)
+
+    if verbose:
+        print(f"Importance sampling complete.")
+        print(f"Effective sample size ≈ {ess:.1f} / {len(weights)}")
+
+    return m1_samples, m2_samples, ess
+
+def importance_sampling_m1_q_prop(
+    n_samples,
+    A, A2, NSmin, NSmax, BHmin, BHmax,
+    UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5,
+    alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2,
+    beta_pair_1, beta_pair_2, mbreak,
+    mmin=0.5, mmax=350.0,
+    oversample_factor=3,
+    verbose=False
+):
+    """
+    Importance sampling using near-optimal proposal:
+        m1 ~ p_m(m)
+        q  ~ pairing power-law
+        m2 = q * m1
+    """
+
+    model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
+
+    hyperparams = {
+        'A': A, 'A2': A2, 'NSmin': NSmin, 'NSmax': NSmax,
+        'BHmin': BHmin, 'BHmax': BHmax,
+        'UPPERmin': UPPERmin, 'UPPERmax': UPPERmax,
+        'n0': n0, 'n1': n1, 'n2': n2, 'n3': n3, 'n4': n4, 'n5': n5,
+        'alpha_1': alpha_1, 'alpha_2': alpha_2, 'alpha_dip': alpha_dip,
+        'mu1': mu1, 'sig1': sig1, 'mix1': mix1,
+        'mu2': mu2, 'sig2': sig2, 'mix2': mix2,
+        'beta_pair_1': beta_pair_1,
+        'beta_pair_2': beta_pair_2,
+        'mbreak': mbreak,
+    }
+
+    # -------------------------
+    # 1D mass proposal p(m)
+    # -------------------------
+    hyperpars_subset = {k: hyperparams[k] for k in [
+        'alpha_1', 'alpha_dip', 'alpha_2',
+        'NSmin', 'NSmax', 'BHmin', 'BHmax',
+        'UPPERmin', 'UPPERmax',
+        'n0', 'n1', 'n2', 'n3', 'n4', 'n5',
+        'mix1', 'mu1', 'sig1', 'mix2', 'mu2', 'sig2',
+        'A', 'A2'
+    ]}
+
+    m_grid = numpy.linspace(mmin, mmax, 10000)
+    p_m_grid = model.p_m(m_grid, **hyperpars_subset)
+
+    prob_m = bilby.core.prior.Interped(
+        m_grid, p_m_grid,
+        minimum=mmin,
+        maximum=mmax
+    )
+
+    # -------------------------
+    # Proposal sampling
+    # -------------------------
+    N_prop = oversample_factor * n_samples
+    rng = numpy.random.default_rng()
+
+    m1_prop = prob_m.sample(N_prop)
+
+    # ---- Sample mass ratio q ----
+    q_prop = numpy.empty(N_prop)
+
+    for i in range(N_prop):
+
+        m1 = m1_prop[i]
+
+        # q_min = mmin / m1
+        q_min = mmin / m1
+        q_max = 1.0
+
+        # choose correct beta
+        beta = beta_pair_1 if m1 < mbreak else beta_pair_2
+
+        # sample power-law in q
+        if abs(beta + 1) > 1e-8:
+            u = rng.uniform()
+            q_prop[i] = (
+                (u * (q_max**(beta+1) - q_min**(beta+1)) + q_min**(beta+1))
+                ** (1/(beta+1))
+            )
+        else:
+            # beta = -1 special case
+            u = rng.uniform()
+            q_prop[i] = q_min * (q_max / q_min)**u
+
+    m2_prop = q_prop * m1_prop
+
+    # -------------------------
+    # Evaluate target density
+    # -------------------------
+    dataset = {'mass_1': m1_prop, 'mass_2': m2_prop}
+    target = model(dataset, **hyperparams)
+
+    # -------------------------
+    # Evaluate proposal density
+    # -------------------------
+
+    # p(m1)
+    q_m1 = prob_m.prob(m1_prop)
+
+    # p(q | m1)
+    q_pdf = numpy.zeros_like(q_prop)
+
+    for i in tqdm(range(N_prop)):
+        m1 = m1_prop[i]
+        beta = beta_pair_1 if m1 < mbreak else beta_pair_2
+
+        q_min = mmin / m1
+        q_max = 1.0
+
+        if abs(beta + 1) > 1e-8:
+            norm = (q_max**(beta+1) - q_min**(beta+1)) / (beta+1)
+            q_pdf[i] = q_prop[i]**beta / norm
+        else:
+            norm = numpy.log(q_max / q_min)
+            q_pdf[i] = 1.0 / (q_prop[i] * norm)
+
+    # Jacobian: m2 = q*m1  →  dm2 = m1 dq
+    proposal = q_m1 * q_pdf / m1_prop
+
+    mask = proposal > 0
+    target = target[mask]
+    proposal = proposal[mask]
+    m1_prop = m1_prop[mask]
+    m2_prop = m2_prop[mask]
+
+    weights = target / proposal
+    weights /= numpy.sum(weights)
+
+    # -------------------------
+    # Resample
+    # -------------------------
+    indices = rng.choice(len(weights), size=n_samples, replace=True, p=weights)
+
+    m1_samples = m1_prop[indices]
+    m2_samples = m2_prop[indices]
+
+    ess = 1.0 / numpy.sum(weights**2)
+
+    if verbose:
+        print(f"Effective sample size ≈ {ess:.1f} / {len(weights)}")
+
+    return m1_samples, m2_samples, ess
+
+def lintsampling(
+    n_samples,
+    A, A2, NSmin, NSmax, BHmin, BHmax,
+    UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5,
+    alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2,
+    beta_pair_1, beta_pair_2, mbreak,
+    mmin=0.5, mmax=350.0,
+    grid_size=256,
+    verbose=False
+):
+    """
+    Sample binary masses using LintSampler.
+    """
+    try:
+        from lintsampler import LintSampler
+    except ImportError:
+        raise ImportError("Please install lintsampler using pip")
+
+    model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
+
+    hyperparams = {
+        'A': A, 'A2': A2, 'NSmin': NSmin, 'NSmax': NSmax,
+        'BHmin': BHmin, 'BHmax': BHmax,
+        'UPPERmin': UPPERmin, 'UPPERmax': UPPERmax,
+        'n0': n0, 'n1': n1, 'n2': n2, 'n3': n3, 'n4': n4, 'n5': n5,
+        'alpha_1': alpha_1, 'alpha_2': alpha_2, 'alpha_dip': alpha_dip,
+        'mu1': mu1, 'sig1': sig1, 'mix1': mix1,
+        'mu2': mu2, 'sig2': sig2, 'mix2': mix2,
+        'beta_pair_1': beta_pair_1,
+        'beta_pair_2': beta_pair_2,
+        'mbreak': mbreak,
+    }
+
+    # -------------------------------------------------
+    # Define vectorized joint PDF for LintSampler
+    # -------------------------------------------------
+    def joint_pdf(x):
+        """
+        x : array of shape (N,2)
+        """
+        m1 = x[:, 0]
+        m2 = x[:, 1]
+
+        # Enforce physical constraint
+        valid = m1 >= m2
+
+        pdf = numpy.zeros(len(x))
+
+        if numpy.any(valid):
+            dataset = {
+                'mass_1': m1[valid],
+                'mass_2': m2[valid],
+            }
+            pdf[valid] = model(dataset, **hyperparams)
+
+        return pdf
+
+    # -------------------------------------------------
+    # Build 2D domain grid
+    # -------------------------------------------------
+    m1_axis = numpy.geomspace(mmin, mmax, grid_size)
+    m2_axis = numpy.geomspace(mmin, mmax, grid_size)
+
+    domain = (m1_axis, m2_axis)
+
+    if verbose:
+        print(f"Building LintSampler grid: {grid_size} x {grid_size}")
+
+    sampler = LintSampler(
+        domain,
+        joint_pdf,
+        seed=numpy.random.default_rng(),
+        vectorizedpdf=True
+    )
+
+    samples = sampler.sample(n_samples)
+
+    m1_samples = samples[:, 0]
+    m2_samples = samples[:, 1]
+
+    return m1_samples, m2_samples

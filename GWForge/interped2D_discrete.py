@@ -1,4 +1,5 @@
 import numpy as np
+from bilby.core.prior import Prior
 
 # Exact index-based sampling (discrete, no interpolation error)
 class Interped2D_Discrete(Prior):

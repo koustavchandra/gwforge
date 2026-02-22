@@ -27,84 +27,6 @@ def rejection_sampling_uniform_grid(
     max_iterations=10000,
     verbose=False
 ):
-    """
-    Sample binary masses from the NotchFilterBinnedPairingMassDistribution model
-    using rejection sampling.
-    
-    Parameters
-    ----------
-    n_samples : int
-        Number of samples to draw
-    A : float
-        Depth of the lower mass gap dip
-    A2 : float
-        Depth of the upper mass gap dip
-    NSmin : float
-        Minimum mass (lower cutoff)
-    NSmax : float
-        Start of lower mass gap
-    BHmin : float
-        End of lower mass gap
-    BHmax : float
-        Maximum mass in power-law component
-    UPPERmin : float
-        Start of upper mass gap
-    UPPERmax : float
-        End of upper mass gap
-    n0 : float
-        Sharpness of low mass cutoff
-    n1 : float
-        Sharpness of lower edge of lower mass gap
-    n2 : float
-        Sharpness of upper edge of lower mass gap
-    n3 : float
-        Sharpness of lower edge of upper mass gap
-    n4 : float
-        Sharpness of upper edge of upper mass gap
-    n5 : float
-        Sharpness of high mass cutoff
-    alpha_1 : float
-        Power-law exponent for m < NSmax
-    alpha_2 : float
-        Power-law exponent for m > BHmin
-    alpha_dip : float
-        Power-law exponent between NSmax and BHmin
-    mu1 : float
-        Mean of first Gaussian peak
-    sig1 : float
-        Width of first Gaussian peak
-    mix1 : float
-        Mixing fraction of first Gaussian peak
-    mu2 : float
-        Mean of second Gaussian peak
-    sig2 : float
-        Width of second Gaussian peak
-    mix2 : float
-        Mixing fraction of second Gaussian peak
-    beta_pair_1 : float
-        Mass ratio exponent for m2 < mbreak
-    beta_pair_2 : float
-        Mass ratio exponent for m2 >= mbreak
-    mbreak : float
-        Mass breakpoint for pairing function transition
-    mmin : float, optional
-        Minimum mass (default: 0.5)
-    mmax : float, optional
-        Maximum mass (default: 350.0)
-    max_iterations : int, optional
-        Maximum number of rejection sampling iterations (default: 1000)
-    verbose : bool, optional
-        Print progress information (default: False)
-        
-    Returns
-    -------
-    m1_samples : ndarray
-        Sampled primary masses
-    m2_samples : ndarray
-        Sampled secondary masses
-    acceptance_rate : float
-        Overall acceptance rate of the rejection sampling
-    """
     
     # Initialize the model class
     model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
@@ -221,6 +143,84 @@ def importance_sampling_m1_m2_prop(
     oversample_factor=5,
     verbose=False
 ):
+    """
+    Sample binary masses from the NotchFilterBinnedPairingMassDistribution model
+    using rejection sampling.
+    
+    Parameters
+    ----------
+    n_samples : int
+        Number of samples to draw
+    A : float
+        Depth of the lower mass gap dip
+    A2 : float
+        Depth of the upper mass gap dip
+    NSmin : float
+        Minimum mass (lower cutoff)
+    NSmax : float
+        Start of lower mass gap
+    BHmin : float
+        End of lower mass gap
+    BHmax : float
+        Maximum mass in power-law component
+    UPPERmin : float
+        Start of upper mass gap
+    UPPERmax : float
+        End of upper mass gap
+    n0 : float
+        Sharpness of low mass cutoff
+    n1 : float
+        Sharpness of lower edge of lower mass gap
+    n2 : float
+        Sharpness of upper edge of lower mass gap
+    n3 : float
+        Sharpness of lower edge of upper mass gap
+    n4 : float
+        Sharpness of upper edge of upper mass gap
+    n5 : float
+        Sharpness of high mass cutoff
+    alpha_1 : float
+        Power-law exponent for m < NSmax
+    alpha_2 : float
+        Power-law exponent for m > BHmin
+    alpha_dip : float
+        Power-law exponent between NSmax and BHmin
+    mu1 : float
+        Mean of first Gaussian peak
+    sig1 : float
+        Width of first Gaussian peak
+    mix1 : float
+        Mixing fraction of first Gaussian peak
+    mu2 : float
+        Mean of second Gaussian peak
+    sig2 : float
+        Width of second Gaussian peak
+    mix2 : float
+        Mixing fraction of second Gaussian peak
+    beta_pair_1 : float
+        Mass ratio exponent for m2 < mbreak
+    beta_pair_2 : float
+        Mass ratio exponent for m2 >= mbreak
+    mbreak : float
+        Mass breakpoint for pairing function transition
+    mmin : float, optional
+        Minimum mass (default: 0.5)
+    mmax : float, optional
+        Maximum mass (default: 350.0)
+    oversample_factor : int, optional
+        n_proposals/n_samples (default: 5)
+    verbose : bool, optional
+        Print progress information (default: False)
+        
+    Returns
+    -------
+    m1_samples : ndarray
+        Sampled primary masses
+    m2_samples : ndarray
+        Sampled secondary masses
+    ess : float
+        Effective sample size
+    """
     """
     Sample binary masses using importance sampling instead of rejection sampling.
     """

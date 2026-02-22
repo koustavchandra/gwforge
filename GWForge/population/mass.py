@@ -36,7 +36,7 @@ choices = [
 
 choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
            'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q', 'FullPop_GWTC4']
-sampler_choices = ['importance_m1_m2', 'importance_m1_q', 'rejection', 'lint']
+sampler_choices = ['importance_m1_m2', 'importance_m1_q', 'lint']
 class Mass:
     def __init__(self, 
                  mass_model, 
@@ -115,25 +115,7 @@ class Mass:
             logging.info('Generating samples using {} model'.format(self.mass_model))
             mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
 
-            if self.full_pop_sampler == 'rejection':
-                from .pdb_mass_sampler import rejection_sampling_uniform_grid
-                m1_samples, m2_samples, acceptance_rate = rejection_sampling_uniform_grid(
-                    n_samples=self.number_of_samples,
-                    verbose=True,
-                    **{param: self.parameters[param] for param in self.parameters if param in ('A', 'A2', 
-                                                                                                'NSmin', 'NSmax', 
-                                                                                                'BHmin', 'BHmax', 
-                                                                                                'UPPERmin', 'UPPERmax', 
-                                                                                                'n0', 'n1', 'n2', 'n3', 'n4', 'n5', 
-                                                                                                'alpha_1', 'alpha_2', 'alpha_dip',
-                                                                                                'mu1', 'sig1', 'mix1', 
-                                                                                                'mu2', 'sig2', 'mix2',
-                                                                                                'beta_pair_1', 'beta_pair_2', 
-                                                                                                'mbreak', 'mmin', 'mmax')}, 
-                    **sampler_kwargs)
-                logging.info(f"Rejection sampling acceptance rate: {acceptance_rate:.4f}")
-            
-            elif self.full_pop_sampler == 'importance_m1_m2':
+            if self.full_pop_sampler == 'importance_m1_m2':
                 from .pdb_mass_sampler import importance_sampling_m1_m2_prop
                 m1_samples, m2_samples, ess = importance_sampling_m1_m2_prop(
                     n_samples=self.number_of_samples,

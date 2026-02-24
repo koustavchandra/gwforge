@@ -16,6 +16,7 @@ choices = [
     "Aligned-Uniform",
     "Beta-Aligned",
     "Aligned-Gaussian-Uniform",
+    'Gaussian-Non_spinning',
     "Isotropic-Bilby",
     "Isotropic-Beta",
     "Isotropic-Beta_Gaussian",
@@ -88,9 +89,19 @@ class Spin:
         else:
             raise ValueError(err_msg)
         if 'nonspinning' in self.spin_model:
-            logging.info('You chose non-spinning distribution')
-            samples['chi_1'] = numpy.zeros(self.number_of_samples)
-            samples['chi_2'] = numpy.zeros(self.number_of_samples)
+            if 'gaussiannonspinning' in self.spin_model:
+                mu_chi_1 = self.parameters['mu_chi_1']
+                sigma_chi_1 = self.parameters['sigma_chi_1']
+                chi_1 = bilby.core.prior.analytical.TruncatedGaussian(name='chi_1',
+                                                                      minimum=self.parameters['minimum_primary_spin'],
+                                                                      maximum=self.parameters['maximum_primary_spin'],
+                                                                      mu=mu_chi_1, sigma=sigma_chi_1)
+                samples['chi_1'] = chi_1.sample(self.number_of_samples)
+                samples['chi_2'] = numpy.zeros(self.number_of_samples)
+            else:
+                logging.info('You chose non-spinning distribution')
+                samples['chi_1'] = numpy.zeros(self.number_of_samples)
+                samples['chi_2'] = numpy.zeros(self.number_of_samples)
     
         elif 'aligned' in self.spin_model:
             logging.info('Generating spin samples from Aligned Spin Distribution')
@@ -102,14 +113,14 @@ class Spin:
             elif 'gaussianuniform' in self.spin_model:
                 mu_chi_1 = self.parameters['mu_chi_1']
                 sigma_chi_1 = self.parameters['sigma_chi_1']
-                chi_1 = bilby.core.prior.analytical.TruncatedGaussian(name='chi_1', 
-                                                                        minimum=self.parameters['minimum_primary_spin'], 
+                chi_1 = bilby.core.prior.analytical.TruncatedGaussian(name='chi_1',
+                                                                        minimum=self.parameters['minimum_primary_spin'],
                                                                         maximum=self.parameters['maximum_primary_spin'],
                                                                         mu=mu_chi_1, sigma=sigma_chi_1)
                 
                 chi_2 = bilby.gw.prior.Uniform(name='chi_2',
                                                 minimum=self.parameters['minimum_secondary_spin'], 
-                                                maximum=self.parameters['maximum_secondary_spin'])                    
+                                                maximum=self.parameters['maximum_secondary_spin'])
             elif 'uniform' in self.spin_model: 
                 chi_1 = bilby.gw.prior.Uniform(name='chi_1', 
                                                 minimum=self.parameters['minimum_primary_spin'], 

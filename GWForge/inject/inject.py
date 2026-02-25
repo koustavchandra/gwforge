@@ -45,21 +45,15 @@ class Inject:
         if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
             self.injection_type = "bbh"
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_black_hole
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
-            )
+            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
         elif self.injection_type == "bns":
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_neutron_star
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
-            )
+            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
         else:
             raise ValueError("Currently supports only CBC sources")
 
         self.waveform_arguments = {
-            "waveform_approximant": waveform_arguments.get(
-                "waveform_approximant", "IMRPhenomXPHM"
-            ),
+            "waveform_approximant": waveform_arguments.get("waveform_approximant", "IMRPhenomXPHM"),
             "reference_frequency": waveform_arguments.get("reference_frequency", 7),
             "minimum_frequency": waveform_arguments.get("minimum_frequency", 7),
         }
@@ -80,7 +74,5 @@ class Inject:
             waveform_arguments=self.waveform_arguments,
         )
         # Add snippet to check if the signal is in the data segment
-        self.ifos.inject_signal(
-            waveform_generator=waveform_generator, parameters=self.injection_parameters
-        )
+        self.ifos.inject_signal(waveform_generator=waveform_generator, parameters=self.injection_parameters)
         return self.ifos

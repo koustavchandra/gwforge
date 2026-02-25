@@ -24,10 +24,7 @@ def find_files(
             for fname in files:
                 path = os.path.join(root, fname)
                 # Exclude specified files and extensions if ignore_files is provided
-                if ignore_files is not None and (
-                    fname in ignore_files
-                    or any(path.endswith(ext) for ext in extensions)
-                ):
+                if ignore_files is not None and (fname in ignore_files or any(path.endswith(ext) for ext in extensions)):
                     continue
 
                 items.append(path)
@@ -52,8 +49,6 @@ ignore_dirs = [
 ignore_files = [".DS_Store", "*.pyc", "Thumbs.db", "*.sqlite", "*.swp", "*.env", ".env"]
 
 setup(
-    scripts=find_files(
-        "bin/", relpath="./", ignore_dirs=ignore_dirs, ignore_files=ignore_files
-    ),
+    scripts=find_files("bin/", relpath="./", ignore_dirs=ignore_dirs, ignore_files=ignore_files),
     packages=find_packages(),
 )

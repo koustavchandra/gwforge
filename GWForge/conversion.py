@@ -23,9 +23,7 @@ def generate_detector_frame_parameters(samples):
     ]:
         if key in output_samples:
             detector_frame_key = key.replace("_source", "")
-            output_samples[detector_frame_key] = output_samples[key] * (
-                1 + output_samples["redshift"]
-            )
+            output_samples[detector_frame_key] = output_samples[key] * (1 + output_samples["redshift"])
     return output_samples
 
 
@@ -113,9 +111,7 @@ def get_safe_signal_durations(
         ("spin_1z", spin_1z),
         ("spin_2z", spin_2z),
     ]:
-        if not isinstance(param, (float, numpy.ndarray, list)) or not numpy.issubdtype(
-            numpy.asarray(param).dtype, numpy.floating
-        ):
+        if not isinstance(param, (float, numpy.ndarray, list)) or not numpy.issubdtype(numpy.asarray(param).dtype, numpy.floating):
             raise ValueError(f"{param_name} must be a float or a float array")
 
     # Convert input parameters to appropriate units
@@ -130,25 +126,11 @@ def get_safe_signal_durations(
 
     # Calculate the safe signal durations based on the waveform approximant
     if "IMRPhenom" in approximant:
-        durations = [
-            safety
-            * lalsimulation.SimIMRPhenomXASDuration(
-                m1, m2, s1z, s2z, waveform_minimum_frequency
-            )
-            for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)
-        ]
+        durations = [safety * lalsimulation.SimIMRPhenomXASDuration(m1, m2, s1z, s2z, waveform_minimum_frequency) for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)]
     elif "SEOBNR" in approximant:
-        durations = [
-            safety
-            * lalsimulation.SimIMRSEOBNRv5ROMTimeOfFrequency(
-                m1, m2, s1z, s2z, waveform_minimum_frequency
-            )
-            for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)
-        ]
+        durations = [safety * lalsimulation.SimIMRSEOBNRv5ROMTimeOfFrequency(m1, m2, s1z, s2z, waveform_minimum_frequency) for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)]
     else:
-        raise RuntimeError(
-            "Failed to compute durations for approximant {}".format(approximant)
-        )
+        raise RuntimeError("Failed to compute durations for approximant {}".format(approximant))
 
     # Return the value directly if durations is a single-element array
     return durations[0] if len(durations) == 1 else durations

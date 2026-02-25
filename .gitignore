@@ -44,3 +44,6 @@ docs/_build
 # Floobits project files
 .floo
 .flooignore
+
+# uv files
+uv.lock

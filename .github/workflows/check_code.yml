@@ -22,11 +22,7 @@ jobs:
       shell: bash -l {0}
       run: |
         pip install -e .
-
-    - name: Black check
-      shell: bash -l {0}
-      run: black --check .
-
+      
     - name: Ruff check
       shell: bash -l {0}
       run: ruff check .

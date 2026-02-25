@@ -1,0 +1,17 @@
+name: gwforge
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - fftw
+  - lalsuite
+  - lalsimulation
+  - lalsimulation-data
+  - lalframe
+  - gitpython
+  - pip
+  - gcc_linux-64
+  - gxx_linux-64
+  - black
+  - ruff
+  - pytest

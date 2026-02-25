@@ -1,0 +1,44 @@
+name: GWForge CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+        cache-environment: true
+
+    - name: Install package
+      shell: bash -l {0}
+      run: |
+        pip install -e .
+
+    - name: Black check
+      shell: bash -l {0}
+      run: black --check .
+
+    - name: Ruff check
+      shell: bash -l {0}
+      run: ruff check .
+
+    - name: Forbid np and plt
+      shell: bash -l {0}
+      run: |
+        if grep -R "np\." gwforge || grep -R "plt\." gwforge; then
+          echo "Forbidden shorthand imports found."
+          exit 1
+        fi
+
+    - name: Run tests
+      shell: bash -l {0}
+      run: pytest

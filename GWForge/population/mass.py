@@ -30,13 +30,13 @@ choices = [
     "PowerLawDipBreak",
     "PowerLaw",
     "Uniform_components",
-    'Uniform_M_q', 'FullPop_GWTC4'
+    "Uniform_M_q",
+    "FullPop_GWTC4"
 ]
 
-
-choices = ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'UniformSecondary', 
-           'DoubleGaussian', 'LogNormal', 'PowerLawDipBreak', 'PowerLaw', 'Uniform_components', 'Uniform_M_q', 'FullPop_GWTC4']
-sampler_choices = ['importance_m1_m2', 'importance_m1_q', 'lint']
+sampler_choices = ["importance_m1_m2", 
+                   "importance_m1_q", 
+                   "lint"]
 class Mass:
     def __init__(self, 
                  mass_model, 
@@ -169,6 +169,7 @@ class Mass:
             samples['mass_2_source'] = m2_samples
         else:
             logging.warning('Parameterised mass model does not exist in gwpopulation')
+            mass_prior = bilby.gw.prior.BBHPriorDict(dictionary=utils.reference_prior_dict)
                 
             if 'uniformsecondary' in self.mass_model:
                 from gwpopulation.models.mass import SinglePeakSmoothedMassDistribution

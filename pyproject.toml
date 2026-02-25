@@ -3,11 +3,11 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 156
+line-length = 200
 target-version = ["py311"]
 
 [tool.ruff]
-line-length = 156
+line-length = 200
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]

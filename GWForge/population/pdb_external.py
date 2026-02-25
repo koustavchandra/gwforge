@@ -19,16 +19,16 @@ def power_law_dip_break_1d(
                          & m^{\alpha_2} \text{ if } m > \gamma_{\text{low}} \\
                          & 0 \text{ otherwise }
                  \end{cases}.
-    
+
     where $l(m|m_{\text{max}}, \eta)$ is the low pass filter with powerlaw $\eta$
     applied at mass $m_{\text{max}}$,
     $n(m|\gamma_{\text{low}}, \gamma_{\text{high}}, A)$ is the notch
-    filter with depth $A$ applied between $\gamma_{\text{low}}$ and 
+    filter with depth $A$ applied between $\gamma_{\text{low}}$ and
     $\gamma_{\text{high}}$, and
     $\lambda$ is the subset of hyperparameters $\{ \gamma_{\text{low}},
     \gamma_{\text{high}}, A, \alpha_1, \alpha_2, m_{\text{min}}, m_{\
     text{max}}\}$.
-    
+
     Parameters
     ----------
     mass: array-like
@@ -54,7 +54,7 @@ def power_law_dip_break_1d(
     UPPERmax: float
         Mass at which the notch filter ends for the upper mass gap (:math:`\gamma_{high2}`).
     mu1: float
-        Location of the upper peak where an overdensity of merging compact objects is observed (:math:`\mu_{peak1}`).. 
+        Location of the upper peak where an overdensity of merging compact objects is observed (:math:`\mu_{peak1}`)..
     sig1: float
         Width of the upper peak where an overdensity of merging compact objects is observed (:math:`\sigma_{peak1}`)..
     mix1: float
@@ -66,16 +66,16 @@ def power_law_dip_break_1d(
     mix2: float
         Mixing fraction of the second gaussian peak with the powerlaw + notches (:math: `c_2`)
     absolute_mmin: float
-        The minimum limit for the truncated normal distribution. 
+        The minimum limit for the truncated normal distribution.
     absolute_mmax: float
-        The maximum limit for the truncated normal distribution. 
+        The maximum limit for the truncated normal distribution.
     n{0,5}:float
-        Exponents to set the sharpness of the low mass cutoff and high mass cutoff, respectively (:math:`\eta_i`). 
+        Exponents to set the sharpness of the low mass cutoff and high mass cutoff, respectively (:math:`\eta_i`).
     n{1,2}: float
-        Exponents to set the sharpness of the lower edge and upper edge of the lower mass gap, respectively (:math:`\eta_i`). 
+        Exponents to set the sharpness of the lower edge and upper edge of the lower mass gap, respectively (:math:`\eta_i`).
     n{3,4}: float
-        Exponents to set the sharpness of the lower edge and upper edge of the upper mass gap, respectively (:math:`\eta_i`). 
-        
+        Exponents to set the sharpness of the lower edge and upper edge of the upper mass gap, respectively (:math:`\eta_i`).
+
     """
     from gwpopulation.utils import xp
 

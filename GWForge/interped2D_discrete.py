@@ -13,7 +13,13 @@ class Interped2D_Discrete(Prior):
         self.jitter = jitter
 
         # Normalize grid to PMF (discrete probabilities)
-        self.pmf = np.asarray(pdf_grid).flatten() / np.sum(pdf_grid)
+        pdf_array = np.asarray(pdf_grid, dtype=float)
+        if not np.all(np.isfinite(pdf_array)):
+            raise ValueError(f"{self.__class__.__name__}: pdf_grid contains non-finite values and cannot be normalized.")
+        total = np.sum(pdf_array)
+        if not np.isfinite(total) or total <= 0.0:
+            raise ValueError(f"{self.__class__.__name__}: pdf_grid must have a finite, positive sum to be normalized (got {total}).")
+        self.pmf = pdf_array.flatten() / total
         self.nx, self.ny = len(x_axis), len(y_axis)
         
         # Cell widths for jittering

@@ -232,9 +232,6 @@ def importance_sampling_m1_m2_prop(
     ess : float
         Effective sample size
     """
-    """
-    Sample binary masses using importance sampling instead of rejection sampling.
-    """
 
     model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
 

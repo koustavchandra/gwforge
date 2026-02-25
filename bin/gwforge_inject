@@ -19,12 +19,16 @@ import warnings
 
 warnings.filterwarnings("ignore", message="ERFA function*")
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 # Load configurations
 config = configparser.ConfigParser()
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--config-file", required=True, help="Path to the configuration ini file")
+parser.add_argument(
+    "--config-file", required=True, help="Path to the configuration ini file"
+)
 parser.add_argument("--data-directory", help="Parent directory containing frame files")
 parser.add_argument(
     "--gps-start-time",
@@ -61,7 +65,9 @@ try:
     channels = json.loads(config.get("IFOS", "channel-dict").replace("'", '"'))
     channels = utils.update_ET_channels(channel_dict=channels)
 except json.JSONDecodeError:
-    logging.warning("Failed to locate and read frame files. Defaulting to INJ channels.")
+    logging.warning(
+        "Failed to locate and read frame files. Defaulting to INJ channels."
+    )
     channels = {ifo: "{}:INJ".format(ifo) for ifo in detectors}
 except Exception as e:
     raise RuntimeError("Failed to locate and read frame files") from e
@@ -69,7 +75,9 @@ except Exception as e:
 # Set sampling frequency and minimum frequency
 sampling_frequency = config.getfloat("IFOS", "sampling-frequency", fallback=8192)
 
-minimum_frequency = config.getfloat("Injection", "waveform-minimum-frequency", fallback=3)
+minimum_frequency = config.getfloat(
+    "Injection", "waveform-minimum-frequency", fallback=3
+)
 
 # Log information about frame files and injections
 logging.info("Loading injections")
@@ -104,16 +112,32 @@ except Exception:
     gps_start_time = opts.gps_start_time
     gps_end_time = opts.gps_end_time
 
-injection_method = config.get("Injections", "injection-method", fallback="bilby").lower()
+injection_method = config.get(
+    "Injections", "injection-method", fallback="bilby"
+).lower()
 
 if not gps_start_time and not gps_end_time:
-    logging.warning("GPS interval not provided. Considering all available frame files. Processing will be slower.")
+    logging.warning(
+        "GPS interval not provided. Considering all available frame files. Processing will be slower."
+    )
 elif not gps_end_time:
-    logging.warning("GPS end time not provided. Considering all frame files after {}s".format(gps_start_time))
+    logging.warning(
+        "GPS end time not provided. Considering all frame files after {}s".format(
+            gps_start_time
+        )
+    )
 elif not gps_start_time:
-    logging.warning("GPS start time not provided. Considering all frame files before {}s".format(gps_end_time))
+    logging.warning(
+        "GPS start time not provided. Considering all frame files before {}s".format(
+            gps_end_time
+        )
+    )
 else:
-    logging.info("Considering frame files between {} and {}s".format(gps_start_time, gps_end_time))
+    logging.info(
+        "Considering frame files between {} and {}s".format(
+            gps_start_time, gps_end_time
+        )
+    )
 
 waveform_arguments = {
     "reference_frequency": minimum_frequency,
@@ -134,7 +158,9 @@ for ifo in detectors:
     )
     # is there a better way?
     sorted_file_paths = sorted(file_paths, key=lambda x: int(x.split("-")[-2]))
-    frame_files[ifo] = utils.generate_frame_file_sublists(sorted_file_paths, window_size=window_size)
+    frame_files[ifo] = utils.generate_frame_file_sublists(
+        sorted_file_paths, window_size=window_size
+    )
 
 # Directories for each detector
 ifo_directory = {}
@@ -190,13 +216,21 @@ with h5py.File(injection_file, "r") as f:
                 if read:
                     # Read the frame files only when necessary. Too memory intensive to load all of them at a time
                     logging.info("Reading network data")
-                    data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
+                    data = {
+                        ifo: TimeSeries.read(
+                            frame_files[ifo][l], channels[ifo], nproc=window_size
+                        )
+                        for ifo in detectors
+                    }
 
                 # Check whether the injection lies within the data segment or not. If yes inject if no read a fresh set of frame files
                 if (
                     (data[detectors[0]].epoch.value)
                     < injection_parameters["geocent_time"]
-                    < (data[detectors[0]].epoch.value + data[detectors[0]].duration.value)
+                    < (
+                        data[detectors[0]].epoch.value
+                        + data[detectors[0]].duration.value
+                    )
                 ):
                     read = False
                     logging.info("Injecting signal {} in the network".format(k))
@@ -220,8 +254,12 @@ with h5py.File(injection_file, "r") as f:
                         samples[param].append(injection_parameters[param])
 
                     for ifo in ifos:
-                        samples["{}_optimal_snr".format(ifo.name)].append(ifos.meta_data[ifo.name]["optimal_SNR"])
-                        samples["{}_matched_filter_snr".format(ifo.name)].append(ifos.meta_data[ifo.name]["matched_filter_SNR"])
+                        samples["{}_optimal_snr".format(ifo.name)].append(
+                            ifos.meta_data[ifo.name]["optimal_SNR"]
+                        )
+                        samples["{}_matched_filter_snr".format(ifo.name)].append(
+                            ifos.meta_data[ifo.name]["matched_filter_SNR"]
+                        )
 
                 else:
                     for ifo in ifos:
@@ -237,7 +275,9 @@ with h5py.File(injection_file, "r") as f:
                     # Read the next set of frame files. Save the ones that are open
 
             elif f["geocent_time"][k] > gps_end_time:
-                logging.info("Signal is outside the current data segment. Saving frame files and Breaking")
+                logging.info(
+                    "Signal is outside the current data segment. Saving frame files and Breaking"
+                )
                 for ifo in ifos:
                     utils.save_frame_files(
                         ifo=ifo,
@@ -250,7 +290,9 @@ with h5py.File(injection_file, "r") as f:
             k = k + 1
         # Save meta data to an HDF5 file
         logging.info("Saving meta data")
-        meta_data_file = os.path.join(data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5")
+        meta_data_file = os.path.join(
+            data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5"
+        )
         with h5py.File(meta_data_file, "w") as f:
             for key in samples.keys():
                 utils.hdf_append(f, key, samples[key])
@@ -296,11 +338,18 @@ with h5py.File(injection_file, "r") as f:
             # Read the frame files only when necessary. Too memory intensive to load all of them at a time
             logging.info("Reading network data")
             try:
-                data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
+                data = {
+                    ifo: TimeSeries.read(
+                        frame_files[ifo][l], channels[ifo], nproc=window_size
+                    )
+                    for ifo in detectors
+                }
                 read = False
                 # # select all injections that lie between the start and end time
                 end = data[detectors[0]].epoch.value + data[detectors[0]].duration.value
-                indices = numpy.where((start <= f["geocent_time"][:]) & (end >= f["geocent_time"][:]))
+                indices = numpy.where(
+                    (start <= f["geocent_time"][:]) & (end >= f["geocent_time"][:])
+                )
                 # # set the start to end for next iteration
                 start = end
                 for key, value in utils.pycbc_labels.items():
@@ -327,7 +376,9 @@ with h5py.File(injection_file, "r") as f:
                 l += 1
 
         logging.info("Saving meta data")
-        meta_data_file = os.path.join(data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5")
+        meta_data_file = os.path.join(
+            data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5"
+        )
         with h5py.File(meta_data_file, "w") as f:
             for key in injection_parameters.keys():
                 utils.hdf_append(f, key, injection_parameters[key])

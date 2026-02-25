@@ -10,7 +10,9 @@ import subprocess
 import shutil
 from rich.progress import track
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 from GWForge.utils import split_odd_even
 
 noise = """######################################################################
@@ -112,14 +114,18 @@ parser.add_argument(
     required=True,
     help="GPS start time of data (int seconds)",
 )
-parser.add_argument("--gps-end-time", type=int, required=True, help="GPS end time of data (int seconds)")
+parser.add_argument(
+    "--gps-end-time", type=int, required=True, help="GPS end time of data (int seconds)"
+)
 parser.add_argument(
     "--output-directory",
     type=str,
     default="outdir",
     help="The output directory. If outdir already exists, an auto-incrementing naming scheme is used",
 )
-parser.add_argument("--log-directory", type=str, help="If given, an alternative path for the log output")
+parser.add_argument(
+    "--log-directory", type=str, help="If given, an alternative path for the log output"
+)
 
 parser.add_argument(
     "--noise-configuration-file",
@@ -156,7 +162,9 @@ parser.add_argument(
     help="Accounting group user to use (see, https://accounting.ligo.org/user) [default: ligo.dev.o4.cbc.pe.lalinference]",
 )
 
-parser.add_argument("--workflow-name", type=str, default="gwforge", help="Name of condor dag workflow")
+parser.add_argument(
+    "--workflow-name", type=str, default="gwforge", help="Name of condor dag workflow"
+)
 
 parser.add_argument("--submit-now", action="store_true", help="Submits condor dag now")
 
@@ -187,7 +195,9 @@ try:
 except Exception:
     logging.warning("Submit and log directory already exist")
 
-logging.info("Checking if jobs can be parallelised or not based on gps-start-time and gps-end-time")
+logging.info(
+    "Checking if jobs can be parallelised or not based on gps-start-time and gps-end-time"
+)
 # Parallelise only if duration > 40960
 minimum_duration = 4096 * 6
 if (opts.gps_end_time - opts.gps_start_time) <= minimum_duration:
@@ -329,7 +339,9 @@ with open(condor_dag_file, "w") as dag_file:
     if bbh_job_ids:
         # Add odd jobs first
         for bbh_job_id in bbh_odd:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(noise_job_ids), bbh_job_id))
+            dag_file.write(
+                "PARENT {} CHILD {}\n".format(" ".join(noise_job_ids), bbh_job_id)
+            )
         # Add even jobs after odd jobs
         for bbh_job_id in bbh_even:
             dag_file.write("PARENT {} CHILD {}\n".format(" ".join(bbh_odd), bbh_job_id))
@@ -338,16 +350,22 @@ with open(condor_dag_file, "w") as dag_file:
     if nsbh_job_ids:
         # Add odd jobs first
         for nsbh_job_id in nsbh_odd:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(bbh_job_ids), nsbh_job_id))
+            dag_file.write(
+                "PARENT {} CHILD {}\n".format(" ".join(bbh_job_ids), nsbh_job_id)
+            )
         # Add even jobs after odd jobs
         for nsbh_job_id in nsbh_even:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(nsbh_odd), nsbh_job_id))
+            dag_file.write(
+                "PARENT {} CHILD {}\n".format(" ".join(nsbh_odd), nsbh_job_id)
+            )
 
     # Handle BNS jobs: odd first, then even
     if bns_job_ids:
         # Add odd jobs first
         for bns_job_id in bns_odd:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(nsbh_job_ids), bns_job_id))
+            dag_file.write(
+                "PARENT {} CHILD {}\n".format(" ".join(nsbh_job_ids), bns_job_id)
+            )
         # Add even jobs after odd jobs
         for bns_job_id in bns_even:
             dag_file.write("PARENT {} CHILD {}\n".format(" ".join(bns_odd), bns_job_id))

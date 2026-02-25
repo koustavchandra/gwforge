@@ -22,10 +22,14 @@ pylab.rcParams.update(
 
 pylab.rcParams["axes.linewidth"] = 1
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 
-def remove_special_characters(input_string, characters_to_remove=["+", "-", "_", " ", "#"]):
+def remove_special_characters(
+    input_string, characters_to_remove=["+", "-", "_", " ", "#"]
+):
     """
     Remove specified special characters from a given input string.
 
@@ -41,7 +45,9 @@ def remove_special_characters(input_string, characters_to_remove=["+", "-", "_",
     str
         The input string with specified special characters removed.
     """
-    result_string = "".join(char for char in input_string if char not in characters_to_remove)
+    result_string = "".join(
+        char for char in input_string if char not in characters_to_remove
+    )
     return result_string
 
 
@@ -229,8 +235,18 @@ def find_frame_files(directory, filePattern="*gwf", start_time=None, end_time=No
             duration = float(parts[-1].split(".")[0])
 
             # Check if the file overlaps with the specified time range
-            if (start_time is None or (gps_start_time <= end_time and gps_start_time + duration > start_time)) and (
-                end_time is None or (gps_start_time < end_time and gps_start_time + duration >= start_time)
+            if (
+                start_time is None
+                or (
+                    gps_start_time <= end_time
+                    and gps_start_time + duration > start_time
+                )
+            ) and (
+                end_time is None
+                or (
+                    gps_start_time < end_time
+                    and gps_start_time + duration >= start_time
+                )
             ):
                 filepaths.append(file_path)
                 filenames.append(filename)
@@ -299,7 +315,9 @@ def update_ET_channels(channel_dict):
             # Extract the suffix after 'ifo:'
             suffix = channel[len(ifo) + 1 :]
             # Generate updated channels for ET1, ET2, ET3
-            updated_channels.update({"ET1": "ET1:" + suffix, "ET2": "ET2:" + suffix, "ET3": "ET3:" + suffix})
+            updated_channels.update(
+                {"ET1": "ET1:" + suffix, "ET2": "ET2:" + suffix, "ET3": "ET3:" + suffix}
+            )
         else:
             updated_channels[ifo] = channel
     return updated_channels
@@ -324,7 +342,9 @@ def save_frame_files(ifo, start_time, duration, ifo_directory):
         save_data = data.crop(start=start_time, end=end)
         # Write the cropped data to a frame file
         save_data.write(
-            target=os.path.join(ifo_directory, f"{ifo.name}-{int(start_time)}-{int(dur)}.h5"),
+            target=os.path.join(
+                ifo_directory, f"{ifo.name}-{int(start_time)}-{int(dur)}.h5"
+            ),
             overwrite=True,
         )
         # Delete the cropped data to free up memory
@@ -360,10 +380,22 @@ pycbc_labels = {
 
 # TODO: Remove this dependency in future versions.
 reference_prior_dict = {
-    "ra": bilby.core.prior.analytical.Uniform(name="ra", minimum=0, maximum=2 * numpy.pi, boundary="periodic"),
-    "dec": bilby.core.prior.analytical.Uniform(name="dec", minimum=0, maximum=numpy.pi, boundary="periodic"),
-    "theta_jn": bilby.core.prior.analytical.Uniform(name="theta_jn", minimum=0, maximum=numpy.pi, boundary="periodic"),
-    "psi": bilby.core.prior.analytical.Uniform(name="psi", minimum=0, maximum=numpy.pi, boundary="periodic"),
-    "luminosity_distance": bilby.gw.prior.UniformSourceFrame(name="luminosity_distance", minimum=10, maximum=1000),
-    "phase": bilby.core.prior.analytical.Uniform(name="phase", minimum=0, maximum=2 * numpy.pi, boundary="periodic"),
+    "ra": bilby.core.prior.analytical.Uniform(
+        name="ra", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
+    ),
+    "dec": bilby.core.prior.analytical.Uniform(
+        name="dec", minimum=0, maximum=numpy.pi, boundary="periodic"
+    ),
+    "theta_jn": bilby.core.prior.analytical.Uniform(
+        name="theta_jn", minimum=0, maximum=numpy.pi, boundary="periodic"
+    ),
+    "psi": bilby.core.prior.analytical.Uniform(
+        name="psi", minimum=0, maximum=numpy.pi, boundary="periodic"
+    ),
+    "luminosity_distance": bilby.gw.prior.UniformSourceFrame(
+        name="luminosity_distance", minimum=10, maximum=1000
+    ),
+    "phase": bilby.core.prior.analytical.Uniform(
+        name="phase", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
+    ),
 }

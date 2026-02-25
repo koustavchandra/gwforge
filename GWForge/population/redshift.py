@@ -10,7 +10,9 @@ from scipy.integrate import quad
 from pycbc.population import population_models
 from rich.progress import track
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 
 class Redshift:
@@ -103,7 +105,11 @@ class Redshift:
         cosmo = self.import_cosmology()
         H0 = cosmo.H0.value / (PC_SI * 1e3)  # H0 in seconds = km --> Mpc
         H0 = H0 * (YRJUL_SI / 1e-9)  # H0 in Gyr^-1
-        dz_dt = H0 * (1 + redshift) * sympy.sqrt((cosmo.Ode0 + cosmo.Om0 * (1 + redshift) ** 3))
+        dz_dt = (
+            H0
+            * (1 + redshift)
+            * sympy.sqrt((cosmo.Ode0 + cosmo.Om0 * (1 + redshift) ** 3))
+        )
         return 1 / dz_dt  # returns dt_dz
 
     def transform(self):
@@ -125,15 +131,23 @@ class Redshift:
             from gwpopulation.models.redshift import MadauDickinsonRedshift
 
             # Note the GWPopulation misses out the 0.015 constant in psi_of_z
-            psi_of_z = 0.015 * MadauDickinsonRedshift(z_max=self.maximum_redshift).psi_of_z(redshift=z, **self.parameters)
+            psi_of_z = 0.015 * MadauDickinsonRedshift(
+                z_max=self.maximum_redshift
+            ).psi_of_z(redshift=z, **self.parameters)
         elif self.redshift_model == "powerlaw":
             from gwpopulation.models.redshift import PowerLawRedshift
 
-            psi_of_z = PowerLawRedshift(z_max=self.maximum_redshift).psi_of_z(redshift=z, **self.parameters)
+            psi_of_z = PowerLawRedshift(z_max=self.maximum_redshift).psi_of_z(
+                redshift=z, **self.parameters
+            )
         else:
             raise ValueError("Redshift model {} is not implemented in GWPopulation")
 
-        return psi_of_z * population_models.p_tau(tau=time_delay, td_model=self.time_delay_model) * diff_lookback_time(z)
+        return (
+            psi_of_z
+            * population_models.p_tau(tau=time_delay, td_model=self.time_delay_model)
+            * diff_lookback_time(z)
+        )
 
     def rate_density(self, elements=1000):
         """
@@ -152,8 +166,14 @@ class Redshift:
 
         for k in track(range(len(redshift))):
             function_2 = lambdify(z, function.subs(z_0, redshift[k]), "scipy")
-            merger_rate_density[k] = quad(function_2, redshift[k], numpy.inf, epsabs=1e-3)[0]
-        merger_rate_density = merger_rate_density / merger_rate_density[0] * self.local_merger_rate_density  # Normalize & Rescale
+            merger_rate_density[k] = quad(
+                function_2, redshift[k], numpy.inf, epsabs=1e-3
+            )[0]
+        merger_rate_density = (
+            merger_rate_density
+            / merger_rate_density[0]
+            * self.local_merger_rate_density
+        )  # Normalize & Rescale
         return interp1d(redshift, merger_rate_density)
 
     def coalescence_rate(self):
@@ -162,7 +182,9 @@ class Redshift:
         """
         rate_density = self.rate_density()
         # this PyCBC function returns an interpolation function ---> merger rate at maximum redshift
-        merger_rate = population_models.coalescence_rate(rate_den=rate_density, maxz=self.maximum_redshift)
+        merger_rate = population_models.coalescence_rate(
+            rate_den=rate_density, maxz=self.maximum_redshift
+        )
         return merger_rate
 
     def average_time_between_signals(self):
@@ -171,7 +193,13 @@ class Redshift:
         """
         merger_rate = self.coalescence_rate()
         # The following returns the average time delay. See Eq. (7) of <Phys. Rev. D 93, 024018 (2016)>
-        return 1 / population_models.total_rate_upto_redshift(z=self.maximum_redshift, merger_rate=merger_rate) * YRJUL_SI
+        return (
+            1
+            / population_models.total_rate_upto_redshift(
+                z=self.maximum_redshift, merger_rate=merger_rate
+            )
+            * YRJUL_SI
+        )
 
     def sample(self):
         """
@@ -204,7 +232,11 @@ class Redshift:
             name="redshift",
         )
         average_time_interval = self.average_time_between_signals()
-        logging.info("Average time interval between signals = {:.2f}".format(average_time_interval))
+        logging.info(
+            "Average time interval between signals = {:.2f}".format(
+                average_time_interval
+            )
+        )
         number_of_samples = int(self.analysis_time / average_time_interval)
         logging.info("Number of samples generated = {}".format(number_of_samples))
         z = prior.sample(number_of_samples)

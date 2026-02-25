@@ -17,7 +17,9 @@ from GWForge.ifo.detectors import Network
 from GWForge.utils import hdf_append
 
 
-def get_optimal_snr(injection_parameters, parameters, detectors, sampling_frequency=8192):
+def get_optimal_snr(
+    injection_parameters, parameters, detectors, sampling_frequency=8192
+):
     bilby.core.utils.setup_logger(log_level="warning")
     ifos = Network(ifos=detectors).initialise_ifos()
     duration = numpy.ceil(injection_parameters["duration"] + 5)
@@ -44,20 +46,26 @@ def get_optimal_snr(injection_parameters, parameters, detectors, sampling_freque
         parameters=signal_parameters,
     )
     for ifo in ifos:
-        signal_parameters["{}_optimal_snr".format(ifo.name)] = ifo.meta_data["optimal_SNR"]
+        signal_parameters["{}_optimal_snr".format(ifo.name)] = ifo.meta_data[
+            "optimal_SNR"
+        ]
     return signal_parameters
 
 
 def multiprocess(parameters, detectors, chunk):
     results_list = []
     for idx, row in chunk.iterrows():
-        meta_data = get_optimal_snr(injection_parameters=row, parameters=parameters, detectors=detectors)
+        meta_data = get_optimal_snr(
+            injection_parameters=row, parameters=parameters, detectors=detectors
+        )
         results_list.append(meta_data)
     return results_list
 
 
 # Setting up logging configuration
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 parser = argparse.ArgumentParser(description=__doc__)
 
@@ -80,7 +88,9 @@ parser.add_argument(
     default=0,
     help="Index to start processing injections from",
 )
-parser.add_argument("--end-index", type=int, default=None, help="Index to end processing injections at")
+parser.add_argument(
+    "--end-index", type=int, default=None, help="Index to end processing injections at"
+)
 parser.add_argument(
     "--output-file",
     type=str,

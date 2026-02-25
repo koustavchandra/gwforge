@@ -5,7 +5,9 @@ import random
 from .. import utils
 from ..conversion import *
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 choices = [
     "Non-spinning",
@@ -40,15 +42,31 @@ class Spin:
         self.spin_model = utils.remove_special_characters(spin_model.lower())
         self.number_of_samples = number_of_samples
         self.parameters = parameters
-        self.parameters["minimum_primary_spin"] = parameters.get("minimum_primary_spin", 0)
-        self.parameters["maximum_primary_spin"] = parameters.get("maximum_primary_spin", 0.99)
-        self.parameters["minimum_secondary_spin"] = parameters.get("minimum_secondary_spin", 0)
-        self.parameters["maximum_secondary_spin"] = parameters.get("maximum_secondary_spin", 0.99)
+        self.parameters["minimum_primary_spin"] = parameters.get(
+            "minimum_primary_spin", 0
+        )
+        self.parameters["maximum_primary_spin"] = parameters.get(
+            "maximum_primary_spin", 0.99
+        )
+        self.parameters["minimum_secondary_spin"] = parameters.get(
+            "minimum_secondary_spin", 0
+        )
+        self.parameters["maximum_secondary_spin"] = parameters.get(
+            "maximum_secondary_spin", 0.99
+        )
         if "mu_chi" in self.parameters and "sigma_squared_chi" in self.parameters:
             self.parameters["alpha_chi"] = (
-                self.parameters["mu_chi"] * (self.parameters["mu_chi"] - self.parameters["mu_chi"] ** 2 - self.parameters["sigma_squared_chi"]) / self.parameters["sigma_squared_chi"]
+                self.parameters["mu_chi"]
+                * (
+                    self.parameters["mu_chi"]
+                    - self.parameters["mu_chi"] ** 2
+                    - self.parameters["sigma_squared_chi"]
+                )
+                / self.parameters["sigma_squared_chi"]
             )
-            self.parameters["beta_chi"] = self.parameters["alpha_chi"] * (1.0 / self.parameters["mu_chi"] - 1.0)
+            self.parameters["beta_chi"] = self.parameters["alpha_chi"] * (
+                1.0 / self.parameters["mu_chi"] - 1.0
+            )
 
         if self.spin_model == "default":
             self.spin_model = "betagaussianuniformisotropic"
@@ -186,10 +204,20 @@ class Spin:
                         maximum=1,
                     )
 
-                    cos_tilt_isotropic = bilby.core.prior.analytical.Uniform(name="cos_tilt_isotropic", minimum=-1, maximum=1)
+                    cos_tilt_isotropic = bilby.core.prior.analytical.Uniform(
+                        name="cos_tilt_isotropic", minimum=-1, maximum=1
+                    )
 
-                    samples["tilt_1"] = numpy.arccos(numpy.concatenate([cos_tilt_gaussian.sample(n), cos_tilt_isotropic.sample(m)]))
-                    samples["tilt_2"] = numpy.arccos(numpy.concatenate([cos_tilt_gaussian.sample(n), cos_tilt_isotropic.sample(m)]))
+                    samples["tilt_1"] = numpy.arccos(
+                        numpy.concatenate(
+                            [cos_tilt_gaussian.sample(n), cos_tilt_isotropic.sample(m)]
+                        )
+                    )
+                    samples["tilt_2"] = numpy.arccos(
+                        numpy.concatenate(
+                            [cos_tilt_gaussian.sample(n), cos_tilt_isotropic.sample(m)]
+                        )
+                    )
                     random.shuffle(samples["tilt_1"])
                     random.shuffle(samples["tilt_2"])
                 elif "betagaussian" in self.spin_model:
@@ -217,8 +245,12 @@ class Spin:
                         maximum=1,
                     )
 
-                    samples["tilt_1"] = numpy.arccos(cos_tilt.sample(self.number_of_samples))
-                    samples["tilt_2"] = numpy.arccos(cos_tilt.sample(self.number_of_samples))
+                    samples["tilt_1"] = numpy.arccos(
+                        cos_tilt.sample(self.number_of_samples)
+                    )
+                    samples["tilt_2"] = numpy.arccos(
+                        cos_tilt.sample(self.number_of_samples)
+                    )
 
                 elif "beta" in self.spin_model:
                     a_1 = bilby.core.prior.analytical.Beta(
@@ -240,8 +272,12 @@ class Spin:
                     samples["tilt_1"] = tilt_1.sample(self.number_of_samples)
                     samples["tilt_2"] = tilt_2.sample(self.number_of_samples)
 
-                phi_12 = bilby.gw.prior.Uniform(name="phi_12", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
-                phi_jl = bilby.gw.prior.Uniform(name="phi_jl", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
+                phi_12 = bilby.gw.prior.Uniform(
+                    name="phi_12", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
+                )
+                phi_jl = bilby.gw.prior.Uniform(
+                    name="phi_jl", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
+                )
 
                 samples["a_1"] = a_1.sample(self.number_of_samples)
                 samples["a_2"] = a_2.sample(self.number_of_samples)

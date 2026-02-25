@@ -14,15 +14,21 @@ from GWForge.population.extrinsic import Extrinsic
 from lal import YRJUL_SI
 
 # Set up logging configuration
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 # Read configuration from ini file
 config = configparser.ConfigParser()
-parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
 # Parse command-line arguments
 parser.add_argument("--config-file", required=True, help="Configuration ini file")
-parser.add_argument("--output-file", required=True, help="HDF5 file to store injection information")
+parser.add_argument(
+    "--output-file", required=True, help="HDF5 file to store injection information"
+)
 parser.add_argument(
     "--save-config",
     action="store_true",
@@ -35,7 +41,9 @@ parser.add_argument(
     default="bbh",
     help="Signal source type",
 )
-parser.add_argument("--reference-frequency", type=float, default=5.0, help="Reference frequency (in Hz)")
+parser.add_argument(
+    "--reference-frequency", type=float, default=5.0, help="Reference frequency (in Hz)"
+)
 opts = parser.parse_args()
 
 # Read configuration file
@@ -137,7 +145,9 @@ else:
     extrinsic_prior_file = None
 
 # Create Extrinsic object and generate samples
-e = Extrinsic(number_of_samples=len(samples["redshift"]), prior_file=extrinsic_prior_file)
+e = Extrinsic(
+    number_of_samples=len(samples["redshift"]), prior_file=extrinsic_prior_file
+)
 
 extrinsic_samples = e.sample()
 for key in extrinsic_samples.keys():
@@ -147,10 +157,18 @@ for key in extrinsic_samples.keys():
 if opts.source_type == "bns" or opts.source_type == "nsbh":
     try:
         eos_file = config.get("EOS", "eos_file")
-        logging.info("Trying {} file to estimate tidal deformability parameter of components".format(eos_file))
-        samples["lambda_2"] = get_lambda(file=eos_file, source_mass=samples["mass_2_source"])
+        logging.info(
+            "Trying {} file to estimate tidal deformability parameter of components".format(
+                eos_file
+            )
+        )
+        samples["lambda_2"] = get_lambda(
+            file=eos_file, source_mass=samples["mass_2_source"]
+        )
         if opts.source_type == "bns":
-            samples["lambda_1"] = get_lambda(file=eos_file, source_mass=samples["mass_1_source"])
+            samples["lambda_1"] = get_lambda(
+                file=eos_file, source_mass=samples["mass_1_source"]
+            )
     except Exception:
         logging.warning("Failed to estimate tidal parameters.")
 
@@ -158,7 +176,9 @@ if opts.source_type == "bns" or opts.source_type == "nsbh":
 # Generate all possible parameters of the specified source type
 logging.info("Generating all possible parameters of {}".format(opts.source_type))
 samples = generate_detector_frame_parameters(samples)
-samples["reference_frequency"] = numpy.ones_like(samples["mass_1"]) * opts.reference_frequency
+samples["reference_frequency"] = (
+    numpy.ones_like(samples["mass_1"]) * opts.reference_frequency
+)
 samples = generate_spin_parameters(samples)
 logging.info("Saving data in {}".format(opts.output_file))
 

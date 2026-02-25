@@ -13,7 +13,9 @@ from pycbc.types.timeseries import TimeSeries as pycbc_timeseries
 from pycbc.noise.reproduceable import colored_noise
 from pycbc.psd import from_txt
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 
 def load_psd(ifo):
@@ -49,7 +51,9 @@ def pycbc_reproducable_noise(ifo, start, end, sampling_frequency, seed=0):
         low_frequency_cutoff=ifo.minimum_frequency,
     )
     epoch = lal.LIGOTimeGPS(noise.sample_times[0])
-    noise = pycbc_timeseries(numpy.asarray(noise), delta_t=1.0 / sampling_frequency, epoch=epoch)
+    noise = pycbc_timeseries(
+        numpy.asarray(noise), delta_t=1.0 / sampling_frequency, epoch=epoch
+    )
     return TimeSeries.from_pycbc(noise)
 
 
@@ -58,7 +62,9 @@ config = configparser.ConfigParser()
 parser = argparse.ArgumentParser(description=__doc__)
 
 parser.add_argument("--config-file", required=True, help="Configuration ini file")
-parser.add_argument("--output-directory", required=True, help="Output directory to store frame files")
+parser.add_argument(
+    "--output-directory", required=True, help="Output directory to store frame files"
+)
 parser.add_argument(
     "--gps-start-time",
     type=int,
@@ -91,7 +97,11 @@ for ifo in ifos:
     if not os.path.exists(ifo_directory[ifo.name]):
         os.makedirs(ifo_directory[ifo.name])
     else:
-        logging.warn("{} directory exists. Files may be overwritten!".format(ifo_directory[ifo.name]))
+        logging.warn(
+            "{} directory exists. Files may be overwritten!".format(
+                ifo_directory[ifo.name]
+            )
+        )
 
 if opts.gps_start_time and opts.gps_end_time:
     gps_start_time = opts.gps_start_time
@@ -109,7 +119,9 @@ else:
 sampling_frequency = config.getint("IFOS", "sampling-frequency", fallback=16384)
 
 # Default is Gaussian Noise. Other option is Zero noise
-noise_type = remove_special_characters(config.get("IFOS", "noise", fallback="gaussian").lower())
+noise_type = remove_special_characters(
+    config.get("IFOS", "noise", fallback="gaussian").lower()
+)
 
 noise_source = config.get("IFOS", "noise-type", fallback="pycbc").lower()
 
@@ -168,7 +180,9 @@ for dur in duration:
             ),
         )
         data.write(
-            target="{}/{}-{}-{}.h5".format(ifo_directory[ifo.name], ifo.name, int(gps_start_time), int(dur)),
+            target="{}/{}-{}-{}.h5".format(
+                ifo_directory[ifo.name], ifo.name, int(gps_start_time), int(dur)
+            ),
             overwrite=True,
         )
     gps_start_time = gps_start_time + dur

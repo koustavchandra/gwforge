@@ -10,12 +10,16 @@ from pycbc.psd import welch, interpolate, inverse_spectrum_truncation
 import pandas as pd
 from lal import LIGOTimeGPS
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--frame-file", type=str, required=True)
 parser.add_argument("--stride", type=int, default=512)
-parser.add_argument("--psd-segment-length", type=int, default=16, help="Segment length in seconds")
+parser.add_argument(
+    "--psd-segment-length", type=int, default=16, help="Segment length in seconds"
+)
 parser.add_argument(
     "--psd-segment-stride",
     type=int,
@@ -34,7 +38,9 @@ stride = opts.stride
 gps_end_time = gps_start_time + opts.stride
 psds = []
 logging.info("Reading frame file {}".format(opts.frame_file))
-logging.info("Estimating PSDs of segments with lengths={}s".format(opts.psd_segment_length))
+logging.info(
+    "Estimating PSDs of segments with lengths={}s".format(opts.psd_segment_length)
+)
 for k in track(range(int((4096 - gps_start_time) / opts.stride))):
     ts = read_frame(
         location=opts.frame_file,
@@ -53,7 +59,9 @@ for k in track(range(int((4096 - gps_start_time) / opts.stride))):
         avg_method="median-mean",
     )
     estimated_psd = interpolate(estimated_psd, 1.0 / ts.duration)
-    estimated_psd = inverse_spectrum_truncation(estimated_psd, segment_length, low_frequency_cutoff=7.0, trunc_method="hann")
+    estimated_psd = inverse_spectrum_truncation(
+        estimated_psd, segment_length, low_frequency_cutoff=7.0, trunc_method="hann"
+    )
 
     psds.append(estimated_psd.data)
     gps_start_time = gps_start_time + opts.stride

@@ -423,7 +423,7 @@ def importance_sampling_m1_q_prop(
     # p(q | m1)
     q_pdf = numpy.zeros_like(q_prop)
 
-    for i in tqdm(range(N_prop)):
+    for i in tqdm(range(N_prop), disable=not verbose):
         m1 = m1_prop[i]
         beta = beta_pair_1 if m1 < mbreak else beta_pair_2
 

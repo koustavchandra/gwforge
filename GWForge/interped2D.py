@@ -49,9 +49,34 @@ class Interped2D(Prior):
         self.max_pdf = float(np.max(self.pdf_grid))
     
     def prob(self, val):
-        """Probability density at (x, y)"""
-        val_arr = np.asarray(val).reshape(1, 2)
-        return float(self.interpolator(val_arr)[0])
+        """Probability density at (x, y) or an array of (x, y) points.
+
+        Parameters
+        ----------
+        val : array-like
+            Either a single point (x, y) with shape (2,) or (1, 2),
+            or an array of points with shape (N, 2).
+
+        Returns
+        -------
+        float or ndarray
+            Scalar probability density for a single point, or an array
+            of probability densities for multiple points.
+        """
+        val_arr = np.asarray(val)
+
+        # Detect whether this is a single (x, y) point
+        is_single_point = val_arr.shape == (2,) or val_arr.shape == (1, 2)
+
+        if is_single_point:
+            # Ensure shape (1, 2) for the interpolator
+            val_arr = val_arr.reshape(1, 2)
+            prob_vals = self.interpolator(val_arr)
+            return float(prob_vals[0])
+        else:
+            # Assume val_arr already has shape (N, 2) or is otherwise
+            # compatible with RegularGridInterpolator's vectorized input.
+            return self.interpolator(val_arr)
     
     def sample(self, size=1):
         """

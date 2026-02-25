@@ -1,135 +1,141 @@
 #!/ligo/home/ligo.org/koustav.chandra/.conda/envs/gwforge-venv/bin/python3.9
-'''
+"""
 Inject gravitational wave signals into a network of detectors and save metadata.
 
 Usage:
     gwforge_inject --config-file path/to/config.ini --data-directory path/to/data
-'''
-import configparser, argparse, logging, json, h5py, numpy, copy
+"""
+import configparser
+import argparse
+import logging
+import json
+import h5py
+import numpy
+import copy
 from gwpy.timeseries import TimeSeries
-from rich.progress import track
 from GWForge.conversion import *
 from GWForge import utils
 import warnings
-warnings.filterwarnings("ignore", message='ERFA function*')
 
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s %(message)s', 
-                    datefmt='%Y-%m-%d %H:%M:%S')
+warnings.filterwarnings("ignore", message="ERFA function*")
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 # Load configurations
 config = configparser.ConfigParser()
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--config-file', 
-                    required=True, 
-                    help='Path to the configuration ini file')
-parser.add_argument('--data-directory', 
-                    help='Parent directory containing frame files')
-parser.add_argument('--gps-start-time', 
-                    type=float, 
-                    default=None, 
-                    help='GPS start time of data (default: None) (float seconds)')
-parser.add_argument('--gps-end-time', 
-                    type=float, 
-                    default=None, 
-                    help='GPS end time of data (default: None) (float seconds)')
+parser.add_argument("--config-file", required=True, help="Path to the configuration ini file")
+parser.add_argument("--data-directory", help="Parent directory containing frame files")
+parser.add_argument(
+    "--gps-start-time",
+    type=float,
+    default=None,
+    help="GPS start time of data (default: None) (float seconds)",
+)
+parser.add_argument(
+    "--gps-end-time",
+    type=float,
+    default=None,
+    help="GPS end time of data (default: None) (float seconds)",
+)
 opts = parser.parse_args()
 config.read(opts.config_file)
 
 # Extract configuration settings
-detectors = json.loads(config.get('IFOS', 'detectors').replace("'", "\""))
+detectors = json.loads(config.get("IFOS", "detectors").replace("'", '"'))
 network = copy.deepcopy(detectors)
-logging.info('Initialising detector network with ifos {}'.format(network))
+logging.info("Initialising detector network with ifos {}".format(network))
 
 # Handling ET as three separate detectors
-if 'ET' in detectors:
-    index = detectors.index('ET')
+if "ET" in detectors:
+    index = detectors.index("ET")
     detectors.pop(index)
-    detectors.extend(['ET1', 'ET2', 'ET3'])
+    detectors.extend(["ET1", "ET2", "ET3"])
 
 try:
-    data_directory = config.get('IFOS', 'data-directory')
-except:
+    data_directory = config.get("IFOS", "data-directory")
+except Exception:
     data_directory = opts.data_directory
 
 try:
-    channels = json.loads(config.get('IFOS', 'channel-dict').replace("'", "\""))
+    channels = json.loads(config.get("IFOS", "channel-dict").replace("'", '"'))
     channels = utils.update_ET_channels(channel_dict=channels)
 except json.JSONDecodeError:
-    logging.warning('Failed to locate and read frame files. Defaulting to INJ channels.')
-    channels = {ifo: '{}:INJ'.format(ifo) for ifo in detectors}
+    logging.warning("Failed to locate and read frame files. Defaulting to INJ channels.")
+    channels = {ifo: "{}:INJ".format(ifo) for ifo in detectors}
 except Exception as e:
-    raise RuntimeError('Failed to locate and read frame files') from e
+    raise RuntimeError("Failed to locate and read frame files") from e
 
 # Set sampling frequency and minimum frequency
-sampling_frequency = config.getfloat('IFOS', 
-                                     'sampling-frequency', 
-                                     fallback=8192)
+sampling_frequency = config.getfloat("IFOS", "sampling-frequency", fallback=8192)
 
-minimum_frequency = config.getfloat('Injection', 'waveform-minimum-frequency', fallback=3)
+minimum_frequency = config.getfloat("Injection", "waveform-minimum-frequency", fallback=3)
 
 # Log information about frame files and injections
-logging.info('Loading injections')
-injection_file = config.get('Injections', 
-                            'injection-file')
+logging.info("Loading injections")
+injection_file = config.get("Injections", "injection-file")
 
-injection_type = config.get('Injections', 
-                            'injection-type', fallback='bbh').lower()
+injection_type = config.get("Injections", "injection-type", fallback="bbh").lower()
 
 # Set the window size based on the injection type
-window_size = 2 if injection_type == 'bbh' else 3
+window_size = 2 if injection_type == "bbh" else 3
 # Note: For NSBH, the window size is the same as BNS
 
-waveform_approximant = config.get('Injections', 
-                                  'waveform-approximant')
+waveform_approximant = config.get("Injections", "waveform-approximant")
 
 from pycbc.waveform import td_approximants
+
 if waveform_approximant in td_approximants():
-    logging.info(f'Using {waveform_approximant} for waveform generation')
+    logging.info(f"Using {waveform_approximant} for waveform generation")
 else:
     import sys
-    logging.error(f'{waveform_approximant} does not exist')
+
+    logging.error(f"{waveform_approximant} does not exist")
     sys.exit(1)
-    
+
 # Set the window size based on the injection type
-window_size = 2 if injection_type == 'bbh' else 3
+window_size = 2 if injection_type == "bbh" else 3
 # Note: For NSBH, the window size is the same as BNS
 
 try:
-    gps_start_time = config.getfloat('Injections', 'gps-start-time')
-    gps_end_time = config.getfloat('Injections', 'gps-end-time')
-except:
+    gps_start_time = config.getfloat("Injections", "gps-start-time")
+    gps_end_time = config.getfloat("Injections", "gps-end-time")
+except Exception:
     gps_start_time = opts.gps_start_time
     gps_end_time = opts.gps_end_time
-    
-injection_method = config.get('Injections', 'injection-method', fallback='bilby').lower()    
+
+injection_method = config.get("Injections", "injection-method", fallback="bilby").lower()
 
 if not gps_start_time and not gps_end_time:
-    logging.warning('GPS interval not provided. Considering all available frame files. Processing will be slower.')
+    logging.warning("GPS interval not provided. Considering all available frame files. Processing will be slower.")
 elif not gps_end_time:
-    logging.warning('GPS end time not provided. Considering all frame files after {}s'.format(gps_start_time))
+    logging.warning("GPS end time not provided. Considering all frame files after {}s".format(gps_start_time))
 elif not gps_start_time:
-    logging.warning('GPS start time not provided. Considering all frame files before {}s'.format(gps_end_time))
+    logging.warning("GPS start time not provided. Considering all frame files before {}s".format(gps_end_time))
 else:
-    logging.info('Considering frame files between {} and {}s'.format(gps_start_time, gps_end_time))
+    logging.info("Considering frame files between {} and {}s".format(gps_start_time, gps_end_time))
 
-waveform_arguments = {'reference_frequency' : minimum_frequency, 
-                      'minimum_frequency' : minimum_frequency, 
-                      'waveform_approximant' : waveform_approximant}
+waveform_arguments = {
+    "reference_frequency": minimum_frequency,
+    "minimum_frequency": minimum_frequency,
+    "waveform_approximant": waveform_approximant,
+}
 
 # Generate frame file sublists
 frame_files = {}
-safety = 4096 
+safety = 4096
 for ifo in detectors:
-    _, file_paths = utils.find_frame_files(directory=data_directory, 
-                                           filePattern='{}*h5'.format(ifo), 
-                                           # to tackle signal across frame files
-                                           start_time=gps_start_time - (window_size-1) * safety, 
-                                           end_time=gps_end_time)
-    #is there a better way?
-    sorted_file_paths = sorted(file_paths, key=lambda x: int(x.split('-')[-2]))
+    _, file_paths = utils.find_frame_files(
+        directory=data_directory,
+        filePattern="{}*h5".format(ifo),
+        # to tackle signal across frame files
+        start_time=gps_start_time - (window_size - 1) * safety,
+        end_time=gps_end_time,
+    )
+    # is there a better way?
+    sorted_file_paths = sorted(file_paths, key=lambda x: int(x.split("-")[-2]))
     frame_files[ifo] = utils.generate_frame_file_sublists(sorted_file_paths, window_size=window_size)
-    
+
 # Directories for each detector
 ifo_directory = {}
 for ifo in detectors:
@@ -137,154 +143,192 @@ for ifo in detectors:
 
 
 # Configure samples dictionary for storing results
-parameters = ['mass_1', 'mass_2', 
-              'luminosity_distance', 'theta_jn', 'phase', 
-              'ra', 'dec', 'psi', 'geocent_time']
+parameters = [
+    "mass_1",
+    "mass_2",
+    "luminosity_distance",
+    "theta_jn",
+    "phase",
+    "ra",
+    "dec",
+    "psi",
+    "geocent_time",
+]
 
 # Read signal parameters from the injection file
-with h5py.File(injection_file, 'r') as f:        
-    if injection_method == 'bilby':
-        if len(f['spin_1x'][:]) == 1:
-            logging.info('Provided injection data set is quasi-circular')
-            parameters.extend(['chi_1', 'chi_2'])
+with h5py.File(injection_file, "r") as f:
+    if injection_method == "bilby":
+        if len(f["spin_1x"][:]) == 1:
+            logging.info("Provided injection data set is quasi-circular")
+            parameters.extend(["chi_1", "chi_2"])
         else:
-            logging.info('Provided injection data set is quasi-spherical')
-            parameters.extend(['a_1', 'a_2', 'tilt_1', 'tilt_2', 'phi_12', 'phi_jl'])
-        if injection_type == 'bns':
+            logging.info("Provided injection data set is quasi-spherical")
+            parameters.extend(["a_1", "a_2", "tilt_1", "tilt_2", "phi_12", "phi_jl"])
+        if injection_type == "bns":
             try:
-                parameters.extend(['lambda_1', 'lambda_2'])
-                logging.info('Loading tidal deformability parameters')
-            except:
-                logging.warning('Your BNS systems do not have tidal deformations')                           
-        samples = {}        
-        logging.info('Injecting signals using Bilby inject method')        
+                parameters.extend(["lambda_1", "lambda_2"])
+                logging.info("Loading tidal deformability parameters")
+            except Exception:
+                logging.warning("Your BNS systems do not have tidal deformations")
+        samples = {}
+        logging.info("Injecting signals using Bilby inject method")
         for param in parameters:
-            samples[param] = [] 
+            samples[param] = []
         for ifo in detectors:
-            samples['{}_optimal_snr'.format(ifo)] = []
-            samples['{}_matched_filter_snr'.format(ifo)] = []
+            samples["{}_optimal_snr".format(ifo)] = []
+            samples["{}_matched_filter_snr".format(ifo)] = []
 
         from GWForge.inject.bilby_inject import BilbyInject
+
         k, l = 0, 0
         read = True
-        while(l < len(frame_files[detectors[0]])):
-            if gps_start_time < f['geocent_time'][k] < gps_end_time:
+        while l < len(frame_files[detectors[0]]):
+            if gps_start_time < f["geocent_time"][k] < gps_end_time:
                 # Extract injection parameters for the current time step
                 # injection_parameters = {key: (f['tc'][k] if key == 'geocent_time' else f[key][k]) for key in parameters}
                 injection_parameters = {key: f[key][k] for key in parameters}
                 if read:
                     # Read the frame files only when necessary. Too memory intensive to load all of them at a time
-                    logging.info('Reading network data')
+                    logging.info("Reading network data")
                     data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
-                    
-                #Check whether the injection lies within the data segment or not. If yes inject if no read a fresh set of frame files   
-                if ((data[detectors[0]].epoch.value) < injection_parameters['geocent_time'] <
-                    (data[detectors[0]].epoch.value + data[detectors[0]].duration.value)):
+
+                # Check whether the injection lies within the data segment or not. If yes inject if no read a fresh set of frame files
+                if (
+                    (data[detectors[0]].epoch.value)
+                    < injection_parameters["geocent_time"]
+                    < (data[detectors[0]].epoch.value + data[detectors[0]].duration.value)
+                ):
                     read = False
-                    logging.info('Injecting signal {} in the network'.format(k))
-                    ifos = BilbyInject(ifos=network, 
-                                       data=data, 
-                                       injection_parameters=injection_parameters, 
-                                       waveform_arguments=waveform_arguments).inject_signal_using_bilby_method()
-                    
-                    #Update the data after injecting
+                    logging.info("Injecting signal {} in the network".format(k))
+                    ifos = BilbyInject(
+                        ifos=network,
+                        data=data,
+                        injection_parameters=injection_parameters,
+                        waveform_arguments=waveform_arguments,
+                    ).inject_signal_using_bilby_method()
+
+                    # Update the data after injecting
                     for ifo in ifos:
-                        data[ifo.name] = TimeSeries(data=ifo.time_domain_strain, 
-                                                    times=ifo.time_array, 
-                                                    name=f'{ifo.name}:INJ',
-                                                    channel=f'{ifo.name}:INJ')
+                        data[ifo.name] = TimeSeries(
+                            data=ifo.time_domain_strain,
+                            times=ifo.time_array,
+                            name=f"{ifo.name}:INJ",
+                            channel=f"{ifo.name}:INJ",
+                        )
                     # Record injection parameters and SNR values
                     for param in parameters:
                         samples[param].append(injection_parameters[param])
-                    
+
                     for ifo in ifos:
-                        samples['{}_optimal_snr'.format(ifo.name)].append(ifos.meta_data[ifo.name]['optimal_SNR'])
-                        samples['{}_matched_filter_snr'.format(ifo.name)].append(ifos.meta_data[ifo.name]['matched_filter_SNR'])
-                
+                        samples["{}_optimal_snr".format(ifo.name)].append(ifos.meta_data[ifo.name]["optimal_SNR"])
+                        samples["{}_matched_filter_snr".format(ifo.name)].append(ifos.meta_data[ifo.name]["matched_filter_SNR"])
+
                 else:
                     for ifo in ifos:
-                        utils.save_frame_files(ifo=ifo, start_time=ifo.start_time, duration=utils.split_duration(ifo.duration), ifo_directory=ifo_directory[ifo.name])
+                        utils.save_frame_files(
+                            ifo=ifo,
+                            start_time=ifo.start_time,
+                            duration=utils.split_duration(ifo.duration),
+                            ifo_directory=ifo_directory[ifo.name],
+                        )
                     read = True
                     l += 1
                     continue
                     # Read the next set of frame files. Save the ones that are open
-                                    
-            elif f['geocent_time'][k] > gps_end_time:
-                logging.info('Signal is outside the current data segment. Saving frame files and Breaking')
+
+            elif f["geocent_time"][k] > gps_end_time:
+                logging.info("Signal is outside the current data segment. Saving frame files and Breaking")
                 for ifo in ifos:
-                    utils.save_frame_files(ifo=ifo, 
-                                        start_time=ifo.start_time, 
-                                        duration=utils.split_duration(ifo.duration), 
-                                        ifo_directory=ifo_directory[ifo.name])
+                    utils.save_frame_files(
+                        ifo=ifo,
+                        start_time=ifo.start_time,
+                        duration=utils.split_duration(ifo.duration),
+                        ifo_directory=ifo_directory[ifo.name],
+                    )
                 break
-            
+
             k = k + 1
-        # Save meta data to an HDF5 file        
-        logging.info('Saving meta data')
-        meta_data_file = os.path.join(data_directory, f'injections-{injection_type}-{int(opts.gps_start_time)}.h5')
-        with h5py.File(meta_data_file,'w') as f:
+        # Save meta data to an HDF5 file
+        logging.info("Saving meta data")
+        meta_data_file = os.path.join(data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5")
+        with h5py.File(meta_data_file, "w") as f:
             for key in samples.keys():
                 utils.hdf_append(f, key, samples[key])
-    
+
     else:
-        logging.info('Injecting signals using PyCBC inject method')
+        logging.info("Injecting signals using PyCBC inject method")
         from GWForge.inject.pycbc_inject import PyCBCInject
         from pycbc.fft.backend_support import set_backend
-        scheme = config.get('IFOS', 'fft-scheme', fallback='mkl')
+
+        scheme = config.get("IFOS", "fft-scheme", fallback="mkl")
         set_backend([scheme])
         injection_parameters = {}
         l = 0
         for param in parameters:
             try:
                 injection_parameters[utils.pycbc_labels[param]] = None
-            except:
+            except Exception:
                 continue
-        if len(f['spin_1x'][:]) == 1:
-            logging.info('Provided injection data set is quasi-circular')
-            for spin in ['spin_1z', 'spin_2z']:
+        if len(f["spin_1x"][:]) == 1:
+            logging.info("Provided injection data set is quasi-circular")
+            for spin in ["spin_1z", "spin_2z"]:
                 injection_parameters[utils.pycbc_labels[spin]] = None
         else:
-            logging.info('Provided injection data set is quasi-spherical')
-            for spin in ['spin_1x', 'spin_2x','spin_1y', 'spin_2y','spin_1z', 'spin_2z']:
+            logging.info("Provided injection data set is quasi-spherical")
+            for spin in [
+                "spin_1x",
+                "spin_2x",
+                "spin_1y",
+                "spin_2y",
+                "spin_1z",
+                "spin_2z",
+            ]:
                 injection_parameters[utils.pycbc_labels[spin]] = None
-        if injection_type == 'bns':
+        if injection_type == "bns":
             try:
-                parameters.extend(['lambda1', 'lambda2'])
-                logging.info('Loading tidal deformability parameters')
-            except:
-                logging.warning('Your BNS systems do not have tidal deformations')                   
+                parameters.extend(["lambda1", "lambda2"])
+                logging.info("Loading tidal deformability parameters")
+            except Exception:
+                logging.warning("Your BNS systems do not have tidal deformations")
 
         start = gps_start_time
-        while(l < len(frame_files[detectors[0]])):
+        while l < len(frame_files[detectors[0]]):
             # Read the frame files only when necessary. Too memory intensive to load all of them at a time
-            logging.info('Reading network data')
+            logging.info("Reading network data")
             try:
                 data = {ifo: TimeSeries.read(frame_files[ifo][l], channels[ifo], nproc=window_size) for ifo in detectors}
                 read = False
                 # # select all injections that lie between the start and end time
                 end = data[detectors[0]].epoch.value + data[detectors[0]].duration.value
-                indices = numpy.where((start <=f['geocent_time'][:]) & (end >= f['geocent_time'][:]))
+                indices = numpy.where((start <= f["geocent_time"][:]) & (end >= f["geocent_time"][:]))
                 # # set the start to end for next iteration
                 start = end
                 for key, value in utils.pycbc_labels.items():
                     try:
                         injection_parameters[value] = f[key][indices]
-                    except:
+                    except Exception:
                         continue
-                ifos = PyCBCInject(ifos=network, 
-                                data=data, 
-                                injection_parameters=injection_parameters, 
-                                waveform_arguments=waveform_arguments).inject_signal_using_pycbc_method()
+                ifos = PyCBCInject(
+                    ifos=network,
+                    data=data,
+                    injection_parameters=injection_parameters,
+                    waveform_arguments=waveform_arguments,
+                ).inject_signal_using_pycbc_method()
                 for ifo in ifos:
-                    utils.save_frame_files(ifo=ifo, start_time=ifo.start_time, duration=utils.split_duration(ifo.duration), ifo_directory=ifo_directory[ifo.name])
+                    utils.save_frame_files(
+                        ifo=ifo,
+                        start_time=ifo.start_time,
+                        duration=utils.split_duration(ifo.duration),
+                        ifo_directory=ifo_directory[ifo.name],
+                    )
                     read = True
                 l += 1
-            except:
+            except Exception:
                 l += 1
-        
-        logging.info('Saving meta data')
-        meta_data_file = os.path.join(data_directory, f'injections-{injection_type}-{int(opts.gps_start_time)}.h5')
-        with h5py.File(meta_data_file,'w') as f:
+
+        logging.info("Saving meta data")
+        meta_data_file = os.path.join(data_directory, f"injections-{injection_type}-{int(opts.gps_start_time)}.h5")
+        with h5py.File(meta_data_file, "w") as f:
             for key in injection_parameters.keys():
                 utils.hdf_append(f, key, injection_parameters[key])
-logging.info('Done!')                
+logging.info("Done!")

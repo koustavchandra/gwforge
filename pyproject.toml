@@ -3,13 +3,24 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 88
+line-length = 156
 target-version = ["py311"]
 
 [tool.ruff]
-line-length = 88
+line-length = 156
+
+[tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Allow wildcard imports in these modules by design
+"GWForge/conversion.py" = ["F403", "F405"]
+"GWForge/inject/*.py" = ["F403", "F405"]
+"GWForge/population/*.py" = ["F403", "F405"]
+
+# CLI scripts are script-style; allow star imports and late imports
+"bin/*" = ["F403", "F405", "E402", "E741"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

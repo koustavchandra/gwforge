@@ -1,146 +1,200 @@
 #!/usr/bin/env python
-'''
+"""
 Compute the optimal snr for every injection in a given HDF file
 and store the results in an H5 File
-'''
-import numpy, logging , bilby, h5py, argparse
+"""
+import numpy
+import logging
+import bilby
+import h5py
+import argparse
 from multiprocessing import Pool
 from functools import partial
 from rich.progress import track
 import pandas as pd
-from bilby.gw.detector.psd import PowerSpectralDensity as psd
 from GWForge.conversion import get_safe_signal_durations
 from GWForge.ifo.detectors import Network
 from GWForge.utils import hdf_append
-def get_optimal_snr(injection_parameters, 
-                    parameters,
-                    detectors,
-                    sampling_frequency = 8192):
-    bilby.core.utils.setup_logger(log_level='warning')
+
+
+def get_optimal_snr(injection_parameters, parameters, detectors, sampling_frequency=8192):
+    bilby.core.utils.setup_logger(log_level="warning")
     ifos = Network(ifos=detectors).initialise_ifos()
-    duration = numpy.ceil(injection_parameters['duration'] + 5)
-    gps_start_time = injection_parameters['tc'] - duration
-    ifos.set_strain_data_from_power_spectral_densities(sampling_frequency=sampling_frequency,
-                                                       duration=duration,
-                                                       start_time=gps_start_time)
-    
-    waveform_generator =  bilby.gw.WaveformGenerator(duration=duration,
-                                                     sampling_frequency=sampling_frequency,
-                                                     frequency_domain_source_model=bilby.gw.source.lal_binary_black_hole,
-                                                     parameter_conversion=bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
-                                                     waveform_arguments=waveform_arguments)
+    duration = numpy.ceil(injection_parameters["duration"] + 5)
+    gps_start_time = injection_parameters["tc"] - duration
+    ifos.set_strain_data_from_power_spectral_densities(
+        sampling_frequency=sampling_frequency,
+        duration=duration,
+        start_time=gps_start_time,
+    )
+
+    waveform_generator = bilby.gw.WaveformGenerator(
+        duration=duration,
+        sampling_frequency=sampling_frequency,
+        frequency_domain_source_model=bilby.gw.source.lal_binary_black_hole,
+        parameter_conversion=bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
+        waveform_arguments=waveform_arguments,
+    )
     signal_parameters = {}
     for parameter in parameters:
         signal_parameters[parameter] = injection_parameters[parameter]
-    signal_parameters['geocent_time'] = injection_parameters['tc']
-    ifos.inject_signal(waveform_generator=waveform_generator, parameters=signal_parameters,)
+    signal_parameters["geocent_time"] = injection_parameters["tc"]
+    ifos.inject_signal(
+        waveform_generator=waveform_generator,
+        parameters=signal_parameters,
+    )
     for ifo in ifos:
-        signal_parameters['{}_optimal_snr'.format(ifo.name)] = ifo.meta_data['optimal_SNR']
+        signal_parameters["{}_optimal_snr".format(ifo.name)] = ifo.meta_data["optimal_SNR"]
     return signal_parameters
+
 
 def multiprocess(parameters, detectors, chunk):
     results_list = []
     for idx, row in chunk.iterrows():
-        meta_data = get_optimal_snr(injection_parameters=row, 
-                                    parameters=parameters, 
-                                    detectors=detectors)
+        meta_data = get_optimal_snr(injection_parameters=row, parameters=parameters, detectors=detectors)
         results_list.append(meta_data)
     return results_list
 
+
 # Setting up logging configuration
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s %(message)s', 
-                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 parser = argparse.ArgumentParser(description=__doc__)
 
-#Define command-line arguments
-parser.add_argument('--ifos', 
-                    type=list, 
-                    default=['CE40', 'CE20', 'ET'],
-                    help='List of detectors/observatories')
-parser.add_argument('--injection-file', 
-                    type=str, 
-                    required=True,
-                    help='Path to the HDF file containing injection parameters')
-parser.add_argument('--start-index', 
-                    type=int, 
-                    default=0,
-                    help='Index to start processing injections from')
-parser.add_argument('--end-index',
-                    type=int, 
-                    default=None,
-                    help='Index to end processing injections at')
-parser.add_argument('--output-file',
-                    type=str,
-                    required=True,
-                    help='Path to the output H5 file to store results')
-parser.add_argument('--waveform-approximant',
-                    type=str,
-                    default='IMRPhenomXPHM',
-                    help='Waveform approximant for the signal')
-parser.add_argument('--minimum-frequency', 
-                    type=float,
-                    default=7.,
-                    help='Minimum frequency for the waveform')
-parser.add_argument('--cores', 
-                    type=int,
-                    default=10,
-                    help='Number of CPU cores to use for parallel processing')
+# Define command-line arguments
+parser.add_argument(
+    "--ifos",
+    type=list,
+    default=["CE40", "CE20", "ET"],
+    help="List of detectors/observatories",
+)
+parser.add_argument(
+    "--injection-file",
+    type=str,
+    required=True,
+    help="Path to the HDF file containing injection parameters",
+)
+parser.add_argument(
+    "--start-index",
+    type=int,
+    default=0,
+    help="Index to start processing injections from",
+)
+parser.add_argument("--end-index", type=int, default=None, help="Index to end processing injections at")
+parser.add_argument(
+    "--output-file",
+    type=str,
+    required=True,
+    help="Path to the output H5 file to store results",
+)
+parser.add_argument(
+    "--waveform-approximant",
+    type=str,
+    default="IMRPhenomXPHM",
+    help="Waveform approximant for the signal",
+)
+parser.add_argument(
+    "--minimum-frequency",
+    type=float,
+    default=7.0,
+    help="Minimum frequency for the waveform",
+)
+parser.add_argument(
+    "--cores",
+    type=int,
+    default=10,
+    help="Number of CPU cores to use for parallel processing",
+)
 
 opts = parser.parse_args()
 
-waveform_arguments = {'waveform_approximant': opts.waveform_approximant,
-                      'reference_frequency' : opts.minimum_frequency,
-                      'minimum_frequency' : opts.minimum_frequency}
+waveform_arguments = {
+    "waveform_approximant": opts.waveform_approximant,
+    "reference_frequency": opts.minimum_frequency,
+    "minimum_frequency": opts.minimum_frequency,
+}
 
-detectors = opts.ifos    
-logging.info('Reading injections')
+detectors = opts.ifos
+logging.info("Reading injections")
 samples = {}
-with h5py.File(opts.injection_file, 'r') as f:
+with h5py.File(opts.injection_file, "r") as f:
     for key in f.keys():
         if len(f[key]) != 1:
             samples[key] = f[key][:]
-    if len(f['spin_1x'][:]) != 1:
-        parameters = ['mass_1', 'mass_2', 'phase', 'phi_12', 'phi_jl', 'ra', 'dec', 'theta_jn', 'tilt_1', 'tilt_2', 'luminosity_distance', 'psi', 'a_1', 'a_2']
+    if len(f["spin_1x"][:]) != 1:
+        parameters = [
+            "mass_1",
+            "mass_2",
+            "phase",
+            "phi_12",
+            "phi_jl",
+            "ra",
+            "dec",
+            "theta_jn",
+            "tilt_1",
+            "tilt_2",
+            "luminosity_distance",
+            "psi",
+            "a_1",
+            "a_2",
+        ]
     else:
-        parameters = ['mass_1', 'mass_2', 'phase', 'ra', 'dec', 'theta_jn',  'luminosity_distance', 'psi', 'chi_1', 'chi_2']
-    if not opts.end_index :
-        opts.end_index = len(f['mass_1'])
-                      
-logging.info('Calculating safe signal duration')                      
-samples['duration'] = get_safe_signal_durations(mass_1=samples['mass_1'], 
-                                                mass_2=samples['mass_2'], 
-                                                spin_1z=samples['spin_1z'], 
-                                                spin_2z=samples['spin_2z'], 
-                                                waveform_minimum_frequency=waveform_arguments['minimum_frequency'])
+        parameters = [
+            "mass_1",
+            "mass_2",
+            "phase",
+            "ra",
+            "dec",
+            "theta_jn",
+            "luminosity_distance",
+            "psi",
+            "chi_1",
+            "chi_2",
+        ]
+    if not opts.end_index:
+        opts.end_index = len(f["mass_1"])
+
+logging.info("Calculating safe signal duration")
+samples["duration"] = get_safe_signal_durations(
+    mass_1=samples["mass_1"],
+    mass_2=samples["mass_2"],
+    spin_1z=samples["spin_1z"],
+    spin_2z=samples["spin_2z"],
+    waveform_minimum_frequency=waveform_arguments["minimum_frequency"],
+)
 
 samples = pd.DataFrame.from_dict(samples)
-sub = samples.iloc[opts.start_index: opts.end_index + 1]
+sub = samples.iloc[opts.start_index : opts.end_index + 1]
 # Split the DataFrame into chunks
 chunks = numpy.array_split(sub, opts.cores)
-logging.info('Calculating optimal snr')
+logging.info("Calculating optimal snr")
 with Pool(processes=opts.cores) as pool:
     partial_multiprocess = partial(multiprocess, parameters, detectors)
-    results_list = list(track(pool.imap(partial_multiprocess, chunks), total=len(chunks), description='Processing chunks'))
+    results_list = list(
+        track(
+            pool.imap(partial_multiprocess, chunks),
+            total=len(chunks),
+            description="Processing chunks",
+        )
+    )
 
-if 'ET' in detectors:
-    detectors.remove('ET')
-    detectors.extend(['ET1', 'ET2', 'ET3'])
+if "ET" in detectors:
+    detectors.remove("ET")
+    detectors.extend(["ET1", "ET2", "ET3"])
 
 for ifo in detectors:
-    parameters.append('{}_optimal_snr'.format(ifo)) 
+    parameters.append("{}_optimal_snr".format(ifo))
 samples = {}
 for parameter in parameters:
     samples[parameter] = []
 
-logging.info('Saving results')
+logging.info("Saving results")
 for results in results_list:
     for parameter in parameters:
         for k in range(len(results)):
             samples[parameter].append(results[k][parameter])
 
-with h5py.File(opts.output_file, 'w') as f:
+with h5py.File(opts.output_file, "w") as f:
     for key in samples.keys():
         hdf_append(f, key, samples[key])
-logging.info('Done!')
+logging.info("Done!")

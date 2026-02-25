@@ -3,15 +3,24 @@ repos:
     rev: 24.4.2
     hooks:
       - id: black
+        language_version: python3.11
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.4
     hooks:
       - id: ruff
+        args: ["--fix"]
 
   - repo: local
     hooks:
       - id: forbid-np-plt
-        name: forbid np and plt
-        entry: bash -c 'if grep -R "np\." gwforge || grep -R "plt\." gwforge; then echo "Use numpy and pylab"; exit 1; fi'
+        name: forbid numpy/pyplot shorthand
+        entry: >
+          bash -c 'if grep -R "np\." gwforge >/dev/null ||
+                   grep -R "plt\." gwforge >/dev/null; then
+                   echo "Forbidden shorthand imports found. Use numpy and pylab.";
+                   exit 1;
+                   fi'
         language: system
+        pass_filenames: false
+        files: \.py$

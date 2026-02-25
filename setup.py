@@ -1,11 +1,19 @@
 #!/usr/bin/env python
-'''
+"""
 setup.py file for GWforge package
-'''
+"""
+
 from setuptools import setup, find_packages
 import os
 
-def find_files(dirname, relpath=None, extensions=(".py", ".pyc"), ignore_dirs=None, ignore_files=None):
+
+def find_files(
+    dirname,
+    relpath=None,
+    extensions=(".py", ".pyc"),
+    ignore_dirs=None,
+    ignore_files=None,
+):
     def find_paths(directory):
         items = []
         for root, dirs, files in os.walk(directory):
@@ -27,10 +35,20 @@ def find_files(dirname, relpath=None, extensions=(".py", ".pyc"), ignore_dirs=No
 
     return [os.path.relpath(path, relpath) for path in items]
 
-ignore_dirs = ['.git', '__pycache__/', 'profile_default/', '.ipynb_checkpoints', '.vscode', 'venv/', 'env/', 'virtualenv/']
-ignore_files = ['.DS_Store', '*.pyc', 'Thumbs.db', '*.sqlite', '*.swp', '*.env', '.env']
+
+ignore_dirs = [
+    ".git",
+    "__pycache__/",
+    "profile_default/",
+    ".ipynb_checkpoints",
+    ".vscode",
+    "venv/",
+    "env/",
+    "virtualenv/",
+]
+ignore_files = [".DS_Store", "*.pyc", "Thumbs.db", "*.sqlite", "*.swp", "*.env", ".env"]
 
 setup(
-    scripts=find_files('bin/', relpath='./', ignore_dirs=ignore_dirs, ignore_files=ignore_files),
-    packages=find_packages()
+    scripts=find_files("bin/", relpath="./", ignore_dirs=ignore_dirs, ignore_files=ignore_files),
+    packages=find_packages(),
 )

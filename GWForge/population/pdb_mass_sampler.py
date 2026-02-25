@@ -5,11 +5,8 @@ This module provides a function to sample binary masses according to the
 NotchFilterBinnedPairingMassDistribution population model.
 """
 
-import sys
 import numpy
-from gwpopulation.utils import powerlaw
 from tqdm import tqdm
-import configparser
 from pathlib import Path
 import bilby
 

@@ -7,7 +7,6 @@ NotchFilterBinnedPairingMassDistribution population model.
 
 import numpy
 from tqdm import tqdm
-from pathlib import Path
 import bilby
 
 # Import from GWForge

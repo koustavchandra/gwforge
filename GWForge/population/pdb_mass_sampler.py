@@ -145,12 +145,26 @@ def importance_sampling_m1_m2_prop(
 ):
     """
     Sample binary masses from the NotchFilterBinnedPairingMassDistribution model
-    using rejection sampling.
-    
+    using importance sampling with a proposal distribution.
+
+    This function draws `oversample_factor * n_samples` points from an internal
+    proposal distribution over (m1, m2) and assigns an importance weight to each
+    point proportional to the target population density divided by the proposal
+    density. The weights are then used to approximate draws from the target
+    distribution, typically via weighted resampling with replacement.
+
+    The quality of the resulting (approximately) unweighted sample depends on
+    the variability of the importance weights. Internally, the effective sample
+    size (ESS) can be estimated from the weights; a low ESS (relative to
+    `n_samples`) indicates that the proposal is poorly matched to the target, in
+    which case callers may wish to increase `oversample_factor` or otherwise
+    interpret the samples with caution. When `verbose` is True, diagnostic
+    information about the weights and ESS may be printed.
+
     Parameters
     ----------
     n_samples : int
-        Number of samples to draw
+        Number of samples to draw (after any internal resampling)
     A : float
         Depth of the lower mass gap dip
     A2 : float

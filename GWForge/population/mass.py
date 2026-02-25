@@ -54,9 +54,9 @@ class Mass:
             The number of samples to generate. [Ideal: Exactly same as redshift samples]
         parameters: (dict, optional)
             A dictionary of model parameters. Default is provided assuming PowerLawPeak
-        max_iterations: (int, optional)
-            Maximum number of iterations for rejection sampling (if applicable) used in FullPop_GWTC4 model. Default is 10000.
-        '''.format(choices)
+        full_pop_sampler : str
+            Sampler to be used for full pop gwtc-4 model. [Options: {}] [Default: importance_m1_m2]
+        '''.format(choices, sampler_choices)
         self.mass_model = utils.remove_special_characters(mass_model.lower())
         self.number_of_samples = number_of_samples
         self.parameters = parameters

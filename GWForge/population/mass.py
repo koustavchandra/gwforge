@@ -8,9 +8,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefm
 
 
 def notch_filter(val, parameters):
-    return 1.0 - parameters["A"] / (
-        (1 + (parameters["gamma_low"] / val) ** parameters["eta_low"]) * (1 + (val / parameters["gamma_high"]) ** parameters["eta_high"])
-    )
+    return 1.0 - parameters["A"] / ((1 + (parameters["gamma_low"] / val) ** parameters["eta_low"]) * (1 + (val / parameters["gamma_high"]) ** parameters["eta_high"]))
 
 
 def low_pass_filter(val, parameters):
@@ -261,9 +259,7 @@ class Mass:
 
             elif "fixed" in self.mass_model:
                 samples["mass_1_source"] = numpy.ones(self.number_of_samples) * self.parameters["primary_mass"]
-                samples["mass_2_source"] = samples["mass_1_source"] * (
-                    self.parameters["mass_ratio"] if self.parameters["mass_ratio"] < 1 else 1 / self.parameters["mass_ratio"]
-                )
+                samples["mass_2_source"] = samples["mass_1_source"] * (self.parameters["mass_ratio"] if self.parameters["mass_ratio"] < 1 else 1 / self.parameters["mass_ratio"])
             elif self.mass_model == "uniformcomponents":
                 mass_prior["mass_1_source"] = bilby.core.prior.analytical.Uniform(
                     minimum=self.parameters["mmin"],

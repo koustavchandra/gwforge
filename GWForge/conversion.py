@@ -126,15 +126,9 @@ def get_safe_signal_durations(
 
     # Calculate the safe signal durations based on the waveform approximant
     if "IMRPhenom" in approximant:
-        durations = [
-            safety * lalsimulation.SimIMRPhenomXASDuration(m1, m2, s1z, s2z, waveform_minimum_frequency)
-            for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)
-        ]
+        durations = [safety * lalsimulation.SimIMRPhenomXASDuration(m1, m2, s1z, s2z, waveform_minimum_frequency) for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)]
     elif "SEOBNR" in approximant:
-        durations = [
-            safety * lalsimulation.SimIMRSEOBNRv5ROMTimeOfFrequency(m1, m2, s1z, s2z, waveform_minimum_frequency)
-            for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)
-        ]
+        durations = [safety * lalsimulation.SimIMRSEOBNRv5ROMTimeOfFrequency(m1, m2, s1z, s2z, waveform_minimum_frequency) for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)]
     else:
         raise RuntimeError("Failed to compute durations for approximant {}".format(approximant))
 

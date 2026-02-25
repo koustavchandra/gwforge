@@ -46,9 +46,7 @@ class Spin:
         self.parameters["maximum_secondary_spin"] = parameters.get("maximum_secondary_spin", 0.99)
         if "mu_chi" in self.parameters and "sigma_squared_chi" in self.parameters:
             self.parameters["alpha_chi"] = (
-                self.parameters["mu_chi"]
-                * (self.parameters["mu_chi"] - self.parameters["mu_chi"] ** 2 - self.parameters["sigma_squared_chi"])
-                / self.parameters["sigma_squared_chi"]
+                self.parameters["mu_chi"] * (self.parameters["mu_chi"] - self.parameters["mu_chi"] ** 2 - self.parameters["sigma_squared_chi"]) / self.parameters["sigma_squared_chi"]
             )
             self.parameters["beta_chi"] = self.parameters["alpha_chi"] * (1.0 / self.parameters["mu_chi"] - 1.0)
 

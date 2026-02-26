@@ -4,9 +4,7 @@ import logging
 import os
 from bilby.gw.detector.psd import PowerSpectralDensity as psd
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class IFO:
@@ -59,9 +57,7 @@ class IFO:
         numpy.random.seed(None)
         try:
             # Execute if ifo is ET or CEs
-            filename = os.path.join(
-                os.path.dirname(__file__), "ifos", "{}.ifo".format(self.name)
-            )
+            filename = os.path.join(os.path.dirname(__file__), "ifos", "{}.ifo".format(self.name))
             ifo = bilby.gw.detector.load_interferometer(filename=filename)
             if self.name == "ET":
                 file_type = "psd"
@@ -78,21 +74,13 @@ class IFO:
             ifo.power_spectral_density = temp
         except FileNotFoundError:
             # Execute if detector is LIGO, Virgo, NEMO or LISA or any other bilby ifos
-            logging.info(
-                "{} is not XG. Checking whether it is implemented in Bilby".format(
-                    self.name
-                )
-            )
+            logging.info("{} is not XG. Checking whether it is implemented in Bilby".format(self.name))
             ifo = bilby.gw.detector.get_empty_interferometer(self.name)
             if self.name in ["H1", "L1", "A1"] and self.asharp:
                 logging.info("Assigning {} ifo A# PSD".format(self.name))
-                ifo.power_spectral_density = psd.from_amplitude_spectral_density_file(
-                    "noise_curves/Asharp-asd.txt"
-                )
+                ifo.power_spectral_density = psd.from_amplitude_spectral_density_file("noise_curves/Asharp-asd.txt")
         except Exception as e:
-            raise ValueError(
-                "Interferometer {} is not implemented. Error: {}".format(self.name, e)
-            )
+            raise ValueError("Interferometer {} is not implemented. Error: {}".format(self.name, e))
         if self.psd_file:
             temp = numpy.loadtxt(self.psd_file)
             frequency_array, psd_array = temp[:, 0], temp[:, -1]
@@ -134,11 +122,7 @@ class Network(IFO):
             elif isinstance(ifo, str) and isinstance(psd_files, list):
                 ifo_list.append(IFO(name=ifo, psd_file=psd_files[k]).initialise_ifo())
                 k = k + 1
-            elif (
-                isinstance(ifo, str)
-                and isinstance(psd_files, str)
-                and psd_files.lower() == "asharp"
-            ):
+            elif isinstance(ifo, str) and isinstance(psd_files, str) and psd_files.lower() == "asharp":
                 ifo_list.append(IFO(name=ifo, asharp=True))
             else:
                 raise ValueError("Input is not compatible")

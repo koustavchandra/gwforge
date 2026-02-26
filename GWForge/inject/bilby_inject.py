@@ -6,9 +6,7 @@ bilby.core.utils.setup_logger(log_level="warning")
 
 
 class BilbyInject:
-    def __init__(
-        self, ifos, data, injection_parameters, waveform_arguments, injection_type="bbh"
-    ):
+    def __init__(self, ifos, data, injection_parameters, waveform_arguments, injection_type="bbh"):
         """
         Parameters:
         --------------
@@ -41,14 +39,10 @@ class BilbyInject:
         if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
             self.injection_type = "bbh"
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_black_hole
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
-            )
+            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
         elif self.injection_type == "bns":
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_neutron_star
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
-            )
+            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
         else:
             raise ValueError("Currently supports only CBC sources")
 
@@ -71,7 +65,5 @@ class BilbyInject:
             waveform_arguments=self.waveform_arguments,
         )
         # Add snippet to check if the signal is in the data segment
-        self.ifos.inject_signal(
-            waveform_generator=waveform_generator, parameters=self.injection_parameters
-        )
+        self.ifos.inject_signal(waveform_generator=waveform_generator, parameters=self.injection_parameters)
         return self.ifos

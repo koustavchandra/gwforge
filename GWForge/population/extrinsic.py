@@ -2,15 +2,11 @@ import numpy
 import bilby
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 
 class Extrinsic:
-    def __init__(
-        self, number_of_samples, prior_file=None, inclination_distribution=None
-    ):
+    def __init__(self, number_of_samples, prior_file=None, inclination_distribution=None):
         """
         Parameters
         ----------
@@ -27,9 +23,7 @@ class Extrinsic:
         """
         See Eq. (25) of https://arxiv.org/pdf/1102.5421.pdf
         """
-        return (
-            1 / 8 * (1 + 6 * numpy.cos(inclination) ** 2 + numpy.cos(inclination) ** 4)
-        )
+        return 1 / 8 * (1 + 6 * numpy.cos(inclination) ** 2 + numpy.cos(inclination) ** 4)
 
     def sample(self):
         samples = {}
@@ -39,20 +33,11 @@ class Extrinsic:
             logging.warn("Using default priors")
             prior = bilby.gw.prior.PriorDict()
             prior["dec"] = bilby.core.prior.analytical.Cosine(name="dec")
-            prior["ra"] = bilby.core.prior.analytical.Uniform(
-                name="ra", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
-            )
+            prior["ra"] = bilby.core.prior.analytical.Uniform(name="ra", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
             prior["theta_jn"] = bilby.core.prior.analytical.Sine(name="theta_jn")
-            prior["psi"] = bilby.core.prior.analytical.Uniform(
-                name="psi", minimum=0, maximum=numpy.pi, boundary="periodic"
-            )
-            prior["phase"] = bilby.core.prior.analytical.Uniform(
-                name="phase", minimum=0, maximum=2 * numpy.pi, boundary="periodic"
-            )
-            if (
-                self.inclination_distribution is not None
-                and "schutz" in self.inclination_distribution.lower()
-            ):
+            prior["psi"] = bilby.core.prior.analytical.Uniform(name="psi", minimum=0, maximum=numpy.pi, boundary="periodic")
+            prior["phase"] = bilby.core.prior.analytical.Uniform(name="phase", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
+            if self.inclination_distribution is not None and "schutz" in self.inclination_distribution.lower():
                 inclination = numpy.linspace(0, numpy.pi, 5001)
                 prob = self.schutz_inclination_prob(inclination)
                 prior["theta_jn"] = bilby.core.prior.Interped(
@@ -61,10 +46,7 @@ class Extrinsic:
                     minimum=numpy.min(inclination),
                     maximum=numpy.max(inclination),
                 )
-            elif (
-                self.inclination_distribution is not None
-                and "schutz" not in self.inclination_distribution.lower()
-            ):
+            elif self.inclination_distribution is not None and "schutz" not in self.inclination_distribution.lower():
                 raise ValueError("Distribution is not implemented!")
         priors = prior.sample(self.number_of_samples)
         for key in ["ra", "dec", "theta_jn", "psi", "phase"]:

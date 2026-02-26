@@ -31,8 +31,10 @@ class Interped2D(Prior):
         self.x_name = x_name
         self.y_name = y_name
 
-        # Normalize
-        self.pdf_grid = np.asarray(pdf_grid) / np.sum(pdf_grid)
+        # Normalize using continuous 2D integration over the grid axes
+        pdf_grid = np.asarray(pdf_grid)
+        norm = np.trapz(np.trapz(pdf_grid, self.y_axis, axis=1), self.x_axis, axis=0)
+        self.pdf_grid = pdf_grid / norm
 
         # Bounds
         self.x_min, self.x_max = float(self.x_axis[0]), float(self.x_axis[-1])

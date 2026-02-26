@@ -1,0 +1,130 @@
+gwforge.GWForge.population.pdb_mass_sampler
+===========================================
+
+.. py:module:: gwforge.GWForge.population.pdb_mass_sampler
+
+.. autoapi-nested-parse::
+
+   Sampling function for NotchFilterBinnedPairingMassDistribution model.
+
+   This module provides a function to sample binary masses according to the
+   NotchFilterBinnedPairingMassDistribution population model.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.pdb_mass_sampler.rejection_sampling_uniform_grid
+   gwforge.GWForge.population.pdb_mass_sampler.importance_sampling_m1_m2_prop
+   gwforge.GWForge.population.pdb_mass_sampler.importance_sampling_m1_q_prop
+   gwforge.GWForge.population.pdb_mass_sampler.lintsampling
+
+
+Module Contents
+---------------
+
+.. py:function:: rejection_sampling_uniform_grid(n_samples, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak, mmin=0.5, mmax=350.0, max_iterations=10000, verbose=False)
+
+.. py:function:: importance_sampling_m1_m2_prop(n_samples, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak, mmin=0.5, mmax=350.0, oversample_factor=5, verbose=False)
+
+   Sample binary masses from the NotchFilterBinnedPairingMassDistribution model
+   using importance sampling with a proposal distribution.
+
+   This function draws `oversample_factor * n_samples` points from an internal
+   proposal distribution over (m1, m2) and assigns an importance weight to each
+   point proportional to the target population density divided by the proposal
+   density. The weights are then used to approximate draws from the target
+   distribution, typically via weighted resampling with replacement.
+
+   The quality of the resulting (approximately) unweighted sample depends on
+   the variability of the importance weights. Internally, the effective sample
+   size (ESS) can be estimated from the weights; a low ESS (relative to
+   `n_samples`) indicates that the proposal is poorly matched to the target, in
+   which case callers may wish to increase `oversample_factor` or otherwise
+   interpret the samples with caution. When `verbose` is True, diagnostic
+   information about the weights and ESS may be printed.
+
+   :param n_samples: Number of samples to draw (after any internal resampling)
+   :type n_samples: int
+   :param A: Depth of the lower mass gap dip
+   :type A: float
+   :param A2: Depth of the upper mass gap dip
+   :type A2: float
+   :param NSmin: Minimum mass (lower cutoff)
+   :type NSmin: float
+   :param NSmax: Start of lower mass gap
+   :type NSmax: float
+   :param BHmin: End of lower mass gap
+   :type BHmin: float
+   :param BHmax: Maximum mass in power-law component
+   :type BHmax: float
+   :param UPPERmin: Start of upper mass gap
+   :type UPPERmin: float
+   :param UPPERmax: End of upper mass gap
+   :type UPPERmax: float
+   :param n0: Sharpness of low mass cutoff
+   :type n0: float
+   :param n1: Sharpness of lower edge of lower mass gap
+   :type n1: float
+   :param n2: Sharpness of upper edge of lower mass gap
+   :type n2: float
+   :param n3: Sharpness of lower edge of upper mass gap
+   :type n3: float
+   :param n4: Sharpness of upper edge of upper mass gap
+   :type n4: float
+   :param n5: Sharpness of high mass cutoff
+   :type n5: float
+   :param alpha_1: Power-law exponent for m < NSmax
+   :type alpha_1: float
+   :param alpha_2: Power-law exponent for m > BHmin
+   :type alpha_2: float
+   :param alpha_dip: Power-law exponent between NSmax and BHmin
+   :type alpha_dip: float
+   :param mu1: Mean of first Gaussian peak
+   :type mu1: float
+   :param sig1: Width of first Gaussian peak
+   :type sig1: float
+   :param mix1: Mixing fraction of first Gaussian peak
+   :type mix1: float
+   :param mu2: Mean of second Gaussian peak
+   :type mu2: float
+   :param sig2: Width of second Gaussian peak
+   :type sig2: float
+   :param mix2: Mixing fraction of second Gaussian peak
+   :type mix2: float
+   :param beta_pair_1: Mass ratio exponent for m2 < mbreak
+   :type beta_pair_1: float
+   :param beta_pair_2: Mass ratio exponent for m2 >= mbreak
+   :type beta_pair_2: float
+   :param mbreak: Mass breakpoint for pairing function transition
+   :type mbreak: float
+   :param mmin: Minimum mass (default: 0.5)
+   :type mmin: float, optional
+   :param mmax: Maximum mass (default: 350.0)
+   :type mmax: float, optional
+   :param oversample_factor: n_proposals/n_samples (default: 5)
+   :type oversample_factor: int, optional
+   :param verbose: Print progress information (default: False)
+   :type verbose: bool, optional
+
+   :returns: * **m1_samples** (*ndarray*) -- Sampled primary masses
+             * **m2_samples** (*ndarray*) -- Sampled secondary masses
+             * **ess** (*float*) -- Effective sample size
+
+
+.. py:function:: importance_sampling_m1_q_prop(n_samples, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak, mmin=0.5, mmax=350.0, oversample_factor=3, verbose=False)
+
+   Importance sampling using near-optimal proposal:
+       m1 ~ p_m(m)
+       q  ~ pairing power-law
+       m2 = q * m1
+
+
+.. py:function:: lintsampling(n_samples, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak, mmin=0.5, mmax=350.0, grid_size=256, verbose=False)
+
+   Sample binary masses using LintSampler.
+
+

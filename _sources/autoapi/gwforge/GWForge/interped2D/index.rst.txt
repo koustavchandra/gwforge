@@ -1,0 +1,86 @@
+gwforge.GWForge.interped2D
+==========================
+
+.. py:module:: gwforge.GWForge.interped2D
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.interped2D.Interped2D
+
+
+Module Contents
+---------------
+
+.. py:class:: Interped2D(name, x_axis, y_axis, pdf_grid, x_name='x', y_name='y')
+
+   Bases: :py:obj:`bilby.core.prior.Prior`
+
+
+   A 2D interpolated Prior that samples from a joint PDF over two variables.
+
+   :param name: Name of the prior (e.g., 'mass_pair')
+   :type name: str
+   :param x_axis: 1D array of values for the first variable
+   :type x_axis: array-like
+   :param y_axis: 1D array of values for the second variable
+   :type y_axis: array-like
+   :param pdf_grid: 2D grid of probability densities with shape (len(x_axis), len(y_axis))
+   :type pdf_grid: 2D array
+   :param x_name: Name of first variable (for labels, default 'x')
+   :type x_name: str, optional
+   :param y_name: Name of second variable (for labels, default 'y')
+   :type y_name: str, optional
+
+
+   .. py:attribute:: x_axis
+
+
+   .. py:attribute:: y_axis
+
+
+   .. py:attribute:: x_name
+      :value: 'x'
+
+
+
+   .. py:attribute:: y_name
+      :value: 'y'
+
+
+
+   .. py:attribute:: pdf_grid
+
+
+   .. py:attribute:: interpolator
+
+
+   .. py:attribute:: max_pdf
+
+
+   .. py:method:: prob(val)
+
+      Probability density at (x, y) or an array of (x, y) points.
+
+      :param val: Either a single point (x, y) with shape (2,) or (1, 2),
+                  or an array of points with shape (N, 2).
+      :type val: array-like
+
+      :returns: Scalar probability density for a single point, or an array
+                of probability densities for multiple points.
+      :rtype: float or ndarray
+
+
+
+   .. py:method:: sample(size=1)
+
+      Vectorized rejection sampling
+
+      :returns: **samples** -- Array of shape (size, 2) with samples drawn from the 2D distribution
+      :rtype: ndarray
+
+
+

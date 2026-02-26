@@ -1,0 +1,17 @@
+gwforge.GWForge.inject
+======================
+
+.. py:module:: gwforge.GWForge.inject
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/gwforge/GWForge/inject/bilby_inject/index
+   /autoapi/gwforge/GWForge/inject/inject/index
+   /autoapi/gwforge/GWForge/inject/pycbc_inject/index
+
+

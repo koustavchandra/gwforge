@@ -1,0 +1,208 @@
+gwforge.GWForge.population.pdb_external
+=======================================
+
+.. py:module:: gwforge.GWForge.population.pdb_external
+
+.. autoapi-nested-parse::
+
+   Power Law + Dip + Break models. None are reviewed.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.pdb_external._NotchFilterPairingMassDistribution
+   gwforge.GWForge.population.pdb_external.NotchFilterPowerLawPairingMassDistribution
+   gwforge.GWForge.population.pdb_external.NotchFilterBinnedPairingMassDistribution
+   gwforge.GWForge.population.pdb_external.NotchFilterBinnedPairing2MassDistribution
+   gwforge.GWForge.population.pdb_external.NotchFilterBinnedPairing3MassDistribution
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.pdb_external.power_law_dip_break_1d
+
+
+Module Contents
+---------------
+
+.. py:function:: power_law_dip_break_1d(mass, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, absolute_mmin, absolute_mmax)
+
+   The one-dimensional mass distribution considered in Fishbach, Essick, Holz. Does
+   Matter Matter? ApJ Lett 899, 1 (2020) : arXiv:2006.13178
+
+   .. math::
+       p(m|\lambda) = n(m|\gamma_{\text{low}}, \gamma_{\text{high}}, A) \times
+           l(m|m_{\text{max}}, \eta) \\
+                \times \begin{cases}
+                        & m^{\alpha_1} \text{ if } m < \gamma_{\text{low}} \\
+                        & m^{\alpha_2} \text{ if } m > \gamma_{\text{low}} \\
+                        & 0 \text{ otherwise }
+                \end{cases}.
+
+   where $l(m|m_{\text{max}}, \eta)$ is the low pass filter with powerlaw $\eta$
+   applied at mass $m_{\text{max}}$,
+   $n(m|\gamma_{\text{low}}, \gamma_{\text{high}}, A)$ is the notch
+   filter with depth $A$ applied between $\gamma_{\text{low}}$ and
+   $\gamma_{\text{high}}$, and
+   $\lambda$ is the subset of hyperparameters $\{ \gamma_{\text{low}},
+   \gamma_{\text{high}}, A, \alpha_1, \alpha_2, m_{\text{min}}, m_{\
+   text{max}}\}$.
+
+   :param mass: Mass to evaluate probability at (:math:`m`).
+   :type mass: array-like
+   :param alpha_1: Powerlaw exponent for compact objects below NSmax (:math:`\alpha_1`).
+   :type alpha_1: float
+   :param alpha_2: Powerlaw exponent for compact objects above BHmin (:math:`\alpha_2`).
+   :type alpha_2: float
+   :param alpha_dip: Powerlaw exponent for compact objects between NSmax and BHmin (:math: `\alpha_d`).
+   :type alpha_dip: float
+   :param NSmin: Minimum compact object mass (:math:`m_\min`).
+   :type NSmin: float
+   :param NSmax: Mass at which the notch filter starts for the lower mass gap (:math:`\gamma_{low1}`).
+   :type NSmax: float
+   :param BHmin: Mass at which the notch filter ends for the lower mass gap (:math:`\gamma_{high1}`).
+   :type BHmin: float
+   :param BHmax: Maximum mass in the powerlaw distributed component (:math:`m_\max`).
+   :type BHmax: float
+   :param A: depth of the dip between NSmax and BHmin (A).
+   :type A: float
+   :param UPPERmin: Mass at which the notch filter starts for the upper mass gap (:math:`\gamma_{low2}`).
+   :type UPPERmin: float
+   :param UPPERmax: Mass at which the notch filter ends for the upper mass gap (:math:`\gamma_{high2}`).
+   :type UPPERmax: float
+   :param mu1: Location of the upper peak where an overdensity of merging compact objects is observed (:math:`\mu_{peak1}`)..
+   :type mu1: float
+   :param sig1: Width of the upper peak where an overdensity of merging compact objects is observed (:math:`\sigma_{peak1}`)..
+   :type sig1: float
+   :param mix1: Mixing fraction of the first gaussian peak with the powerlaw + notches (:math: `c_1`)
+   :type mix1: float
+   :param mu2: Location of the lower peak where an overdensity of merging compact objects is observed (:math:`\mu_{peak2}`)..
+   :type mu2: float
+   :param sig2: Width of the lower peak where an overdensity of merging compact objects is observed (:math:`\mu_{peak2}`)..
+   :type sig2: float
+   :param mix2: Mixing fraction of the second gaussian peak with the powerlaw + notches (:math: `c_2`)
+   :type mix2: float
+   :param absolute_mmin: The minimum limit for the truncated normal distribution.
+   :type absolute_mmin: float
+   :param absolute_mmax: The maximum limit for the truncated normal distribution.
+   :type absolute_mmax: float
+   :param n{0: Exponents to set the sharpness of the low mass cutoff and high mass cutoff, respectively (:math:`\eta_i`).
+   :type n{0: float
+   :param 5}: Exponents to set the sharpness of the low mass cutoff and high mass cutoff, respectively (:math:`\eta_i`).
+   :type 5}: float
+   :param n{1: Exponents to set the sharpness of the lower edge and upper edge of the lower mass gap, respectively (:math:`\eta_i`).
+   :type n{1: float
+   :param 2}: Exponents to set the sharpness of the lower edge and upper edge of the lower mass gap, respectively (:math:`\eta_i`).
+   :type 2}: float
+   :param n{3: Exponents to set the sharpness of the lower edge and upper edge of the upper mass gap, respectively (:math:`\eta_i`).
+   :type n{3: float
+   :param 4}: Exponents to set the sharpness of the lower edge and upper edge of the upper mass gap, respectively (:math:`\eta_i`).
+   :type 4}: float
+
+
+.. py:class:: _NotchFilterPairingMassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`gwforge.GWForge.population.pairing._IdenticalPairingMassDistribution`
+
+
+   Generic pairing function mass distribution with "matter matters" 1D mass
+   model base class.
+
+
+   .. py:method:: p_m(mass, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2)
+
+
+.. py:class:: NotchFilterPowerLawPairingMassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`_NotchFilterPairingMassDistribution`
+
+
+   Two-dimensional "Power Law + Dip + Break" Model.
+
+   :param dataset: Dictionary of numpy arrays for 'mass_1' (:math:`m_1`) and
+                   'mass_ratio' q (:math:`m_2=m_1*q`).
+   :type dataset: dict
+   :param alpha_1: Powerlaw exponent for compact object below break (:math:`lpha_1`).
+   :type alpha_1: float
+   :param alpha_2: Powerlaw exponent for compact object above break (:math:`lpha_2`).
+   :type alpha_2: float
+   :param NSmin: Minimum compact object mass (:math:`m_\min`).
+   :type NSmin: float
+   :param NSmax: Mass at which the notch filter starts (:math:`\gamma_{low}`)
+   :type NSmax: float
+   :param BHmin: Mass at which the notch filter ends (:math:`\gamma_{high}`).
+                 Also, the mass value at which the power law exponent switches from alpha_1 to alpha_2.
+   :type BHmin: float
+   :param BHmax: Maximum mass in the powerlaw distributed component (:math:`m_\max`).
+   :type BHmax: float
+   :param n{0: Exponents to set the sharpness of the low mass cutoff, low edge of dip,
+               high edge of dip, and high mass cutoff, respectively (:math:`\eta_i`).
+   :type n{0: float
+   :param 1: Exponents to set the sharpness of the low mass cutoff, low edge of dip,
+             high edge of dip, and high mass cutoff, respectively (:math:`\eta_i`).
+   :type 1: float
+   :param 2: Exponents to set the sharpness of the low mass cutoff, low edge of dip,
+             high edge of dip, and high mass cutoff, respectively (:math:`\eta_i`).
+   :type 2: float
+   :param 3}: Exponents to set the sharpness of the low mass cutoff, low edge of dip,
+              high edge of dip, and high mass cutoff, respectively (:math:`\eta_i`).
+   :type 3}: float
+   :param A: depth of the dip between NSmax and BHmin (A).
+   :type A: float
+
+
+   .. py:method:: pairing(dataset, beta_q)
+
+
+   .. py:method:: __call__(dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, mu1, sig1, mix1, mu2, sig2, mix2, beta_q)
+
+
+.. py:class:: NotchFilterBinnedPairingMassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`_NotchFilterPairingMassDistribution`
+
+
+   2D "Power Law + Dip + Break" Model with a pairing function that depends on m2.
+
+
+   .. py:method:: pairing(dataset, beta_pair_1, beta_pair_2, mbreak)
+
+
+   .. py:method:: __call__(dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak)
+
+
+.. py:class:: NotchFilterBinnedPairing2MassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`_NotchFilterPairingMassDistribution`
+
+
+   2D "Power Law + Dip + Break" Model with a pairing function that depends on m2. - bin edge is Nsmax
+
+
+   .. py:method:: pairing(dataset, beta_pair_1, beta_pair_2, NSmax)
+
+
+   .. py:method:: __call__(dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2)
+
+
+.. py:class:: NotchFilterBinnedPairing3MassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`_NotchFilterPairingMassDistribution`
+
+
+   2D "Power Law + Dip + Break" Model with a pairing function that depends on m2. - bin edge is BHmin
+
+
+   .. py:method:: pairing(dataset, beta_pair_1, beta_pair_2, BHmin)
+
+
+   .. py:method:: __call__(dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2)
+
+

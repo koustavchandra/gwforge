@@ -1,0 +1,44 @@
+gwforge.GWForge.inject.bilby_inject
+===================================
+
+.. py:module:: gwforge.GWForge.inject.bilby_inject
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.bilby_inject.BilbyInject
+
+
+Module Contents
+---------------
+
+.. py:class:: BilbyInject(ifos, data, injection_parameters, waveform_arguments, injection_type='bbh')
+
+   .. py:attribute:: ifos
+
+
+   .. py:attribute:: injection_parameters
+
+
+   .. py:attribute:: injection_type
+      :value: ''
+
+
+
+   .. py:attribute:: waveform_arguments
+
+
+   .. py:method:: inject_signal_using_bilby_method()
+
+      Inject a gravitational wave signal into the interferometer network.
+      using bilby methods
+      Returns:
+      -------
+      Network: bilby.gw.detectors.InterferometerList
+          Injected interferometer network
+
+
+

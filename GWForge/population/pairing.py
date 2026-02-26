@@ -1,4 +1,4 @@
-"""Base classes to implement models with pairing functions. None are reviewed."""
+"""Base classes to implement models with pairing functions."""
 
 import inspect
 

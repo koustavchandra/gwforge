@@ -1,0 +1,134 @@
+gwforge.GWForge.population.pairing
+==================================
+
+.. py:module:: gwforge.GWForge.population.pairing
+
+.. autoapi-nested-parse::
+
+   Base classes to implement models with pairing functions.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.pairing._PairingMassDistribution
+   gwforge.GWForge.population.pairing._IdenticalPairingMassDistribution
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.pairing._primary_secondary_general
+
+
+Module Contents
+---------------
+
+.. py:function:: _primary_secondary_general(dataset, p_m1, p_m2)
+
+.. py:class:: _PairingMassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`object`
+
+
+   Generic mass distribution with a pairing function base class.
+
+   Implements mass distributions of the form:
+
+   .. math::
+       p(m_1, m_2) = p_1(m_1) * p_2(m_2) * f_p(q) : m_1 \geq m_2
+
+
+
+   .. py:attribute:: mmin
+      :value: 0.5
+
+
+
+   .. py:attribute:: mmax
+      :value: 350.0
+
+
+
+   .. py:attribute:: qmin
+      :value: 0.0014285714285714286
+
+
+
+   .. py:method:: __call__(dataset, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: p1_m1(*args, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: p2_m2(*args, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: pairing(*args, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: p_m1_m2(dataset, **kwargs)
+
+
+.. py:class:: _IdenticalPairingMassDistribution(mmin=0.5, mmax=350.0)
+
+   Bases: :py:obj:`_PairingMassDistribution`
+
+
+   Base class for mass distribution with a mass ratio-dependent pairing function,
+   where p(m1) and p(m2) are identical.
+
+   Implements mass distributions of the form:
+
+   .. math::
+       p(m_1, m_2) &= p_m(m_1) * p_m(m_2) * f_p(q) : m_1 \geq m_2
+
+       q &= m_2/m_1
+
+
+   .. py:attribute:: mmin
+      :value: 0.5
+
+
+
+   .. py:attribute:: mmax
+      :value: 350.0
+
+
+
+   .. py:attribute:: qmin
+      :value: 0.0014285714285714286
+
+
+
+   .. py:method:: __call__(dataset, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: p_m(*args, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: pairing(*args, **kwargs)
+      :abstractmethod:
+
+
+
+   .. py:method:: p_m1_m2(dataset, **kwargs)
+
+

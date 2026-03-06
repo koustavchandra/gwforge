@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 from bilby.core.prior import Prior
 
 
@@ -8,18 +8,18 @@ class Interped2D_Discrete(Prior):
 
     def __init__(self, name, x_axis, y_axis, pdf_grid, x_name="x", y_name="y", jitter=True):
         super().__init__(name=name, latex_label=f"${name}$", unit=None)
-        self.x_axis = np.asarray(x_axis)
-        self.y_axis = np.asarray(y_axis)
+        self.x_axis = numpy.asarray(x_axis)
+        self.y_axis = numpy.asarray(y_axis)
         self.x_name = x_name
         self.y_name = y_name
         self.jitter = jitter
 
         # Normalize grid to PMF (discrete probabilities)
-        pdf_array = np.asarray(pdf_grid, dtype=float)
-        if not np.all(np.isfinite(pdf_array)):
+        pdf_array = numpy.asarray(pdf_grid, dtype=float)
+        if not numpy.all(numpy.isfinite(pdf_array)):
             raise ValueError(f"{self.__class__.__name__}: pdf_grid contains non-finite values and cannot be normalized.")
-        total = np.sum(pdf_array)
-        if not np.isfinite(total) or total <= 0.0:
+        total = numpy.sum(pdf_array)
+        if not numpy.isfinite(total) or total <= 0.0:
             raise ValueError(f"{self.__class__.__name__}: pdf_grid must have a finite, positive sum to be normalized (got {total}).")
         self.pmf = pdf_array.flatten() / total
         self.nx, self.ny = len(x_axis), len(y_axis)
@@ -30,7 +30,7 @@ class Interped2D_Discrete(Prior):
 
     def sample(self, size=1):
         """Sample grid indices exactly, optionally jitter within cells."""
-        indices = np.random.choice(len(self.pmf), size=size, p=self.pmf)
+        indices = numpy.random.choice(len(self.pmf), size=size, p=self.pmf)
         i_x = indices // self.ny
         i_y = indices % self.ny
 
@@ -40,7 +40,7 @@ class Interped2D_Discrete(Prior):
 
         # Optional jittering: uniform within ±0.5*cell
         if self.jitter:
-            x_samp = x_samp + np.random.uniform(-0.5 * self.dx, 0.5 * self.dx, size=size)
-            y_samp = y_samp + np.random.uniform(-0.5 * self.dy, 0.5 * self.dy, size=size)
+            x_samp = x_samp + numpy.random.uniform(-0.5 * self.dx, 0.5 * self.dx, size=size)
+            y_samp = y_samp + numpy.random.uniform(-0.5 * self.dy, 0.5 * self.dy, size=size)
 
-        return np.column_stack([x_samp, y_samp])
+        return numpy.column_stack([x_samp, y_samp])

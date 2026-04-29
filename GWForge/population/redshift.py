@@ -130,7 +130,7 @@ class Redshift:
         -----
             See the Appendix in <arXiv:2011.02717v3> for more details.
         """
-        from sympy import sqrt, exp, log, Piecewise
+        from sympy import sqrt, exp, log, Piecewise, pi as sympy_pi
 
         td_model = self.time_delay_model
         td_min = self.td_min
@@ -139,11 +139,11 @@ class Redshift:
         if td_model == "log_normal":
             t_ln = 2.9  # Gyr
             sigma_ln = 0.2
-            p_t = exp(-(log(tau) - log(t_ln)) ** 2 / (2 * sigma_ln ** 2)) / (sqrt(2 * numpy.pi) * sigma_ln)
+            p_t = exp(-(log(tau) - log(t_ln)) ** 2 / (2 * sigma_ln ** 2)) / (sqrt(2 * sympy_pi) * sigma_ln)
         elif td_model == "gaussian":
             t_g = 2  # Gyr
             sigma_g = 0.3
-            p_t = exp(-(tau - t_g) ** 2 / (2 * sigma_g ** 2)) / (sqrt(2 * numpy.pi) * sigma_g)
+            p_t = exp(-(tau - t_g) ** 2 / (2 * sigma_g ** 2)) / (sqrt(2 * sympy_pi) * sigma_g)
         elif td_model == "power_law":
             alpha_t = 0.81
             p_t = tau ** (-alpha_t)

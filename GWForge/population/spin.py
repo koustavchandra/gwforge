@@ -4,6 +4,7 @@ import bilby
 import random
 from .. import utils
 from ..conversion import *
+from . import get_xx_yy_from_population_priors
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -20,6 +21,7 @@ choices = [
     "Isotropic-Beta_Gaussian",
     "Isotropic-Beta_Gaussian_Uniform",
     "Default",
+    "CustomJSON",
 ]
 
 
@@ -208,6 +210,29 @@ class Spin:
 
             samples["a_1"] = a_1.sample(self.number_of_samples)
             samples["a_2"] = a_2.sample(self.number_of_samples)
+            samples["phi_12"] = phi_12.sample(self.number_of_samples)
+            samples["phi_jl"] = phi_jl.sample(self.number_of_samples)
+        elif self.spin_model == "customjson":
+            logging.info("Generating spin samples from CustomJSON population prior file")
+            population_file = self.parameters["population_file"]
+
+            a_1_xx, a_1_yy = get_xx_yy_from_population_priors(population_file, "a_1")
+            a_2_xx, a_2_yy = get_xx_yy_from_population_priors(population_file, "a_2")
+            cos_tilt_1_xx, cos_tilt_1_yy = get_xx_yy_from_population_priors(population_file, "cos_tilt_1")
+            cos_tilt_2_xx, cos_tilt_2_yy = get_xx_yy_from_population_priors(population_file, "cos_tilt_2")
+
+            a_1 = bilby.core.prior.Interped(xx=a_1_xx, yy=a_1_yy, name="a_1")
+            a_2 = bilby.core.prior.Interped(xx=a_2_xx, yy=a_2_yy, name="a_2")
+            cos_tilt_1 = bilby.core.prior.Interped(xx=cos_tilt_1_xx, yy=cos_tilt_1_yy, name="cos_tilt_1")
+            cos_tilt_2 = bilby.core.prior.Interped(xx=cos_tilt_2_xx, yy=cos_tilt_2_yy, name="cos_tilt_2")
+
+            phi_12 = bilby.gw.prior.Uniform(name="phi_12", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
+            phi_jl = bilby.gw.prior.Uniform(name="phi_jl", minimum=0, maximum=2 * numpy.pi, boundary="periodic")
+
+            samples["a_1"] = a_1.sample(self.number_of_samples)
+            samples["a_2"] = a_2.sample(self.number_of_samples)
+            samples["tilt_1"] = numpy.arccos(cos_tilt_1.sample(self.number_of_samples))
+            samples["tilt_2"] = numpy.arccos(cos_tilt_2.sample(self.number_of_samples))
             samples["phi_12"] = phi_12.sample(self.number_of_samples)
             samples["phi_jl"] = phi_jl.sample(self.number_of_samples)
         return samples

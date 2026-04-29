@@ -7,7 +7,6 @@ from sympy import symbols, lambdify, integrate
 from lal import YRJUL_SI, PC_SI
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
-from pycbc.population import population_models
 from rich.progress import track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
@@ -24,6 +23,7 @@ class Redshift:
         cosmology="Planck18",
         parameters={"gamma": 2.7, "kappa": 5.6, "z_peak": 1.9},
         time_delay_model="inverse",
+        td_min=0.02,
         H0=70,
         Om0=0.3,
         Ode0=0.7,
@@ -36,7 +36,9 @@ class Redshift:
         Parameters:
         ----------
         redshift_model : str
-            Implemented gwpopulation redshift model to use
+            Implemented gwpopulation redshift model to use. Options: 'MadauDickinson', 'PowerLaw'.
+            For 'PowerLaw', parameters should contain {'lamb': value} (power-law index).
+            For 'MadauDickinson', parameters should contain {'gamma', 'kappa', 'z_peak'}.
         local_merger_rate_density : float
             Estimated local merger rate density in /Gpc^3/yr
         maximum_redshift: float
@@ -48,9 +50,11 @@ class Redshift:
         cosmology: str, optional
             Name of astropy cosmology class to use [Default: Planck18]
         parameters: dict, optional
-            Dictionary of parameters
+            Dictionary of parameters for the chosen redshift model
         time_delay_model : str, optional
-            Implemented PyCBC time delay model to use [Default: inverse]
+            Time delay model to use [Default: inverse]. Options: 'inverse', 'log_normal', 'gaussian', 'power_law'
+        td_min : float, optional
+            Minimum time delay in Gyr used in the inverse time delay model [Default: 0.02]
         H0 : float, optional
             Hubble constant value for custom LDCM cosmology [Default: 70]
         Om0 : float, optional
@@ -71,6 +75,7 @@ class Redshift:
         self.cosmology = cosmology
         self.parameters = parameters
         self.time_delay_model = time_delay_model
+        self.td_min = td_min
         self.H0, self.Om0, self.Ode0, self.Tcmb0, self.Ob0 = H0, Om0, Ode0, Tcmb0, Ob0
 
     def import_cosmology(self):
@@ -106,6 +111,53 @@ class Redshift:
         dz_dt = H0 * (1 + redshift) * sympy.sqrt((cosmo.Ode0 + cosmo.Om0 * (1 + redshift) ** 3))
         return 1 / dz_dt  # returns dt_dz
 
+    def p_tau(self, tau):
+        """
+        The probability distribution of the time delay.
+        Adapted from pycbc.population.population_models.p_tau
+
+        Parameters
+        ----------
+        tau : float, numpy.ndarray, or sympy expression
+            The merger delay time in Gyr.
+
+        Returns
+        -------
+        p_t : float, numpy.ndarray, or sympy expression
+            The probability at time delay tau.
+
+        Notes
+        -----
+            See the Appendix in <arXiv:2011.02717v3> for more details.
+        """
+        from sympy import sqrt, exp, log, Piecewise
+
+        td_model = self.time_delay_model
+        td_min = self.td_min
+        td_max = self.import_cosmology().age(0).to("Gyr").value
+
+        if td_model == "log_normal":
+            t_ln = 2.9  # Gyr
+            sigma_ln = 0.2
+            p_t = exp(-(log(tau) - log(t_ln)) ** 2 / (2 * sigma_ln ** 2)) / (sqrt(2 * numpy.pi) * sigma_ln)
+        elif td_model == "gaussian":
+            t_g = 2  # Gyr
+            sigma_g = 0.3
+            p_t = exp(-(tau - t_g) ** 2 / (2 * sigma_g ** 2)) / (sqrt(2 * numpy.pi) * sigma_g)
+        elif td_model == "power_law":
+            alpha_t = 0.81
+            p_t = tau ** (-alpha_t)
+        elif td_model == "inverse":
+            if isinstance(tau, (float, int)) or isinstance(tau, numpy.ndarray):
+                norm_const = 1 / numpy.log(td_max / td_min)
+                p_t = numpy.where((tau < td_min) | (tau > td_max), 0, norm_const * tau ** (-0.999))
+            else:
+                norm_const = 1 / numpy.log(td_max / td_min)
+                p_t = Piecewise((0, tau < td_min), (0, tau > td_max), (norm_const * tau ** (-0.999), True))
+        else:
+            raise ValueError("'time_delay_model' must be one of ['log_normal', 'gaussian', 'power_law', 'inverse'].")
+        return p_t
+
     def transform(self):
         """
         Adapted from pycbc.population.population_models
@@ -133,7 +185,7 @@ class Redshift:
         else:
             raise ValueError(f"Redshift model {self.redshift_model} is not implemented in GWPopulation")
 
-        return psi_of_z * population_models.p_tau(tau=time_delay, td_model=self.time_delay_model) * diff_lookback_time(z)
+        return psi_of_z * self.p_tau(tau=time_delay) * diff_lookback_time(z)
 
     def rate_density(self, elements=1000):
         """
@@ -158,20 +210,30 @@ class Redshift:
 
     def coalescence_rate(self):
         """
-        Calculates the merger rate from rate_density function. Uses pycbc.population.population_models.coalescence_rate
+        Calculates the merger rate from rate_density function.
+        Adapted from pycbc.population.population_models.coalescence_rate
         """
+        from astropy import units
+
         rate_density = self.rate_density()
-        # this PyCBC function returns an interpolation function ---> merger rate at maximum redshift
-        merger_rate = population_models.coalescence_rate(rate_den=rate_density, maxz=self.maximum_redshift)
-        return merger_rate
+        cosmology = self.import_cosmology()
+
+        z_array = numpy.linspace(0, self.maximum_redshift, 1000)
+        dr_dz = []
+        for z in z_array:
+            dr = cosmology.differential_comoving_volume(z) / (1 + z)
+            dr_dz.append((dr * 4 * numpy.pi * units.sr * rate_density(z) * (units.Mpc) ** (-3)).value)
+
+        return interp1d(z_array, dr_dz, fill_value="extrapolate")
 
     def average_time_between_signals(self):
         """
-        Calculates the average time interval between two signals of same type
+        Calculates the average time interval between two signals of same type.
+        Adapted from pycbc.population.population_models.total_rate_upto_redshift
         """
         merger_rate = self.coalescence_rate()
-        # The following returns the average time delay. See Eq. (7) of <Phys. Rev. D 93, 024018 (2016)>
-        return 1 / population_models.total_rate_upto_redshift(z=self.maximum_redshift, merger_rate=merger_rate) * YRJUL_SI
+        total_rate = quad(merger_rate, 0, self.maximum_redshift, epsabs=2.00e-4, epsrel=2.00e-4, limit=1000)[0]
+        return 1 / total_rate * YRJUL_SI
 
     def sample(self):
         """

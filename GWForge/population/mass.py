@@ -3,6 +3,7 @@ import logging
 import bilby
 from .. import utils
 from .. import conversion
+from . import get_xx_yy_from_population_priors
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -15,7 +16,7 @@ def low_pass_filter(val, parameters):
     return 1.0 / (1 + (val / parameters["mmax"]) ** parameters["n"])
 
 
-choices = ["PowerLaw+Peak", "MultiPeak", "BrokenPowerLaw", "UniformSecondary", "DoubleGaussian", "LogNormal", "PowerLawDipBreak", "PowerLaw", "Uniform_components", "Uniform_M_q", "FullPop_GWTC4"]
+choices = ["PowerLaw+Peak", "MultiPeak", "BrokenPowerLaw", "UniformSecondary", "DoubleGaussian", "LogNormal", "PowerLawDipBreak", "PowerLaw", "Uniform_components", "Uniform_M_q", "FullPop_GWTC4", "CustomJSON"]
 
 sampler_choices = ["importance_m1_m2", "importance_m1_q", "lint"]
 
@@ -375,12 +376,47 @@ class Mass:
                     minimum=self.parameters["minimum_total_mass"], maximum=self.parameters["maximum_total_mass"], name="total_mass_source"
                 )
                 mass_prior["mass_ratio"] = bilby.core.prior.analytical.Uniform(minimum=self.parameters["minimum_mass_ratio"], maximum=self.parameters["maximum_mass_ratio"], name="mass_ratio")
+            elif self.mass_model == "customjson":
+                logging.info("Generating mass samples from CustomJSON population prior file")
+                population_file = self.parameters["population_file"]
+                mass_1_xx, mass_1_yy = get_xx_yy_from_population_priors(population_file, "mass_1")
+                mass_ratio_xx, mass_ratio_yy = get_xx_yy_from_population_priors(population_file, "mass_ratio")
+
+                minimum_mass_1 = self.parameters.get("minimum_mass_1", numpy.min(mass_1_xx))
+                maximum_mass_1 = self.parameters.get("maximum_mass_1", numpy.max(mass_1_xx))
+                minimum_mass_ratio = self.parameters.get("minimum_mass_ratio", numpy.min(mass_ratio_xx))
+                maximum_mass_ratio = self.parameters.get("maximum_mass_ratio", numpy.max(mass_ratio_xx))
+
+                mass_prior["mass_1_source"] = bilby.core.prior.Interped(
+                    xx=mass_1_xx, yy=mass_1_yy, name="mass_1_source",
+                    minimum=minimum_mass_1, maximum=maximum_mass_1,
+                )
+                mass_prior["mass_ratio"] = bilby.core.prior.Interped(
+                    xx=mass_ratio_xx, yy=mass_ratio_yy, name="mass_ratio",
+                    minimum=minimum_mass_ratio, maximum=maximum_mass_ratio,
+                )
+
+                if "minimum_total_mass" in self.parameters and "maximum_total_mass" in self.parameters:
+                    mass_prior["total_mass"] = bilby.core.prior.Constraint(
+                        name="total_mass",
+                        minimum=self.parameters["minimum_total_mass"],
+                        maximum=self.parameters["maximum_total_mass"],
+                    )
+                if "minimum_chirp_mass" in self.parameters and "maximum_chirp_mass" in self.parameters:
+                    mass_prior["chirp_mass"] = bilby.core.prior.Constraint(
+                        name="chirp_mass",
+                        minimum=self.parameters["minimum_chirp_mass"],
+                        maximum=self.parameters["maximum_chirp_mass"],
+                    )
             else:
                 raise ValueError("{} is not implemented in gwpopulation. Please choose from {}".format(self.mass_model, choices))
 
             prior_samples = mass_prior.sample(self.number_of_samples)
             if self.mass_model == "uniformmq":
                 samples["total_mass_source"] = prior_samples["total_mass_source"]
+                samples["mass_ratio"] = prior_samples["mass_ratio"]
+            elif self.mass_model == "customjson":
+                samples["mass_1_source"] = prior_samples["mass_1_source"]
                 samples["mass_ratio"] = prior_samples["mass_ratio"]
             else:
                 samples["mass_1_source"] = prior_samples["mass_1_source"]

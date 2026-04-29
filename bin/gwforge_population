@@ -70,6 +70,7 @@ redshift_parameters = config.get(
 # Use json.loads to parse the JSON string
 redshift_parameters = json.loads(redshift_parameters.replace("'", '"'))
 time_delay_model = config.get("Redshift", "time-delay-model", fallback="inverse")
+td_min = config.getfloat("Redshift", "td-min", fallback=0.02)
 H0 = config.getfloat("Redshift", "H0", fallback=70)
 Om0 = config.getfloat("Redshift", "Om0", fallback=0.3)
 Ode0 = config.getfloat("Redshift", "Ode0", fallback=0.7)
@@ -85,6 +86,7 @@ z = Redshift(
     cosmology=cosmology,
     parameters=redshift_parameters,
     time_delay_model=time_delay_model,
+    td_min=td_min,
     H0=H0,
     Om0=Om0,
     Ode0=Ode0,

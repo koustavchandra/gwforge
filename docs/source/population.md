@@ -54,7 +54,40 @@ and
 | $z_\textrm{peak}$ | Redshift at which the distribution peaks. |
 | $z_\textrm{max}$ | The maximum redshift allowed. |
 
-It is important to note that this describes the progenitor formation rate distribution. To obtain the compact binary merger rate distribution, GWForge convolves it with a time-delay distribution.
+It is important to note that $\psi(z)$ describes the progenitor *formation* rate distribution. To obtain the compact binary *merger* rate distribution, GWForge convolves it with a time-delay distribution $p(\tau)$ between the formation of the binary and its eventual merger:
+$$
+\mathcal{R}(z_m) \propto \int_{z_m}^{\infty} \psi(z_f)\, p\big(t(z_f) - t(z_m)\big)\, \frac{dt}{dz_f}\, dz_f,
+$$
+where $t(z)$ is the lookback time and the lower limit $z_f \geq z_m$ enforces that a binary must form before it merges.
+
+By default GWForge uses the `inverse` time-delay distribution, $p(\tau) \propto 1/\tau$ (i.e. flat-in-log), between a minimum delay of $20~\mathrm{Myr}$ and the age of the Universe. This is the canonical choice for compact binaries formed through [isolated binary evolution via the common-envelope phase](https://www.frontiersin.org/articles/10.3389/fspas.2020.00038/full). If you want a different slope, use the `powerlaw` model, $p(\tau) \propto \tau^{-\mathrm{slope}}$, and set `time-delay-slope`:
+
+```ini
+[Redshift]
+redshift-model = MadauDickinson
+redshift-parameters = {'gamma': 2.7, 'kappa': 5.6, 'z_peak': 1.9}
+local-merger-rate-density = 22
+maximum-redshift = 10
+gps-start-time = 1893024018
+; power-law time delay instead of the default 1/tau
+time-delay-model = powerlaw
+time-delay-slope = 0.8
+```
+
+| parameter | description |
+| --- | --- |
+| `time-delay-model` | `inverse` (default, $\propto 1/\tau$) or `powerlaw` ($\propto \tau^{-\mathrm{slope}}$) |
+| `time-delay-slope` | Slope of the power-law time delay. Ignored (fixed to 1) for `inverse` |
+
+If, instead of Madau-Dickinson, you would rather scale the merger rate as a simple power law of redshift, $\psi(z) = (1+z)^{\lambda}$, use the `PowerLaw` model:
+```ini
+[Redshift]
+redshift-model = PowerLaw
+redshift-parameters = {'lamb': 2.7}
+local-merger-rate-density = 22
+maximum-redshift = 10
+gps-start-time = 1893024018
+```
 
  The reader can refer to the following for further details:
 * [A Mock Data Challenge for the Einstein Gravitational-Wave Telescope](https://inspirehep.net/literature/1084847)
@@ -62,7 +95,7 @@ It is important to note that this describes the progenitor formation rate distri
 
 
 ```{note}
-The above implementation assumes that all compact binary systems are formed by [isolated binary evolution via the common-envelope phase](https://www.frontiersin.org/articles/10.3389/fspas.2020.00038/full). It also adopts a flat-in-log distribution for a time delay between binary formation and merger.
+The redshift, time-delay, mass and spin models are all implemented in-house on top of `bilby` — GWForge no longer depends on `gwpopulation` or `pycbc` to build the population. The numbers are validated against those original implementations, so nothing changes for you except a lighter set of dependencies.
 ```
 
 ## Mass
@@ -84,13 +117,18 @@ The currently available mass distribution models and their parameters are:
   |[`PowerLaw+Peak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.SinglePeakSmoothedMassDistribution.html#gwpopulation.models.mass.SinglePeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, mpp, sigpp, delta_m` | Powerlaw + peak model for two-dimensional mass distribution with low mass smoothing.
   |[`MultiPeak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.MultiPeakSmoothedMassDistribution.html#gwpopulation.models.mass.MultiPeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, lam_1, mpp_1, mpp_2, sigpp_1, sigp_2, delta_m` | Powerlaw + two peak model for two-dimensional mass distribution with low mass smoothing.
   |[`BrokenPowerLaw`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution.html#gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution)| `alpha_1, alpha_2, beta, break_fraction, mmin, mmax, delta_m` | Broken power law for two-dimensional mass distribution with low mass smoothing. |
+  |`BGP`| `alpha_1, alpha_2, m_break, mmin, m_high, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, delta_m, beta` | Broken power law + two Gaussian peaks — the fiducial BBH mass model from GWTC-4.0/5.0. See [below](#the-bgp-model). |
   |`UniformSecondary`| `alpha, beta, delta_m, mmin, mmax, 88.81, lam, mpp, sigpp, minimum_secondary_mass, maximum_secondary_mass` | PowerLaw + Peak for primary mass and uniform for secondary |
   |`DoubleGaussian`| `mu_1, sigma_1, mu_2, sigma_2, breaking_fraction, mmin, mmax` | Truncated Gaussian distribution for primary and secondary
   |`LogNormal`| `mu, sigma` | Log-normal distribution with mean mu and width sigma for primary and secondary | 
   |`PowerLawDipBreak`|`mmin, mmax, alpha_1, alpha_2, gamma_low, gamma_high, eta_low, eta_high, A, n` | Extension of power law break model |
-  |`PowerLaw`| `alpha, mmin, mmax`  | Power law with bounds and alpha, spectral index for primary and secondary |      
+  |`PowerLaw`| `alpha, mmin, mmax`  | Power law with bounds and alpha, spectral index for primary and secondary |
+  |`Uniform_components`| `mmin, mmax` | Both component masses drawn uniformly in `[mmin, mmax]` and ordered so that $m_1 \geq m_2$ |
+  |`Uniform_M_q`| `minimum_total_mass, maximum_total_mass, minimum_mass_ratio, maximum_mass_ratio` | Uniform in total mass and mass ratio |
+  |`FullPop_GWTC4`| `A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0..n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2, mbreak, mmin, mmax` | Full "Power Law + Dip + Break" compact-binary mass function with a pairing function (GWTC-4.0). See [below](#the-fullpop_gwtc4-model). |
+  |`UserDefined`| `file, primary_parameter, (mass_ratio_parameter \| secondary_parameter)` | Tabulated distributions supplied by you, e.g. from a population-synthesis run. See [below](#user-defined-populations). |
 
-The parameter names are heavily dependent on gwpopulation and bilby. Thus, it is essential to keep track of definition changes.
+The parameter definitions follow `gwpopulation` and the LVK population papers, even though the models are now implemented in-house. It is therefore still worth keeping an eye on how those references define things.
 
 For more details, refer to the following publications:
 * [Binary Black Hole Population Properties Inferred from the First and Second Observing Runs of Advanced LIGO and Advanced Virgo](https://inspirehep.net/literature/1706043)
@@ -102,6 +140,65 @@ For more details, refer to the following publications:
 ```{note}
 GWForge overlooks special characters and converts everything to lower cases. So `PowerLaw+Peak` is equivalent to `powerlawpeak`.
 ```
+
+### The BGP model
+`BGP` (Broken power law + Gaussian Peaks) is the fiducial BBH mass model used in the GWTC-4.0 and GWTC-5.0 population analyses. The primary mass is a mixture of a broken power law and two left-truncated Gaussian peaks, with a low-mass Planck taper $S$ applied to the whole distribution:
+$$
+\pi(m_1) \propto \Big[\lambda_0\, p_\mathrm{BP}(m_1) + \lambda_1\, N_\mathrm{lt}(m_1 | \mu_1, \sigma_1) + (1 - \lambda_0 - \lambda_1)\, N_\mathrm{lt}(m_1 | \mu_2, \sigma_2)\Big]\, S(m_1 | m_\mathrm{min}, \delta_m),
+$$
+where the broken power law switches from slope $-\alpha_1$ to $-\alpha_2$ at $m_\mathrm{break}$ over $[m_\mathrm{min}, m_\mathrm{high}]$, and $N_\mathrm{lt}$ is a normal distribution truncated below at $m_\mathrm{min}$. The mass ratio is a power law $\propto q^{\beta}$ with the same low-mass taper applied to the secondary. For example:
+
+```ini
+[Mass]
+mass-model = BGP
+mass-parameters = {'alpha_1': 1.6, 'alpha_2': 5.0, 'm_break': 38.0, 'mmin': 5.0, 'm_high': 100.0, 'lam_0': 0.9, 'lam_1': 0.05, 'mpp_1': 33.0, 'sigpp_1': 4.0, 'mpp_2': 10.0, 'sigpp_2': 1.5, 'delta_m': 4.8, 'beta': 1.1}
+```
+
+| parameter | description |
+| --- | --- |
+| `alpha_1, alpha_2` | Power-law slopes below and above the break |
+| `m_break` | Mass at which the power law breaks |
+| `mmin, m_high` | Lower and upper edges of the power-law component |
+| `lam_0, lam_1` | Mixing fractions of the power law and the first peak (the second peak gets $1 - \lambda_0 - \lambda_1$) |
+| `mpp_1, sigpp_1` | Location and width of the first (high-mass) Gaussian peak |
+| `mpp_2, sigpp_2` | Location and width of the second (low-mass) Gaussian peak |
+| `delta_m` | Width of the low-mass smoothing |
+| `beta` | Power-law slope of the mass ratio |
+| `maximum_mass` | *(optional)* upper bound of the evaluation grid, default `200` $M_\odot$ |
+
+The exact definitions are Eqs. (B10)–(B14) of the [GWTC-5.0 population paper](https://arxiv.org/abs/2605.27226).
+
+### User-defined populations
+Sometimes you already have a population — say, the output of a population-synthesis code — and you simply want GWForge to draw from it. The `UserDefined` model lets you do exactly that: you hand it a JSON file that tabulates the support `xx` and the (un-normalised) probability density `yy` of each parameter, and GWForge turns each into a prior it can sample from. The file looks like this:
+
+```json
+{
+  "mass_1_source": {"xx": [...], "yy": [...]},
+  "mass_ratio":    {"xx": [...], "yy": [...]}
+}
+```
+
+You then point the `[Mass]` section at the file and tell it which key is the primary mass, and either a mass-ratio key or a secondary-mass key:
+
+```ini
+[Mass]
+mass-model = UserDefined
+mass-parameters = {'file': '/path/to/priors.json', 'primary_parameter': 'mass_1_source', 'mass_ratio_parameter': 'mass_ratio'}
+```
+
+| parameter | description |
+| --- | --- |
+| `file` | Path to the JSON population-priors file |
+| `primary_parameter` | Key to use for the primary mass (default `mass_1_source`) |
+| `mass_ratio_parameter` | Key to use for the mass ratio |
+| `secondary_parameter` | Key to use for the secondary mass (use this *instead of* `mass_ratio_parameter`) |
+
+```{note}
+If you provide the primary and secondary masses as two independent distributions, GWForge samples them independently and then orders each pair so that $m_1 \geq m_2$; the pairing of the original population is therefore not preserved. If you care about the pairing, provide the mass ratio instead.
+```
+
+### The FullPop_GWTC4 model
+`FullPop_GWTC4` is the strongly-parameterised "Power Law + Dip + Break" model that describes the *whole* compact-binary mass spectrum — from neutron stars, through the lower mass gap, to black holes — together with a pairing function that sets how strongly binaries favour equal masses. It carries a large number of hyperparameters (the notch edges, filter sharpnesses `n0..n5`, peak locations and pairing slopes listed in the table above). Because there is no closed-form inverse, the masses are drawn with an importance sampler; the default is `importance_m1_m2`. The model is described in App. B.2 of the [GWTC-5.0 population paper](https://arxiv.org/abs/2605.27226) (following Farah et al. 2022 and Mali & Essick 2025).
 
 ## Spin
 The `[Spin]` section determines the spin distribution of the population. For example:
@@ -120,6 +217,7 @@ Here is the list of currently available spin distribution
   |Model | Parameters | Description|
   |---|---|---|
   |`Non-spinning`| `None` | Non-spinning 
+  |`Gaussian-Non_spinning`| `mu_chi_1, sigma_chi_1, minimum_primary_spin, maximum_primary_spin` | Primary aligned spin drawn from a Truncated Gaussian; secondary non-spinning |
   |`Aligned`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin` | [Aligned spin distribution Bilby-style](https://lscsoft.docs.ligo.org/bilby/api/bilby.gw.prior.AlignedSpin.html#bilby.gw.prior.AlignedSpin)| 
   |`Aligned-Bilby`|`minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin` | [Aligned spin distribution Bilby-style](https://lscsoft.docs.ligo.org/bilby/api/bilby.gw.prior.AlignedSpin.html#bilby.gw.prior.AlignedSpin)|
   |`Aligned-Uniform`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin` | Aligned component of spins are sampled from uniform distribution|
@@ -139,13 +237,27 @@ For more details, refer to the following publications:
 </details>
 
 ## Extrinsic
-The [Extrinsic] section is designed to handle sky location and binary orientation parameters. You can specify a bilby prior file as input. By default, it assumes an isotropic distribution for sky location and orientation parameters and a uniform distribution for the polarization angle.
-
-For example:
+The `[Extrinsic]` section handles the sky location and binary orientation. By default GWForge assumes an isotropic sky (right ascension uniform, declination cosine-distributed), isotropic orientation (inclination sine-distributed), and a uniform polarization angle. An empty section is enough to get these defaults:
 ```ini
 [Extrinsic]
 ```
-will use the second.
+
+If you want something other than the defaults, you can point to your own [bilby prior file](https://lscsoft.docs.ligo.org/bilby/prior.html):
+```ini
+[Extrinsic]
+extrinsic-prior-file = /path/to/my_extrinsic.prior
+```
+
+You can also override just the inclination without writing a full prior file. Setting `inclination-distribution = schutz` draws inclinations from the [Schutz (2011)](https://arxiv.org/abs/1102.5421) distribution, which weights orientations by their detectability — handy if you want a detection-like sample rather than a strictly isotropic one:
+```ini
+[Extrinsic]
+inclination-distribution = schutz
+```
+
+| parameter | description |
+| --- | --- |
+| `extrinsic-prior-file` | *(optional)* bilby prior file overriding the default isotropic priors |
+| `inclination-distribution` | *(optional)* set to `schutz` for the detectability-weighted inclination distribution |
 
 ## EOS (Equation of State)
 
@@ -180,12 +292,17 @@ gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
 It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH. For other options, please check `gwforge_population --help`. Please note that the waveform approximant that you use for your waveform generation supports tidal parameters if the source-type is bns or nsbh.
 
-```note
-By default a year gwforge_population generates a year worth of population. If you want some other value, please add the `duration` flag and add a value in seconds.
-Example: `duration=4096`. Please note that the population generated should be greater than the number of signals injected.
+If you want the population to be reproducible, pass a `--seed`:
+```bash
+gwforge_population --config-file bbh.ini --output-file bbh.h5 --seed 42
+```
+Running with the same seed and the same configuration gives you byte-for-byte the same population every time. Without a seed, each run gives you a fresh realisation.
+
+```{note}
+By default `gwforge_population` generates a year's worth of population. If you want some other value, add the `duration` option (in seconds) to the `[Redshift]` section — for example `duration = 4096`. Please note that the population generated should be greater than the number of signals injected.
 ```
 
-A few more example configuration file exist here: `~/.conda/envs/gwforge-venv/lib/python3.9/site-packages/GWForge/population/`. Feel free to modify and see what you get.
+A few more example configuration files ship with the package under `GWForge/population/population_configuration_files/` (inside your environment's `site-packages`, or in the [source tree](https://github.com/koustavchandra/gwforge/tree/main/GWForge/population/population_configuration_files)). Feel free to modify them and see what you get.
 
 ### Naive way to check the population
 You can check the binary parameters of the population by doing the following:

@@ -139,11 +139,17 @@ set_backend([scheme])
 
 duration = split_duration(duration)
 logging.info("Generating noise data of interferometer network")
-for dur in duration:
+for chunk_index, dur in enumerate(duration):
     for ifo in ifos:
         if "bilby" in noise_source:
             if noise_type == "gaussian":
-                # Replace this by PyCBC noise reproducable
+                # bilby draws Gaussian noise from its own Generator (bilby.core.utils
+                # .random), not numpy's global RNG. Seed it deterministically per
+                # (detector, chunk) using the same ifo-seeds as the pycbc path so the
+                # bilby noise realisation is reproducible.
+                from bilby.core.utils import random as bilby_random
+
+                bilby_random.seed((int(ifo_seeds[ifo.name]) * 1000003 + chunk_index) % (2**32))
                 ifo.set_strain_data_from_power_spectral_density(
                     sampling_frequency=sampling_frequency,
                     duration=dur,

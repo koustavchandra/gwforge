@@ -1,5 +1,6 @@
 from ..ifo.detectors import Network
 import bilby
+import numpy
 import logging
 from rich.progress import track
 from ..conversion import *
@@ -11,10 +12,16 @@ from gwpy.timeseries import TimeSeries
 import lalsimulation
 
 injection_func_map = {
-    numpy.dtype(float32): lambda *args: lalsimulation.SimAddInjectionREAL4TimeSeries(*args),
-    numpy.dtype(float64): lambda *args: lalsimulation.SimAddInjectionREAL8TimeSeries(*args),
+    numpy.dtype(float32): lambda *args: lalsimulation.SimAddInjectionREAL4TimeSeries(
+        *args
+    ),
+    numpy.dtype(float64): lambda *args: lalsimulation.SimAddInjectionREAL8TimeSeries(
+        *args
+    ),
 }
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 bilby.core.utils.setup_logger(log_level="warning")
 
@@ -55,6 +62,11 @@ class PyCBCInject:
         self.injection_type = injection_type.lower()
         for ifo in self.ifos:
             ifo.strain_data.set_from_gwpy_timeseries(data[ifo.name])
+            # bilby and pycbc use different azimuth conventions: pycbc's
+            # add_detector_on_earth expects cartographer-style angles, so the bilby
+            # arm azimuths are converted with (360 - azimuth) and the x/y arms are
+            # exchanged. This conversion was verified to reproduce bilby's antenna
+            # response |F+|^2 + |Fx|^2 for CE40 to ~5e-5.
             add_detector_on_earth(
                 name=ifo.name,
                 longitude=ifo.longitude_radians,
@@ -69,10 +81,14 @@ class PyCBCInject:
         if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
             self.injection_type = "bbh"
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_black_hole
-            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
+            self.parameter_conversion = (
+                bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
+            )
         elif self.injection_type == "bns":
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_neutron_star
-            self.parameter_conversion = bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
+            self.parameter_conversion = (
+                bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
+            )
         else:
             raise ValueError("Currently supports only CBC sources")
 
@@ -128,10 +144,19 @@ class PyCBCInject:
                 description="Injecting signals in {}".format(ifo.name),
             ):
                 try:
-                    signal_parameters = {key: self.injection_parameters[key][k] for key in self.injection_parameters.keys()}
-                    strain = self.inject(ifo=ifo, strain=strain, signal_parameters=signal_parameters)
+                    signal_parameters = {
+                        key: self.injection_parameters[key][k]
+                        for key in self.injection_parameters.keys()
+                    }
+                    strain = self.inject(
+                        ifo=ifo, strain=strain, signal_parameters=signal_parameters
+                    )
                 except Exception:
-                    logging.warning("Failed to inject signal for {} with parameters: {}".format(ifo.name, signal_parameters))
+                    logging.warning(
+                        "Failed to inject signal for {} with parameters: {}".format(
+                            ifo.name, signal_parameters
+                        )
+                    )
                     continue
             strain = TimeSeries.from_pycbc(strain)
             ifo.strain_data.set_from_gwpy_timeseries(strain)

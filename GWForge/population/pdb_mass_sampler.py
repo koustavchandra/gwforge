@@ -154,7 +154,9 @@ def rejection_sampling_uniform_grid(
     pbar.close()
 
     if len(m1_accepted) < n_samples and verbose:
-        print(f"Warning: Could only generate {len(m1_accepted)} out of {n_samples} requested samples after {max_iterations} iterations.")
+        print(
+            f"Warning: Could only generate {len(m1_accepted)} out of {n_samples} requested samples after {max_iterations} iterations."
+        )
 
     # Convert to arrays - return however many samples were obtained
     m1_samples = numpy.array(m1_accepted)
@@ -553,7 +555,9 @@ def importance_sampling_m1_q_prop(
         # sample power-law in q
         if abs(beta + 1) > 1e-8:
             u = rng.uniform()
-            q_prop[i] = (u * (q_max ** (beta + 1) - q_min ** (beta + 1)) + q_min ** (beta + 1)) ** (1 / (beta + 1))
+            q_prop[i] = (
+                u * (q_max ** (beta + 1) - q_min ** (beta + 1)) + q_min ** (beta + 1)
+            ) ** (1 / (beta + 1))
         else:
             # beta = -1 special case
             u = rng.uniform()
@@ -726,7 +730,9 @@ def lintsampling(
     if verbose:
         print(f"Building LintSampler grid: {grid_size} x {grid_size}")
 
-    sampler = LintSampler(domain, joint_pdf, seed=numpy.random.default_rng(), vectorizedpdf=True)
+    sampler = LintSampler(
+        domain, joint_pdf, seed=numpy.random.default_rng(), vectorizedpdf=True
+    )
 
     samples = sampler.sample(n_samples)
 

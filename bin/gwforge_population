@@ -44,7 +44,24 @@ parser.add_argument(
 parser.add_argument(
     "--reference-frequency", type=float, default=5.0, help="Reference frequency (in Hz)"
 )
+parser.add_argument(
+    "--seed",
+    type=int,
+    default=None,
+    help="Random seed for reproducible sampling. If omitted, sampling is non-deterministic.",
+)
 opts = parser.parse_args()
+
+# Seed before any sampling so runs are reproducible when a seed is supplied.
+# Both RNGs must be seeded: modern bilby priors (used by mass/spin/redshift/
+# extrinsic) draw from bilby's own Generator, while spin.py's shuffle and other
+# helpers use numpy's global RNG.
+if opts.seed is not None:
+    logging.info("Seeding numpy and bilby RNGs with {}".format(opts.seed))
+    numpy.random.seed(opts.seed)
+    from bilby.core.utils import random as bilby_random
+
+    bilby_random.seed(opts.seed)
 
 # Read configuration file
 config.read(opts.config_file)
@@ -70,6 +87,8 @@ redshift_parameters = config.get(
 # Use json.loads to parse the JSON string
 redshift_parameters = json.loads(redshift_parameters.replace("'", '"'))
 time_delay_model = config.get("Redshift", "time-delay-model", fallback="inverse")
+# For the "powerlaw" time-delay model p(tau) ∝ tau^-slope; "inverse" forces slope=1.
+time_delay_slope = config.getfloat("Redshift", "time-delay-slope", fallback=1.0)
 H0 = config.getfloat("Redshift", "H0", fallback=70)
 Om0 = config.getfloat("Redshift", "Om0", fallback=0.3)
 Ode0 = config.getfloat("Redshift", "Ode0", fallback=0.7)
@@ -85,6 +104,7 @@ z = Redshift(
     cosmology=cosmology,
     parameters=redshift_parameters,
     time_delay_model=time_delay_model,
+    time_delay_slope=time_delay_slope,
     H0=H0,
     Om0=Om0,
     Ode0=Ode0,
@@ -134,19 +154,25 @@ for key in spin_samples.keys():
 
 # Generate extrinsic parameter samples
 logging.info("Generating extrinsic parameters")
+inclination_distribution = None
 if "Extrinsic" in config:
     if config.has_option("Extrinsic", "extrinsic-prior-file"):
         extrinsic_prior_file = config.get("Extrinsic", "extrinsic-prior-file")
     else:
         logging.warning("No 'extrinsic_prior_file' provided. Using default priors")
         extrinsic_prior_file = None
+    inclination_distribution = config.get(
+        "Extrinsic", "inclination-distribution", fallback=None
+    )
 else:
     logging.warning("No 'extrinsic_prior_file' provided. Using default priors")
     extrinsic_prior_file = None
 
 # Create Extrinsic object and generate samples
 e = Extrinsic(
-    number_of_samples=len(samples["redshift"]), prior_file=extrinsic_prior_file
+    number_of_samples=len(samples["redshift"]),
+    prior_file=extrinsic_prior_file,
+    inclination_distribution=inclination_distribution,
 )
 
 extrinsic_samples = e.sample()

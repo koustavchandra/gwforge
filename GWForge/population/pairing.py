@@ -1,6 +1,7 @@
 """Base classes to implement models with pairing functions."""
 
 import inspect
+import numpy
 
 
 def _primary_secondary_general(dataset, p_m1, p_m2):
@@ -37,19 +38,37 @@ class _PairingMassDistribution(object):
 
     def p_m1_m2(self, dataset, **kwargs):
         # parse arguments for use in pm(m) vs fp(q)
-        from gwpopulation.utils import xp
-
-        pm1_args = [k for k, v in inspect.signature(self.p1_m1).parameters.items() if k not in ["self", "mass"]]
+        pm1_args = [
+            k
+            for k, v in inspect.signature(self.p1_m1).parameters.items()
+            if k not in ["self", "mass"]
+        ]
         pm1_dict = {k: kwargs[k] for k in dict(kwargs) if k in pm1_args}
 
-        pm2_args = [k for k, v in inspect.signature(self.p2_m2).parameters.items() if k not in ["self", "mass"]]
+        pm2_args = [
+            k
+            for k, v in inspect.signature(self.p2_m2).parameters.items()
+            if k not in ["self", "mass"]
+        ]
         pm2_dict = {k: kwargs[k] for k in dict(kwargs) if k in pm2_args}
 
-        fp_args = [k for k, v in inspect.signature(self.pairing).parameters.items() if k not in ["self", "dataset"]]
+        fp_args = [
+            k
+            for k, v in inspect.signature(self.pairing).parameters.items()
+            if k not in ["self", "dataset"]
+        ]
         fp_dict = {k: kwargs[k] for k in dict(kwargs) if k in fp_args}
 
-        p_m1 = xp.where((dataset["mass_1"] >= self.mmin) * (dataset["mass_1"] <= self.mmax), self.p1_m1(dataset["mass_1"], **pm1_dict), 0.0)
-        p_m2 = xp.where((dataset["mass_2"] >= self.mmin) * (dataset["mass_2"] <= self.mmax), self.p2_m2(dataset["mass_2"], **pm2_dict), 0.0)
+        p_m1 = numpy.where(
+            (dataset["mass_1"] >= self.mmin) * (dataset["mass_1"] <= self.mmax),
+            self.p1_m1(dataset["mass_1"], **pm1_dict),
+            0.0,
+        )
+        p_m2 = numpy.where(
+            (dataset["mass_2"] >= self.mmin) * (dataset["mass_2"] <= self.mmax),
+            self.p2_m2(dataset["mass_2"], **pm2_dict),
+            0.0,
+        )
         fp = self.pairing(dataset, **fp_dict)
 
         return _primary_secondary_general(dataset, p_m1, p_m2) * fp
@@ -83,18 +102,32 @@ class _IdenticalPairingMassDistribution(_PairingMassDistribution):
         raise NotImplementedError
 
     def p_m1_m2(self, dataset, **kwargs):
-        from gwpopulation.utils import xp
-
         # parse arguments for use in pm(m) vs fp(q)
-        pm_args = [k for k, v in inspect.signature(self.p_m).parameters.items() if k not in ["self", "mass"]]
+        pm_args = [
+            k
+            for k, v in inspect.signature(self.p_m).parameters.items()
+            if k not in ["self", "mass"]
+        ]
         pm_dict = {k: kwargs[k] for k in dict(kwargs) if k in pm_args}
 
-        fp_args = [k for k, v in inspect.signature(self.pairing).parameters.items() if k not in ["self", "dataset"]]
+        fp_args = [
+            k
+            for k, v in inspect.signature(self.pairing).parameters.items()
+            if k not in ["self", "dataset"]
+        ]
         fp_dict = {k: kwargs[k] for k in dict(kwargs) if k in fp_args}
 
         # evaluate probabilities
-        p_m1 = xp.where((dataset["mass_1"] >= self.mmin) * (dataset["mass_1"] <= self.mmax), self.p_m(dataset["mass_1"], **pm_dict), 0.0)
-        p_m2 = xp.where((dataset["mass_2"] >= self.mmin) * (dataset["mass_2"] <= self.mmax), self.p_m(dataset["mass_2"], **pm_dict), 0.0)
+        p_m1 = numpy.where(
+            (dataset["mass_1"] >= self.mmin) * (dataset["mass_1"] <= self.mmax),
+            self.p_m(dataset["mass_1"], **pm_dict),
+            0.0,
+        )
+        p_m2 = numpy.where(
+            (dataset["mass_2"] >= self.mmin) * (dataset["mass_2"] <= self.mmax),
+            self.p_m(dataset["mass_2"], **pm_dict),
+            0.0,
+        )
         fp = self.pairing(dataset, **fp_dict)
 
         return _primary_secondary_general(dataset, p_m1, p_m2) * fp

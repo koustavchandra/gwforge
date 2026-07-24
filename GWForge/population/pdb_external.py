@@ -1,11 +1,37 @@
 """Power Law + Dip + Break models. None are reviewed."""
 
-from gwpopulation.utils import powerlaw, truncnorm
+import numpy
+from ._smoothed_mass import powerlaw, truncnorm
 from .pairing import _IdenticalPairingMassDistribution
 
 
 def power_law_dip_break_1d(
-    mass, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, absolute_mmin, absolute_mmax
+    mass,
+    A,
+    A2,
+    NSmin,
+    NSmax,
+    BHmin,
+    BHmax,
+    UPPERmin,
+    UPPERmax,
+    n0,
+    n1,
+    n2,
+    n3,
+    n4,
+    n5,
+    alpha_1,
+    alpha_2,
+    alpha_dip,
+    mu1,
+    sig1,
+    mix1,
+    mu2,
+    sig2,
+    mix2,
+    absolute_mmin,
+    absolute_mmax,
 ):
     r"""
     The one-dimensional mass distribution considered in Fishbach, Essick, Holz. Does
@@ -77,21 +103,34 @@ def power_law_dip_break_1d(
         Exponents to set the sharpness of the lower edge and upper edge of the upper mass gap, respectively (:math:`\eta_i`).
 
     """
-    from gwpopulation.utils import xp
-
     gaussian_peak1 = truncnorm(mass, mu1, sig1, low=absolute_mmin, high=absolute_mmax)
     gaussian_peak2 = truncnorm(mass, mu2, sig2, low=absolute_mmin, high=absolute_mmax)
 
     condlist = [mass < NSmax, (mass >= NSmax) & (mass < BHmin), mass >= BHmin]
-    choicelist = [mass**alpha_1, (mass**alpha_dip) * (NSmax ** (alpha_1 - alpha_dip)), (mass**alpha_2) * (NSmax ** (alpha_1 - alpha_dip)) * (BHmin ** (alpha_dip - alpha_2))]
-    plaw = xp.select(condlist, choicelist, default=0.0)
+    choicelist = [
+        mass**alpha_1,
+        (mass**alpha_dip) * (NSmax ** (alpha_1 - alpha_dip)),
+        (mass**alpha_2)
+        * (NSmax ** (alpha_1 - alpha_dip))
+        * (BHmin ** (alpha_dip - alpha_2)),
+    ]
+    plaw = numpy.select(condlist, choicelist, default=0.0)
 
     highpass_lower = 1 + (NSmin / mass) ** n0
     notch_lower = 1.0 - A / ((1 + (NSmax / mass) ** n1) * (1 + (mass / BHmin) ** n2))
-    notch_upper = 1.0 - A2 / ((1 + (UPPERmin / mass) ** n3) * (1 + (mass / UPPERmax) ** n4))
+    notch_upper = 1.0 - A2 / (
+        (1 + (UPPERmin / mass) ** n3) * (1 + (mass / UPPERmax) ** n4)
+    )
     lowpass_upper = 1 + (mass / BHmax) ** n5
 
-    return (1 + mix1 * gaussian_peak1 + mix2 * gaussian_peak2) * plaw * notch_lower * notch_upper / highpass_lower / lowpass_upper
+    return (
+        (1 + mix1 * gaussian_peak1 + mix2 * gaussian_peak2)
+        * plaw
+        * notch_lower
+        * notch_upper
+        / highpass_lower
+        / lowpass_upper
+    )
 
 
 class _NotchFilterPairingMassDistribution(_IdenticalPairingMassDistribution):
@@ -100,7 +139,33 @@ class _NotchFilterPairingMassDistribution(_IdenticalPairingMassDistribution):
     model base class.
     """
 
-    def p_m(self, mass, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2):
+    def p_m(
+        self,
+        mass,
+        A,
+        A2,
+        NSmin,
+        NSmax,
+        BHmin,
+        BHmax,
+        UPPERmin,
+        UPPERmax,
+        n0,
+        n1,
+        n2,
+        n3,
+        n4,
+        n5,
+        alpha_1,
+        alpha_2,
+        alpha_dip,
+        mu1,
+        sig1,
+        mix1,
+        mu2,
+        sig2,
+        mix2,
+    ):
         return power_law_dip_break_1d(
             mass,
             A,
@@ -164,7 +229,34 @@ class NotchFilterPowerLawPairingMassDistribution(_NotchFilterPairingMassDistribu
         mass_ratio = dataset["mass_2"] / dataset["mass_1"]
         return powerlaw(mass_ratio, beta_q, 1, self.qmin)
 
-    def __call__(self, dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, mu1, sig1, mix1, mu2, sig2, mix2, beta_q):
+    def __call__(
+        self,
+        dataset,
+        A,
+        A2,
+        NSmin,
+        NSmax,
+        BHmin,
+        BHmax,
+        UPPERmin,
+        UPPERmax,
+        n0,
+        n1,
+        n2,
+        n3,
+        n4,
+        n5,
+        alpha_1,
+        alpha_2,
+        alpha_dip,
+        mu1,
+        sig1,
+        mix1,
+        mu2,
+        sig2,
+        mix2,
+        beta_q,
+    ):
         # get arguments in a dict
         kwargs = locals()
         kwargs.pop("self")
@@ -177,12 +269,12 @@ class NotchFilterBinnedPairingMassDistribution(_NotchFilterPairingMassDistributi
     """
 
     def pairing(self, dataset, beta_pair_1, beta_pair_2, mbreak):
-        from gwpopulation.utils import xp
-
         mass_ratio = dataset["mass_2"] / dataset["mass_1"]
 
-        beta_pair = xp.where(dataset["mass_2"] < mbreak, beta_pair_1, beta_pair_2)
-        lower_q_bound = xp.where(dataset["mass_2"] < mbreak, self.qmin, mbreak / self.mmax)
+        beta_pair = numpy.where(dataset["mass_2"] < mbreak, beta_pair_1, beta_pair_2)
+        lower_q_bound = numpy.where(
+            dataset["mass_2"] < mbreak, self.qmin, mbreak / self.mmax
+        )
 
         return powerlaw(mass_ratio, beta_pair, 1, lower_q_bound)
 
@@ -228,15 +320,43 @@ class NotchFilterBinnedPairing2MassDistribution(_NotchFilterPairingMassDistribut
     """
 
     def pairing(self, dataset, beta_pair_1, beta_pair_2, NSmax):
-        from gwpopulation.utils import xp
-
         mass_ratio = dataset["mass_2"] / dataset["mass_1"]
 
-        beta_pair = xp.where(dataset["mass_2"] < NSmax, beta_pair_1, beta_pair_2)
-        lower_q_bound = xp.where(dataset["mass_2"] < NSmax, self.qmin, NSmax / self.mmax)
+        beta_pair = numpy.where(dataset["mass_2"] < NSmax, beta_pair_1, beta_pair_2)
+        lower_q_bound = numpy.where(
+            dataset["mass_2"] < NSmax, self.qmin, NSmax / self.mmax
+        )
         return powerlaw(mass_ratio, beta_pair, 1, lower_q_bound)
 
-    def __call__(self, dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2):
+    def __call__(
+        self,
+        dataset,
+        A,
+        A2,
+        NSmin,
+        NSmax,
+        BHmin,
+        BHmax,
+        UPPERmin,
+        UPPERmax,
+        n0,
+        n1,
+        n2,
+        n3,
+        n4,
+        n5,
+        alpha_1,
+        alpha_2,
+        alpha_dip,
+        mu1,
+        sig1,
+        mix1,
+        mu2,
+        sig2,
+        mix2,
+        beta_pair_1,
+        beta_pair_2,
+    ):
         # get arguments in a dict
         kwargs = locals()
         kwargs.pop("self")
@@ -249,15 +369,43 @@ class NotchFilterBinnedPairing3MassDistribution(_NotchFilterPairingMassDistribut
     """
 
     def pairing(self, dataset, beta_pair_1, beta_pair_2, BHmin):
-        from gwpopulation.utils import xp
-
         mass_ratio = dataset["mass_2"] / dataset["mass_1"]
 
-        beta_pair = xp.where(dataset["mass_2"] < BHmin, beta_pair_1, beta_pair_2)
-        lower_q_bound = xp.where(dataset["mass_2"] < BHmin, self.qmin, BHmin / self.mmax)
+        beta_pair = numpy.where(dataset["mass_2"] < BHmin, beta_pair_1, beta_pair_2)
+        lower_q_bound = numpy.where(
+            dataset["mass_2"] < BHmin, self.qmin, BHmin / self.mmax
+        )
         return powerlaw(mass_ratio, beta_pair, 1, lower_q_bound)
 
-    def __call__(self, dataset, A, A2, NSmin, NSmax, BHmin, BHmax, UPPERmin, UPPERmax, n0, n1, n2, n3, n4, n5, alpha_1, alpha_2, alpha_dip, mu1, sig1, mix1, mu2, sig2, mix2, beta_pair_1, beta_pair_2):
+    def __call__(
+        self,
+        dataset,
+        A,
+        A2,
+        NSmin,
+        NSmax,
+        BHmin,
+        BHmax,
+        UPPERmin,
+        UPPERmax,
+        n0,
+        n1,
+        n2,
+        n3,
+        n4,
+        n5,
+        alpha_1,
+        alpha_2,
+        alpha_dip,
+        mu1,
+        sig1,
+        mix1,
+        mu2,
+        sig2,
+        mix2,
+        beta_pair_1,
+        beta_pair_2,
+    ):
         # get arguments in a dict
         kwargs = locals()
         kwargs.pop("self")

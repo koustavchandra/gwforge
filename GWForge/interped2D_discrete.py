@@ -6,7 +6,9 @@ from bilby.core.prior import Prior
 class Interped2D_Discrete(Prior):
     """Index-based 2D Prior: sample grid indices exactly, optionally jitter within cells."""
 
-    def __init__(self, name, x_axis, y_axis, pdf_grid, x_name="x", y_name="y", jitter=True):
+    def __init__(
+        self, name, x_axis, y_axis, pdf_grid, x_name="x", y_name="y", jitter=True
+    ):
         super().__init__(name=name, latex_label=f"${name}$", unit=None)
         self.x_axis = numpy.asarray(x_axis)
         self.y_axis = numpy.asarray(y_axis)
@@ -17,10 +19,14 @@ class Interped2D_Discrete(Prior):
         # Normalize grid to PMF (discrete probabilities)
         pdf_array = numpy.asarray(pdf_grid, dtype=float)
         if not numpy.all(numpy.isfinite(pdf_array)):
-            raise ValueError(f"{self.__class__.__name__}: pdf_grid contains non-finite values and cannot be normalized.")
+            raise ValueError(
+                f"{self.__class__.__name__}: pdf_grid contains non-finite values and cannot be normalized."
+            )
         total = numpy.sum(pdf_array)
         if not numpy.isfinite(total) or total <= 0.0:
-            raise ValueError(f"{self.__class__.__name__}: pdf_grid must have a finite, positive sum to be normalized (got {total}).")
+            raise ValueError(
+                f"{self.__class__.__name__}: pdf_grid must have a finite, positive sum to be normalized (got {total})."
+            )
         self.pmf = pdf_array.flatten() / total
         self.nx, self.ny = len(x_axis), len(y_axis)
 
@@ -40,7 +46,11 @@ class Interped2D_Discrete(Prior):
 
         # Optional jittering: uniform within ±0.5*cell
         if self.jitter:
-            x_samp = x_samp + numpy.random.uniform(-0.5 * self.dx, 0.5 * self.dx, size=size)
-            y_samp = y_samp + numpy.random.uniform(-0.5 * self.dy, 0.5 * self.dy, size=size)
+            x_samp = x_samp + numpy.random.uniform(
+                -0.5 * self.dx, 0.5 * self.dx, size=size
+            )
+            y_samp = y_samp + numpy.random.uniform(
+                -0.5 * self.dy, 0.5 * self.dy, size=size
+            )
 
         return numpy.column_stack([x_samp, y_samp])

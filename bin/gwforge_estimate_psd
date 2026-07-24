@@ -8,7 +8,6 @@ from rich.progress import track
 from pycbc.frame import read_frame
 from pycbc.psd import welch, interpolate, inverse_spectrum_truncation
 import pandas as pd
-from lal import LIGOTimeGPS
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
@@ -16,7 +15,15 @@ logging.basicConfig(
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--frame-file", type=str, required=True)
-parser.add_argument("--stride", type=int, default=512)
+parser.add_argument(
+    "--channel", type=str, required=True, help="Channel name to read, e.g. CE40:INJ"
+)
+parser.add_argument(
+    "--stride",
+    type=int,
+    default=512,
+    help="Length in seconds of each window over which a PSD is estimated",
+)
 parser.add_argument(
     "--psd-segment-length", type=int, default=16, help="Segment length in seconds"
 )
@@ -26,29 +33,47 @@ parser.add_argument(
     default=8,
     help="Separation between consecutive segments in seconds",
 )
-parser.add_argument("--gps-start-time", type=float, default=None)
-parser.add_argument("--duration", type=float, default=None)
+parser.add_argument(
+    "--low-frequency-cutoff",
+    type=float,
+    default=7.0,
+    help="Low frequency cutoff used for inverse spectrum truncation",
+)
+parser.add_argument("--gps-start-time", type=float, required=True)
+parser.add_argument(
+    "--duration",
+    type=float,
+    required=True,
+    help="Total duration in seconds to estimate PSDs over",
+)
 parser.add_argument("--output-file", type=str, required=True)
 opts = parser.parse_args()
 
-if not opts.gps_start_time:
-    gps_start_time = LIGOTimeGPS(opts.gps_start_time)
-
-stride = opts.stride
+gps_start_time = opts.gps_start_time
+final_time = opts.gps_start_time + opts.duration
 gps_end_time = gps_start_time + opts.stride
+
+if opts.stride > opts.duration:
+    raise ValueError(
+        "--stride ({}s) cannot exceed --duration ({}s)".format(opts.stride, opts.duration)
+    )
+
 psds = []
+estimated_psd = None
 logging.info("Reading frame file {}".format(opts.frame_file))
 logging.info(
-    "Estimating PSDs of segments with lengths={}s".format(opts.psd_segment_length)
+    "Estimating PSDs of {}s windows with segment lengths={}s".format(
+        opts.stride, opts.psd_segment_length
+    )
 )
-for k in track(range(int((4096 - gps_start_time) / opts.stride))):
+number_of_windows = int(opts.duration / opts.stride)
+for k in track(range(number_of_windows)):
     ts = read_frame(
         location=opts.frame_file,
-        channels="CE40:INJ",
+        channels=opts.channel,
         start_time=gps_start_time,
         end_time=gps_end_time,
     )
-    # delta_t = 1./ts.sample_rate
     segment_length = int(opts.psd_segment_length * ts.sample_rate)
     segment_stride = int(opts.psd_segment_stride * ts.sample_rate)
     # estimate psd using welch method
@@ -60,14 +85,21 @@ for k in track(range(int((4096 - gps_start_time) / opts.stride))):
     )
     estimated_psd = interpolate(estimated_psd, 1.0 / ts.duration)
     estimated_psd = inverse_spectrum_truncation(
-        estimated_psd, segment_length, low_frequency_cutoff=7.0, trunc_method="hann"
+        estimated_psd,
+        segment_length,
+        low_frequency_cutoff=opts.low_frequency_cutoff,
+        trunc_method="hann",
     )
 
     psds.append(estimated_psd.data)
     gps_start_time = gps_start_time + opts.stride
     gps_end_time = gps_end_time + opts.stride
-    if gps_end_time > 4096:
+    if gps_end_time > final_time:
         break
+
+if estimated_psd is None:
+    raise RuntimeError("No PSDs were estimated; check the frame file and time range.")
+
 df = pd.DataFrame()
 df["frequency_array"] = estimated_psd.sample_frequencies
 for k in range(len(psds)):

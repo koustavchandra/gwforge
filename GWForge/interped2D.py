@@ -33,7 +33,9 @@ class Interped2D(Prior):
 
         # Normalize using continuous 2D integration over the grid axes
         pdf_grid = numpy.asarray(pdf_grid)
-        norm = numpy.trapz(numpy.trapz(pdf_grid, self.y_axis, axis=1), self.x_axis, axis=0)
+        norm = numpy.trapz(
+            numpy.trapz(pdf_grid, self.y_axis, axis=1), self.x_axis, axis=0
+        )
         self.pdf_grid = pdf_grid / norm
 
         # Bounds
@@ -41,7 +43,12 @@ class Interped2D(Prior):
         self.y_min, self.y_max = float(self.y_axis[0]), float(self.y_axis[-1])
 
         # Create interpolator
-        self.interpolator = RegularGridInterpolator((self.x_axis, self.y_axis), self.pdf_grid, bounds_error=False, fill_value=0.0)
+        self.interpolator = RegularGridInterpolator(
+            (self.x_axis, self.y_axis),
+            self.pdf_grid,
+            bounds_error=False,
+            fill_value=0.0,
+        )
 
         # Max density for rejection sampling
         self.max_pdf = float(numpy.max(self.pdf_grid))

@@ -1,4 +1,4 @@
-#!/ligo/home/ligo.org/koustav.chandra/.conda/envs/gwforge-venv/bin/python3.9
+#!/usr/bin/env python
 """
 Creates a Condor DAG for job submission in particular sequence.
 """
@@ -330,45 +330,31 @@ with open(condor_dag_file, "w") as dag_file:
             dag_file.write("RETRY {} 3\n".format(bns_job_id))
             bns_job_ids.append(bns_job_id)
 
-    # Split odd and even BBH, NSBH, and BNS jobs
-    bbh_odd, bbh_even = split_odd_even(bbh_job_ids)
-    nsbh_odd, nsbh_even = split_odd_even(nsbh_job_ids)
-    bns_odd, bns_even = split_odd_even(bns_job_ids)
+    # Build parent/child dependencies across whichever injection categories are
+    # present. Within a category, odd-indexed segments run first and even-indexed
+    # segments depend on them (adjacent segments share frame files, so they must
+    # not be written concurrently). Across categories the chain is
+    # noise -> bbh -> nsbh -> bns, skipping any absent category. A PARENT line is
+    # only written when the parent list is non-empty, so a single-interval run or a
+    # missing middle category never produces an invalid "PARENT  CHILD x" line.
+    def write_parent_child(parents, children):
+        parents = list(parents)
+        if not parents:
+            return
+        for child in children:
+            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(parents), child))
 
-    # Handle BBH jobs: odd first, then even
-    if bbh_job_ids:
-        # Add odd jobs first
-        for bbh_job_id in bbh_odd:
-            dag_file.write(
-                "PARENT {} CHILD {}\n".format(" ".join(noise_job_ids), bbh_job_id)
-            )
-        # Add even jobs after odd jobs
-        for bbh_job_id in bbh_even:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(bbh_odd), bbh_job_id))
-
-    # Handle NSBH jobs: odd first, then even
-    if nsbh_job_ids:
-        # Add odd jobs first
-        for nsbh_job_id in nsbh_odd:
-            dag_file.write(
-                "PARENT {} CHILD {}\n".format(" ".join(bbh_job_ids), nsbh_job_id)
-            )
-        # Add even jobs after odd jobs
-        for nsbh_job_id in nsbh_even:
-            dag_file.write(
-                "PARENT {} CHILD {}\n".format(" ".join(nsbh_odd), nsbh_job_id)
-            )
-
-    # Handle BNS jobs: odd first, then even
-    if bns_job_ids:
-        # Add odd jobs first
-        for bns_job_id in bns_odd:
-            dag_file.write(
-                "PARENT {} CHILD {}\n".format(" ".join(nsbh_job_ids), bns_job_id)
-            )
-        # Add even jobs after odd jobs
-        for bns_job_id in bns_even:
-            dag_file.write("PARENT {} CHILD {}\n".format(" ".join(bns_odd), bns_job_id))
+    previous_stage_jobs = noise_job_ids
+    for category_job_ids in (bbh_job_ids, nsbh_job_ids, bns_job_ids):
+        if not category_job_ids:
+            continue
+        odd, even = split_odd_even(category_job_ids)
+        # odd jobs depend on all jobs of the previous stage (noise or prior category)
+        write_parent_child(previous_stage_jobs, odd)
+        # even jobs depend on this category's odd jobs, falling back to the previous
+        # stage when there are no odd jobs (e.g. a single-interval run)
+        write_parent_child(odd if odd else previous_stage_jobs, even)
+        previous_stage_jobs = category_job_ids
 
 logging.info("Created Condor DAG file {}".format(condor_dag_file))
 if opts.submit_now:

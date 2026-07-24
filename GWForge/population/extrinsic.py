@@ -36,7 +36,7 @@ class Extrinsic:
         if self.prior_file:
             prior = bilby.gw.prior.PriorDict(filename=self.prior_file)
         else:
-            logging.warn("Using default priors")
+            logging.warning("Using default priors")
             prior = bilby.gw.prior.PriorDict()
             prior["dec"] = bilby.core.prior.analytical.Cosine(name="dec")
             prior["ra"] = bilby.core.prior.analytical.Uniform(

@@ -1,4 +1,4 @@
-"""Pure-numpy reimplementations of the ``gwpopulation`` smoothed mass models.
+"""Numpy/SciPy reimplementations of the ``gwpopulation`` smoothed mass models.
 
 GWForge only ever used a thin slice of ``gwpopulation`` for its mass models:
 the ``SinglePeak``/``MultiPeak``/``BrokenPowerLaw`` ``SmoothedMassDistribution``

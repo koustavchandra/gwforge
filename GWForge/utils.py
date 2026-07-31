@@ -361,10 +361,12 @@ def save_frame_files(ifo, start_time, duration, ifo_directory):
         # Crop the data based on the start and end times
         save_data = data.crop(start=start_time, end=end)
         # Write the cropped data to a frame file
+        # The path must be positional and the format explicit: gwpy >=4 infers
+        # the format from *args, so passing it as target= makes identification
+        # fail with an IndexError.
         save_data.write(
-            target=os.path.join(
-                ifo_directory, f"{ifo.name}-{int(start_time)}-{int(dur)}.h5"
-            ),
+            os.path.join(ifo_directory, f"{ifo.name}-{int(start_time)}-{int(dur)}.h5"),
+            format="hdf5",
             overwrite=True,
         )
         # Delete the cropped data to free up memory

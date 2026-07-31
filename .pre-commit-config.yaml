@@ -1,12 +1,6 @@
 repos:
-  # - repo: https://github.com/psf/black
-  #   rev: 24.4.2
-  #   hooks:
-  #     - id: black
-  #       language_version: python3.11
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+    rev: v0.15.22
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -15,9 +9,12 @@ repos:
     hooks:
       - id: forbid-np-plt
         name: forbid numpy/pyplot shorthand
+        # GWForge spells these out in full: `import numpy` and `import pylab`.
+        # Match the import statements themselves rather than every `np.` /
+        # `plt.` substring: the old rule also pointed at a path that does not
+        # exist (`gwforge`, not `GWForge`), so it never actually ran.
         entry: >
-          bash -c 'if grep -R "np\." gwforge >/dev/null ||
-                   grep -R "plt\." gwforge >/dev/null; then
+          bash -c 'if grep -REn "^[[:space:]]*(import numpy as np|import matplotlib.pyplot as plt|from matplotlib import pyplot as plt)$" GWForge bin; then
                    echo "Forbidden shorthand imports found. Use numpy and pylab.";
                    exit 1;
                    fi'

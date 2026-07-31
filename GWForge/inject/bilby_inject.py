@@ -1,4 +1,5 @@
 from ..ifo.detectors import Network
+from ..ifo.antenna import inject_signal_with_response
 import bilby
 from ..conversion import *
 
@@ -7,7 +8,14 @@ bilby.core.utils.setup_logger(log_level="warning")
 
 class BilbyInject:
     def __init__(
-        self, ifos, data, injection_parameters, waveform_arguments, injection_type="bbh"
+        self,
+        ifos,
+        data,
+        injection_parameters,
+        waveform_arguments,
+        injection_type="bbh",
+        earth_rotation=True,
+        finite_size=True,
     ):
         """
         Parameters:
@@ -20,6 +28,13 @@ class BilbyInject:
             Dictionary of injection parameters.
         injection_type: str, optional
             Type of injection (default: 'bbh').
+        earth_rotation: bool, optional
+            Evolve the antenna pattern and arrival delay along the signal's
+            time-frequency track rather than freezing them at coalescence
+            (default: True).
+        finite_size: bool, optional
+            Apply the per-arm finite light-travel-time transfer function
+            (default: True).
         waveform_arguments: dict, optional
             Arguments for the waveform generator
         """
@@ -53,6 +68,8 @@ class BilbyInject:
             raise ValueError("Currently supports only CBC sources")
 
         self.waveform_arguments = waveform_arguments
+        self.earth_rotation = earth_rotation
+        self.finite_size = finite_size
 
     def inject_signal_using_bilby_method(self):
         """
@@ -70,8 +87,14 @@ class BilbyInject:
             parameter_conversion=self.parameter_conversion,
             waveform_arguments=self.waveform_arguments,
         )
-        # Add snippet to check if the signal is in the data segment
-        self.ifos.inject_signal(
-            waveform_generator=waveform_generator, parameters=self.injection_parameters
+        # bilby's InterferometerList.inject_signal hard-codes its own
+        # long-wavelength, static-pattern response, so the projection is done
+        # here instead. The meta_data it fills is identical.
+        inject_signal_with_response(
+            self.ifos,
+            waveform_generator=waveform_generator,
+            parameters=self.injection_parameters,
+            earth_rotation=self.earth_rotation,
+            finite_size=self.finite_size,
         )
         return self.ifos

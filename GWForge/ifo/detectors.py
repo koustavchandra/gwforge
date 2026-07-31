@@ -3,10 +3,55 @@ import numpy
 import logging
 import os
 from bilby.gw.detector.psd import PowerSpectralDensity as psd
+from bilby.gw.detector.networks import TriangularInterferometer
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
+
+
+def load_xg_interferometer(filename, power_spectral_density):
+    """Load a GWForge XG ``.ifo`` file, attaching ``power_spectral_density``.
+
+    This mirrors ``bilby.gw.detector.load_interferometer``'s tiny key = value
+    parser but injects a valid PSD before the interferometer is constructed.
+    Two things make this necessary rather than a plain ``load_interferometer``:
+
+    - bilby's ``TriangularInterferometer`` indexes ``power_spectral_density[ii]``
+      for each of the three arms, so a ``.ifo`` file carrying
+      ``power_spectral_density = None`` (as ET does) raises a ``TypeError`` at
+      load time.
+    - even for a single detector the PSD has to reach the interferometer(s), not
+      just the enclosing list, so we set it explicitly on every arm.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the ``.ifo`` file.
+    power_spectral_density : bilby.gw.detector.psd.PowerSpectralDensity
+        The PSD to attach to the interferometer (all three arms for a triangle).
+
+    Returns
+    -------
+    bilby.gw.detector.Interferometer or bilby.gw.detector.networks.TriangularInterferometer
+    """
+    parameters = {}
+    with open(filename, "r") as parameter_file:
+        for line in parameter_file:
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            key, _, value = line.partition("=")
+            parameters[key.strip()] = eval(value)
+    parameters["power_spectral_density"] = power_spectral_density
+    shape = str(parameters.pop("shape", "L"))
+    if shape.lower() in ("triangular", "triangle"):
+        ifo = TriangularInterferometer(**parameters)
+        for arm in ifo:
+            arm.power_spectral_density = power_spectral_density
+    else:
+        ifo = bilby.gw.detector.Interferometer(**parameters)
+        ifo.power_spectral_density = power_spectral_density
+    return ifo
 
 
 class IFO:
@@ -63,7 +108,6 @@ class IFO:
             filename = os.path.join(
                 os.path.dirname(__file__), "ifos", "{}.ifo".format(self.name)
             )
-            ifo = bilby.gw.detector.load_interferometer(filename=filename)
             if self.name == "ET":
                 file_type = "psd"
                 load_psd = psd.from_power_spectral_density_file
@@ -76,7 +120,10 @@ class IFO:
                 "{}-{}.txt".format(self.name, file_type),
             )
             temp = load_psd(noise_file)
-            ifo.power_spectral_density = temp
+            # Attach the PSD as the interferometer is built: bilby's
+            # TriangularInterferometer rejects a None PSD (as ET's .ifo carries),
+            # and the PSD must reach each ET arm, not just the enclosing list.
+            ifo = load_xg_interferometer(filename, temp)
         except FileNotFoundError:
             # Execute if detector is LIGO, Virgo, NEMO or LISA or any other bilby ifos
             logging.info(

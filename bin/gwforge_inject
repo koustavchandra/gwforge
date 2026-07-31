@@ -117,6 +117,13 @@ injection_method = config.get(
     "Injections", "injection-method", fallback="bilby"
 ).lower()
 
+# Detector-response options (bilby injection method only; the pycbc method uses
+# LAL's own projection). Both default to True: XG detectors see hour-long
+# signals during which the Earth turns, and CE's free spectral range sits inside
+# the analysis band, so neither approximation is safe there.
+earth_rotation = config.getboolean("Injections", "earth-rotation", fallback=True)
+finite_size = config.getboolean("Injections", "finite-size", fallback=True)
+
 if gps_start_time is None or gps_end_time is None:
     raise ValueError(
         "Both gps-start-time and gps-end-time are required. Provide them in the "
@@ -232,6 +239,8 @@ with h5py.File(injection_file, "r") as f:
                         data=data,
                         injection_parameters=injection_parameters,
                         waveform_arguments=waveform_arguments,
+                        earth_rotation=earth_rotation,
+                        finite_size=finite_size,
                     ).inject_signal_using_bilby_method()
 
                     # Update the data after injecting

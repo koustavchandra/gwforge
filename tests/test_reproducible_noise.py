@@ -140,13 +140,17 @@ def test_resample_matches_pycbc():
 
 
 def test_inverse_spectrum_truncation_matches_pycbc():
-    """Bit-identical in band; round-off-limited in the discarded roll-off.
+    """Tight in band; round-off-limited in the discarded roll-off.
 
-    Most bins agree exactly (median relative difference is 0). A handful below
-    the cutoff -- where ``1/|F|^2`` sits on a near-cancellation and numpy's and
-    FFTW's summation orders diverge -- differ by up to ~1e-6 relative. Those bins
-    are zeroed by :func:`colored_noise` before use, so the check is split: exact
-    in the analysis band, loose below it.
+    In band the typical bin agrees to an ulp. A handful below the cutoff --
+    where ``1/|F|^2`` sits on a near-cancellation and numpy's and FFTW's
+    summation orders diverge -- differ by up to ~1e-6 relative. Those bins are
+    zeroed by :func:`colored_noise` before use, so the check is split: tight in
+    the analysis band, loose below it.
+
+    Nothing here asserts bit-identity. How many bins land on exactly the same
+    double depends on the FFTW build and its SIMD codelets, so that count is a
+    property of the machine rather than of the port.
     """
     delta_f = 1.0 / 256
     low_frequency_cutoff = 6.0
@@ -166,9 +170,15 @@ def test_inverse_spectrum_truncation_matches_pycbc():
     band = frequencies >= low_frequency_cutoff
     numpy.testing.assert_allclose(mine[band], reference[band], rtol=1e-11, atol=0)
 
-    relative = numpy.abs(mine - reference) / numpy.abs(reference)
-    assert numpy.median(relative) == 0.0
-    assert numpy.percentile(relative, 99) < 1e-10
+    nonzero = reference != 0
+    relative = numpy.zeros_like(reference)
+    relative[nonzero] = numpy.abs(mine[nonzero] - reference[nonzero]) / numpy.abs(
+        reference[nonzero]
+    )
+    # The line above bounds every in-band bin; this says the typical one is far
+    # tighter still, sitting at the one-ulp level rather than near that bound.
+    assert numpy.median(relative[band]) < 1e-13
+    assert relative[~band].max() < 1e-5
 
 
 # -- reproducibility invariants ----------------------------------------------

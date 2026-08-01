@@ -284,10 +284,20 @@ def antenna_response(
         response_plus = numpy.einsum("ij,ijk->k", detector_tensor, polarization_plus)
         response_cross = numpy.einsum("ij,ijk->k", detector_tensor, polarization_cross)
 
-    vertex_delay = -numpy.dot(omega.T, interferometer.geometry.vertex) / speed_of_light
+    vertex = interferometer.geometry.vertex
+    if earth_rotation:
+        vertex_delay = -numpy.dot(omega.T, vertex) / speed_of_light
+    else:
+        # Every column of omega is the same here, so the (len(frequencies), 3) @ (3,)
+        # product would compute one value len(frequencies) times over just to keep the
+        # first. The explicit three-term sum also mirrors bilby_cython's scalar
+        # expression rather than going through a BLAS dgemv, whose accumulation order
+        # varies between builds and shifts tau by an ulp.
+        vertex_delay = (
+            -(omega[0, 0] * vertex[0] + omega[1, 0] * vertex[1] + omega[2, 0] * vertex[2])
+            / speed_of_light
+        )
     tau = (geocent_time - start_time) + vertex_delay
-    if not earth_rotation:
-        tau = tau[0]
 
     return response_plus, response_cross, tau
 

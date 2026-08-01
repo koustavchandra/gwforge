@@ -68,8 +68,14 @@ def network():
 def test_reduces_to_bilby_when_both_corrections_are_off(network, ra, dec, psi):
     """With Earth rotation and finite size off, this *is* bilby's response.
 
-    The tolerance is machine precision, not a loose 1e-6: anything looser would
-    let a genuine convention error hide.
+    The tolerance sits just above the precision floor, not at a loose 1e-6:
+    anything looser would let a genuine convention error hide. The floor comes
+    from the phase factor. ``tau`` is ~6.005 s and the band reaches 1024 Hz, so
+    ``2 * pi * f * tau`` runs up to ~3.9e4 radians. One ulp of ``tau``
+    (8.9e-16 s) is therefore already a 5.7e-12 error in the response, and it is
+    a coin flip whether our ``tau`` and bilby's round to the same double: they
+    reach it by different routes (numpy's vectorised trigonometry against
+    bilby_cython's scalar libm calls), so the last bit tracks the architecture.
     """
     generator = numpy.random.default_rng(0)
     length = len(network[0].frequency_array)
@@ -97,7 +103,9 @@ def test_reduces_to_bilby_when_both_corrections_are_off(network, ra, dec, psi):
         )
         mask = interferometer.frequency_mask
         scale = numpy.abs(reference[mask]).max()
-        assert numpy.abs(mine[mask] - reference[mask]).max() / scale < 1e-12
+        # 1e-9 keeps ~175x headroom over the one-ulp floor described above while
+        # staying ~1e7 times tighter than any convention error, which is O(1).
+        assert numpy.abs(mine[mask] - reference[mask]).max() / scale < 1e-9
         # Outside the band bilby returns exactly zero; so must we.
         assert numpy.count_nonzero(mine[~mask]) == 0
 

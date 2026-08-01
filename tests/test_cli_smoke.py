@@ -18,6 +18,7 @@ SCRIPTS = [
     "gwforge_workflow",
     "gwforge_optimal_snr",
     "gwforge_estimate_psd",
+    "gwforge_fisher",
 ]
 
 

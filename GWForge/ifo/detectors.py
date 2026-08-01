@@ -108,6 +108,8 @@ class IFO:
             filename = os.path.join(
                 os.path.dirname(__file__), "ifos", "{}.ifo".format(self.name)
             )
+            if not os.path.isfile(filename):
+                raise FileNotFoundError(filename)
             if self.name == "ET":
                 file_type = "psd"
                 load_psd = psd.from_power_spectral_density_file

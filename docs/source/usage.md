@@ -9,6 +9,9 @@
 3. **Injecting Signals:**
    Inject gravitational wave signal(s) into the generated detector data using the previously generated population and a chosen waveform model.
 
+4. **Detector Response:**
+   Project signals onto the detectors with a frequency- and time-dependent antenna response, which drops the long-wavelength and static-pattern approximations that break for XG detectors.
+
 I have curated some examples below for reference. Please give them a try!
 ```{toctree}
 :caption: 'Contents:'
@@ -17,6 +20,7 @@ I have curated some examples below for reference. Please give them a try!
 population
 noise
 inject
+antenna
 workflow
 ```
 

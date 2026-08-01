@@ -12,6 +12,5 @@ dependencies:
   - pip
   - gcc_linux-64
   - gxx_linux-64
-  - black
   - ruff
   - pytest

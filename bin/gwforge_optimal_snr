@@ -14,11 +14,18 @@ from rich.progress import track
 import pandas as pd
 from GWForge.conversion import get_safe_signal_durations
 from GWForge.ifo.detectors import Network
+from GWForge.ifo.antenna import inject_signal_with_response
 from GWForge.utils import hdf_append
 
 
 def get_optimal_snr(
-    injection_parameters, parameters, detectors, waveform_arguments, sampling_frequency=8192
+    injection_parameters,
+    parameters,
+    detectors,
+    waveform_arguments,
+    sampling_frequency=8192,
+    earth_rotation=True,
+    finite_size=True,
 ):
     bilby.core.utils.setup_logger(log_level="warning")
     ifos = Network(ifos=detectors).initialise_ifos()
@@ -41,9 +48,14 @@ def get_optimal_snr(
     for parameter in parameters:
         signal_parameters[parameter] = injection_parameters[parameter]
     signal_parameters["geocent_time"] = injection_parameters["tc"]
-    ifos.inject_signal(
+    # bilby's inject_signal hard-codes the long-wavelength, static-pattern
+    # response; use GWForge's frequency-dependent one instead.
+    inject_signal_with_response(
+        ifos,
         waveform_generator=waveform_generator,
         parameters=signal_parameters,
+        earth_rotation=earth_rotation,
+        finite_size=finite_size,
     )
     for ifo in ifos:
         signal_parameters["{}_optimal_snr".format(ifo.name)] = ifo.meta_data[
@@ -52,7 +64,14 @@ def get_optimal_snr(
     return signal_parameters
 
 
-def multiprocess(parameters, detectors, waveform_arguments, chunk):
+def multiprocess(
+    parameters,
+    detectors,
+    waveform_arguments,
+    chunk,
+    earth_rotation=True,
+    finite_size=True,
+):
     results_list = []
     for idx, row in chunk.iterrows():
         meta_data = get_optimal_snr(
@@ -60,6 +79,8 @@ def multiprocess(parameters, detectors, waveform_arguments, chunk):
             parameters=parameters,
             detectors=detectors,
             waveform_arguments=waveform_arguments,
+            earth_rotation=earth_rotation,
+            finite_size=finite_size,
         )
         results_list.append(meta_data)
     return results_list
@@ -118,6 +139,19 @@ def main():
         type=int,
         default=10,
         help="Number of CPU cores to use for parallel processing",
+    )
+    parser.add_argument(
+        "--no-earth-rotation",
+        action="store_true",
+        help="Freeze the antenna pattern at the coalescence time instead of "
+        "evolving it along the signal (restores the historical behaviour)",
+    )
+    parser.add_argument(
+        "--no-finite-size",
+        action="store_true",
+        help="Use the long-wavelength approximation for the detector response "
+        "instead of the per-arm transfer function (restores the historical "
+        "behaviour)",
     )
 
     opts = parser.parse_args()
@@ -183,7 +217,14 @@ def main():
     chunks = numpy.array_split(sub, opts.cores)
     logging.info("Calculating optimal snr")
     with Pool(processes=opts.cores) as pool:
-        partial_multiprocess = partial(multiprocess, parameters, detectors, waveform_arguments)
+        partial_multiprocess = partial(
+            multiprocess,
+            parameters,
+            detectors,
+            waveform_arguments,
+            earth_rotation=not opts.no_earth_rotation,
+            finite_size=not opts.no_finite_size,
+        )
         results_list = list(
             track(
                 pool.imap(partial_multiprocess, chunks),

@@ -30,8 +30,8 @@ jobs:
     - name: Forbid np and plt
       shell: bash -l {0}
       run: |
-        if grep -R "np\." gwforge || grep -R "plt\." gwforge; then
-          echo "Forbidden shorthand imports found."
+        if grep -REn --exclude-dir=__pycache__ "^[[:space:]]*(import numpy as np|import matplotlib\.pyplot as plt|from matplotlib import pyplot as plt)\b" GWForge bin tests __init__.py; then
+          echo "Forbidden shorthand imports found. Use numpy and pylab."
           exit 1
         fi
 

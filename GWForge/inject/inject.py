@@ -1,4 +1,5 @@
 from ..ifo.detectors import Network
+from ..ifo.antenna import inject_signal_with_response
 import bilby
 
 bilby.core.utils.setup_logger(log_level="warning")
@@ -11,6 +12,8 @@ class Inject:
         data,
         injection_parameters,
         injection_type="bbh",
+        earth_rotation=True,
+        finite_size=True,
         **waveform_arguments,
     ):
         """
@@ -24,6 +27,15 @@ class Inject:
             Dictionary of injection parameters.
         injection_type: str, optional
             Type of injection (default: 'bbh').
+        earth_rotation: bool, optional
+            Evolve the antenna pattern and arrival delay along the signal's
+            time-frequency track, instead of freezing them at the coalescence
+            time (default: True). Matters for the hour-long inspirals XG
+            detectors see.
+        finite_size: bool, optional
+            Apply the per-arm finite light-travel-time transfer function,
+            dropping the long-wavelength approximation (default: True). Matters
+            near the free spectral range, 3.75 kHz for CE's 40 km arms.
         waveform_arguments: dict, optional
             Arguments for the waveform generator
         """
@@ -41,6 +53,8 @@ class Inject:
 
         self.injection_parameters = injection_parameters
         self.injection_type = injection_type.lower()
+        self.earth_rotation = earth_rotation
+        self.finite_size = finite_size
 
         if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
             self.injection_type = "bbh"
@@ -79,8 +93,14 @@ class Inject:
             parameter_conversion=self.parameter_conversion,
             waveform_arguments=self.waveform_arguments,
         )
-        # Add snippet to check if the signal is in the data segment
-        self.ifos.inject_signal(
-            waveform_generator=waveform_generator, parameters=self.injection_parameters
+        # bilby's InterferometerList.inject_signal hard-codes its own
+        # long-wavelength, static-pattern response, so the projection is done
+        # here instead. The meta_data it fills is identical.
+        inject_signal_with_response(
+            self.ifos,
+            waveform_generator=waveform_generator,
+            parameters=self.injection_parameters,
+            earth_rotation=self.earth_rotation,
+            finite_size=self.finite_size,
         )
         return self.ifos

@@ -1,8 +1,8 @@
 # Proposed ET detector with triangular configuration
 name = 'ET'
 power_spectral_density = None
-minimum_frequency = 2
-maximum_frequency = 2048
+minimum_frequency = 6
+maximum_frequency = 4096
 length = 10
 latitude = 40. + 31./60
 longitude = 9. + 25./60

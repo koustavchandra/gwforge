@@ -36,3 +36,19 @@ Again, like before you can choose `fft-scheme` to be either `numpy`, `mkl` or `c
 ```
 
 Available `injection-type` (for the moment) are `bbh, bns, nsbh, imbhb, imbbh, pbh`.
+## Detector response
+
+The `bilby` injection method projects signals onto the detectors using GWForge's
+frequency- and time-dependent antenna response, which drops the long-wavelength
+and static-pattern approximations. Both corrections are **on by default**:
+
+```ini
+[Injections]
+injection-method = bilby
+earth-rotation = True
+finite-size = True
+```
+
+Set either to `False` to recover bilby's historical behaviour exactly. The
+`pycbc` injection method is unaffected — it uses LAL's own projection. See
+[Detector response](antenna.md) for the physics and its validation.

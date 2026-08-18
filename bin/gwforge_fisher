@@ -1,0 +1,293 @@
+#!/usr/bin/env python
+"""
+Forecast parameter-estimation uncertainties with the Fisher matrix, optionally
+with the second-order DALI correction.
+
+Usage:
+    gwforge_fisher --config-file path/to/config.ini
+"""
+import argparse
+import configparser
+import logging
+import os
+import pickle
+import warnings
+
+import numpy
+from rich.progress import track
+
+warnings.filterwarnings("ignore", message="ERFA function*")
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+
+def forecast(injection_parameters, index, config_settings):
+    """Build the Fisher matrix, and the DALI posterior when asked, for one source.
+
+    Parameters
+    ----------
+    injection_parameters : dict
+        Source parameters.
+    index : int
+        Position in the injection set, used to label output files.
+    config_settings : dict
+        Everything read out of the configuration file.
+
+    Returns
+    -------
+    dict
+        The result record written to the output pickle.
+    """
+    import bilby
+    from GWForge.fisher import FisherMatrix, covariance
+    from GWForge.fisher.config import segment_duration
+    from GWForge.ifo.detectors import Network
+
+    bilby.core.utils.setup_logger(log_level="warning")
+    waveform = config_settings["waveform"]
+    fisher_options = config_settings["fisher"]
+
+    duration = segment_duration(
+        injection_parameters,
+        waveform["minimum_frequency"],
+        waveform["waveform_arguments"]["waveform_approximant"],
+        maximum=config_settings["maximum_duration"],
+    )
+    logging.info(
+        "Source %d: using a %.0f s segment at %.0f Hz",
+        index,
+        duration,
+        config_settings["sampling_frequency"],
+    )
+
+    ifos = Network(
+        ifos=list(config_settings["detectors"]), psd_files=config_settings["psd_files"]
+    ).initialise_ifos()
+    ifos.set_strain_data_from_zero_noise(
+        sampling_frequency=config_settings["sampling_frequency"],
+        duration=duration,
+        start_time=injection_parameters["geocent_time"] - duration + 2,
+    )
+
+    waveform_generator = bilby.gw.WaveformGenerator(
+        duration=duration,
+        sampling_frequency=config_settings["sampling_frequency"],
+        frequency_domain_source_model=waveform["frequency_domain_source_model"],
+        parameter_conversion=waveform["parameter_conversion"],
+        waveform_arguments=waveform["waveform_arguments"],
+    )
+
+    fisher = FisherMatrix(
+        ifos,
+        waveform_generator,
+        injection_parameters,
+        fisher_parameters=fisher_options["parameters"],
+        earth_rotation=fisher_options["earth_rotation"],
+        finite_size=fisher_options["finite_size"],
+        step_sizes=fisher_options["step_sizes"],
+        order=fisher_options["order"],
+        calibrate=fisher_options["calibrate"],
+        target_change=fisher_options["target_change"],
+        estimate_noise=fisher_options["estimate_noise"],
+    )
+
+    matrix, diagnostics = covariance(fisher.matrix, names=fisher.names)
+    record = {
+        "index": index,
+        "parameters": dict(injection_parameters),
+        "names": list(fisher.names),
+        "fisher": fisher.matrix,
+        "fisher_per_detector": fisher.per_detector,
+        "covariance": matrix,
+        "sigmas": fisher.sigmas,
+        "optimal_snrs": fisher.optimal_snrs,
+        "duration": duration,
+        "steps": dict(fisher.derivatives.steps),
+        # Per-parameter derivative error from the waveform model's own noise;
+        # travels with the forecast so the caveat is not lost with the log.
+        "noise_ratios": dict(fisher.derivatives.noise_ratios),
+        "waveform_evaluations": fisher.derivatives.waveform_evaluations,
+        "order": fisher_options["order"],
+        **diagnostics,
+    }
+
+    priors = config_settings["priors"]
+    if priors["prior_file"]:
+        record["prior_file"] = priors["prior_file"]
+
+    if fisher_options["order"] >= 2:
+        record["doublet"] = fisher.doublet
+        record["quartic"] = fisher.quartic
+        record["samples"], record["sample_parameters"] = _sample(
+            fisher, config_settings, index
+        )
+
+    return record
+
+
+def _sample(fisher, config_settings, index):
+    """Draw the DALI posterior for one source."""
+    from GWForge.fisher.dali import DALILikelihood, build_priors, sample_posterior
+
+    priors = config_settings["priors"]
+    likelihood = DALILikelihood(fisher, order=config_settings["fisher"]["order"])
+    prior_dict = build_priors(
+        priors["prior_file"],
+        fisher.names,
+        fisher.parameters,
+        enforce_physicality=priors["enforce_physicality"],
+        sigmas=fisher.sigmas,
+    )
+    result = sample_posterior(
+        likelihood,
+        prior_dict,
+        outdir=config_settings["output_directory"],
+        label="fisher_source_{}".format(index),
+        sampler=config_settings["sampler"],
+        **config_settings["sampler_kwargs"],
+    )
+    names = list(fisher.names)
+    return result.posterior[names].to_numpy(), names
+
+
+def main():
+    from GWForge.fisher.config import (
+        fisher_settings,
+        parse_collection,
+        prior_settings,
+        read_injections,
+        waveform_settings,
+    )
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config-file", required=True, help="Path to the configuration ini file"
+    )
+    parser.add_argument(
+        "--output-file",
+        default=None,
+        help="Where to write the results pickle (overrides [Output] output-file)",
+    )
+    parser.add_argument(
+        "--start-index", type=int, default=None, help="First injection to process"
+    )
+    parser.add_argument(
+        "--end-index", type=int, default=None, help="Stop before this injection"
+    )
+    opts = parser.parse_args()
+
+    config = configparser.ConfigParser()
+    if not config.read(opts.config_file):
+        raise FileNotFoundError("Could not read {}".format(opts.config_file))
+
+    injections = read_injections(config)
+    if opts.start_index is not None or opts.end_index is not None:
+        injections = injections[opts.start_index : opts.end_index]
+    logging.info("Forecasting %d source(s)", len(injections))
+
+    fisher_options = fisher_settings(config)
+    output_file = opts.output_file or config.get(
+        "Output", "output-file", fallback="fisher.pkl"
+    )
+    output_directory = os.path.dirname(os.path.abspath(output_file)) or "."
+    os.makedirs(output_directory, exist_ok=True)
+
+    detectors = parse_collection(config, "IFOS", "detectors", fallback=["CE40", "CE20", "ET"])
+    config_settings = {
+        "detectors": detectors,
+        "psd_files": parse_collection(config, "IFOS", "psd-dict"),
+        "sampling_frequency": config.getfloat("IFOS", "sampling-frequency", fallback=4096),
+        "maximum_duration": config.getfloat("IFOS", "maximum-duration", fallback=None),
+        "waveform": waveform_settings(config),
+        "fisher": fisher_options,
+        "priors": prior_settings(config, fisher_options["order"]),
+        "output_directory": output_directory,
+        "sampler": config.get("Output", "sampler", fallback="emcee"),
+        "sampler_kwargs": parse_collection(config, "Output", "sampler-kwargs") or {},
+    }
+    logging.info(
+        "Order %d Fisher over %s for network %s",
+        fisher_options["order"],
+        ", ".join(fisher_options["parameters"]),
+        detectors,
+    )
+
+    results = []
+    for position, injection_parameters in enumerate(
+        track(injections, description="Forecasting")
+    ):
+        index = (opts.start_index or 0) + position
+        try:
+            results.append(forecast(injection_parameters, index, config_settings))
+        except Exception as error:
+            # One pathological source should not lose the whole population; the
+            # failure is recorded so it is visible in the output rather than
+            # silently missing.
+            logging.error("Source %d failed: %s", index, error)
+            results.append(
+                {"index": index, "parameters": dict(injection_parameters), "error": str(error)}
+            )
+
+    logging.info("Saving results to %s", output_file)
+    with open(output_file, "wb") as handle:
+        pickle.dump(results, handle)
+
+    if config.getboolean("Output", "plot-corner", fallback=True):
+        _plot(results, output_directory, fisher_options)
+
+    _summarise(results)
+    logging.info("Done!")
+
+
+def _plot(results, output_directory, fisher_options):
+    """Write one corner plot per successful source."""
+    from GWForge.fisher.plot import overlay_corner, samples_from_covariance
+
+    for record in results:
+        if "error" in record:
+            continue
+        names = record["names"]
+        mean = numpy.array([record["parameters"][name] for name in names])
+        datasets = [
+            ("Fisher (order 1)", samples_from_covariance(mean, record["covariance"], seed=42))
+        ]
+        if record.get("samples") is not None:
+            datasets.append(("DALI (order 2)", record["samples"]))
+        path = os.path.join(
+            output_directory, "fisher_corner_{}.png".format(record["index"])
+        )
+        overlay_corner(
+            datasets,
+            names,
+            truths=mean,
+            save=path,
+            title="source {}, network SNR {:.1f}".format(
+                record["index"], record["optimal_snrs"]["network"]
+            ),
+        )
+
+
+def _summarise(results):
+    """Log a one-line summary per source."""
+    for record in results:
+        if "error" in record:
+            logging.info("source %d: FAILED (%s)", record["index"], record["error"])
+            continue
+        sigmas = record["sigmas"]
+        headline = ", ".join(
+            "{} {:.3e}".format(name, sigmas[name])
+            for name in list(sigmas)[: min(3, len(sigmas))]
+        )
+        logging.info(
+            "source %d: network SNR %.1f, cond %.2e, %s",
+            record["index"],
+            record["optimal_snrs"]["network"],
+            record["condition_number"],
+            headline,
+        )
+
+
+if __name__ == "__main__":
+    main()

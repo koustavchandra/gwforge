@@ -2,6 +2,7 @@ import numpy
 import logging
 import bilby
 from .. import utils
+from ..cosmology import astropy_cosmology, differential_comoving_volume
 from lal import YRJUL_SI, PC_SI
 from scipy.interpolate import interp1d
 from scipy.integrate import cumulative_trapezoid
@@ -10,13 +11,14 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# Supported time-delay models. Both map to a single power-law form
-# p(tau) ∝ tau^-slope on [td_min, td_max]; "inverse" is the 1/tau special case
-# (slope = 1) used by Regimbau et al. and pycbc's default.
+# Supported time-delay models.
 TIME_DELAY_MODELS = ("inverse", "powerlaw")
-# Minimum formation->merger delay in Gyr (Regimbau et al. 2012,
+# Regimbau et al. 2012 said use 20 Myr (0.02 Gyr)
 # Phys. Rev. D 86, 122001), below which p(tau) = 0.
 DEFAULT_TIME_DELAY_MINIMUM = 0.02
+# Merger rate density at z = 0 in Gpc^-3 yr^-1: the posterior median of the O4b
+# `Default` analysis (arXiv:2605.27226). One should get roughly 33000 BBHs if z_max = 10
+GWTC5_LOCAL_MERGER_RATE_DENSITY = 23.3895396
 # Lookback-time table resolution. The table must reach the age of the universe,
 # so it extends to very high redshift (lookback time saturates as z -> inf).
 FORMATION_GRID_POINTS = 20000
@@ -152,26 +154,25 @@ class Redshift:
         self.H0, self.Om0, self.Ode0, self.Tcmb0, self.Ob0 = H0, Om0, Ode0, Tcmb0, Ob0
 
     def import_cosmology(self):
+        """Resolve this object's cosmology specification.
 
-        try:
-            from astropy import cosmology
+        Delegates to :func:`GWForge.cosmology.astropy_cosmology`, which is the
+        single place a GWForge cosmology specification is resolved, so that the
+        redshifts a population is sampled from and the luminosity distances it
+        is labelled with cannot come from two different universes.
 
-            cosmology = getattr(cosmology, self.cosmology)
-            return cosmology
-        except (ImportError, AttributeError):
-            if self.H0 is not None and self.Om0 is not None and self.Ode0 is not None:
-                logging.info("Importing FLRW Cosmology with the provided constants")
-                from astropy.cosmology import LambdaCDM
-
-                return LambdaCDM(
-                    H0=self.H0,
-                    Om0=self.Om0,
-                    Ode0=self.Ode0,
-                    Tcmb0=self.Tcmb0,
-                    Ob0=self.Ob0,
-                )
-            else:
-                raise ValueError("Could not import cosmology")
+        Returns
+        -------
+        astropy.cosmology.FLRW
+        """
+        return astropy_cosmology(
+            name=self.cosmology,
+            H0=self.H0,
+            Om0=self.Om0,
+            Ode0=self.Ode0,
+            Tcmb0=self.Tcmb0,
+            Ob0=self.Ob0,
+        )
 
     def differential_lookback_time(self, redshift):
         """
@@ -315,17 +316,12 @@ class Redshift:
         and the :math:`1/(1+z)` factor converting source-frame to detector-frame
         time. Reproduces ``pycbc.population.population_models.coalescence_rate``.
         """
-        from astropy import units
-
         rate_density = self.rate_density()
         cosmo = self.import_cosmology()
         z = numpy.linspace(0, self.maximum_redshift, COALESCENCE_GRID_POINTS)
-        differential_comoving_volume = (
-            (cosmo.differential_comoving_volume(z) * 4 * numpy.pi * units.sr)
-            .to(units.Mpc**3)
-            .value
+        dr_dz = (
+            rate_density(z) * differential_comoving_volume(cosmo, z) / (1 + z)
         )
-        dr_dz = rate_density(z) * differential_comoving_volume / (1 + z)
         return interp1d(z, dr_dz, fill_value="extrapolate")
 
     def average_time_between_signals(self):

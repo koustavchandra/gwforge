@@ -1,26 +1,5 @@
-"""Numpy/SciPy reimplementations of the ``gwpopulation`` smoothed mass models.
-
-GWForge only ever used a thin slice of ``gwpopulation`` for its mass models:
-the ``SinglePeak``/``MultiPeak``/``BrokenPowerLaw`` ``SmoothedMassDistribution``
-classes, and only their ``m1s``/``qs`` grids plus ``p_m1``/``p_q`` evaluations.
-These are the standard Talbot & Thrane (2018) analytic forms with a Planck-taper
-low-mass smoothing window (see the GWTC-3 population paper, arXiv:2111.03634).
-
-Reimplementing them here removes the runtime dependency on ``gwpopulation`` (and
-its heavy transitive stack). The classes intentionally mirror the ``gwpopulation``
-API (same constructor signature, ``m1s``/``qs`` attributes, ``p_m1``/``p_q``
-methods, same keyword names) so they are drop-in replacements and can be validated
-directly against ``gwpopulation`` -- see ``tests/test_population_smoothed_mass.py``.
-
-The functional forms match ``gwpopulation`` exactly:
-
-* ``powerlaw`` / ``truncnorm`` -- normalised power-law and truncated-normal pdfs.
-* ``smoothing`` -- one-sided Planck-taper window on ``(mmin, mmin + delta_m]``
-  (Talbot & Thrane 2018, Eqs. 7-8; note the sign fix documented there).
-* ``two_component_single`` / ``three_component_single`` /
-  ``double_power_law_primary_mass`` -- the primary-mass models.
-* ``p_m1`` normalises by the trapezoidal integral over the ``m1s`` grid;
-  ``p_q`` normalises via linear interpolation of the per-``m1`` mass-ratio norm.
+"""
+Numpy/SciPy reimplementations of the ``gwpopulation`` smoothed mass models.
 """
 
 import numpy
@@ -198,8 +177,7 @@ def broken_power_law_two_peak(
 
 
 class BaseSmoothedMassDistribution:
-    """Shared machinery for the smoothed primary-mass + power-law mass-ratio models.
-
+    """
     Mirrors ``gwpopulation.models.mass.BaseSmoothedMassDistribution`` closely enough
     to be a drop-in replacement for GWForge's usage: it exposes ``m1s``/``qs`` grids
     and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
@@ -232,27 +210,61 @@ class BaseSmoothedMassDistribution:
         p_m = p_m * smoothing(self.m1s, mmin=mmin, mmax=self.mmax, delta_m=delta_m)
         return numpy.nan_to_num(numpy.trapezoid(p_m, self.m1s))
 
-    def p_q(self, dataset, beta, mmin, delta_m):
-        p_q = powerlaw(dataset["mass_ratio"], beta, 1, mmin / dataset["mass_1"])
+    def p_q(self, dataset, beta, mmin, delta_m, mmin_2=None, delta_m_2=None):
+        r"""
+        Mass-ratio distribution :math:`p(q \mid m_1) \propto q^\beta S(m_2)`.
+
+        Parameters
+        ----------
+        dataset : dict
+            ``mass_1`` and ``mass_ratio``.
+        beta : float
+            Power-law index :math:`\beta_q`.
+        mmin, delta_m : float
+            The **primary** taper, :math:`(m_{1,\rm low}, \delta_{m,1})`.
+        mmin_2, delta_m_2 : float or None
+            The **secondary** taper, :math:`(m_{2,\rm low}, \delta_{m,2})`
+            (the posterior's ``mlow_2``/``delta_m_2``). Each defaults to its
+            primary counterpart, which is the single-taper behaviour the models
+            without a separate secondary edge -- ``PowerLaw+Peak``,
+            ``MultiPeak``, ``BrokenPowerLaw`` -- keep.
+
+        Returns
+        -------
+        numpy.ndarray
+        """
+        mmin_2 = mmin if mmin_2 is None else mmin_2
+        delta_m_2 = delta_m if delta_m_2 is None else delta_m_2
+        p_q = powerlaw(dataset["mass_ratio"], beta, 1, mmin_2 / dataset["mass_1"])
         p_q = p_q * smoothing(
             dataset["mass_1"] * dataset["mass_ratio"],
-            mmin=mmin,
+            mmin=mmin_2,
             mmax=dataset["mass_1"],
-            delta_m=delta_m,
+            delta_m=delta_m_2,
         )
-        # The per-m1 norm vanishes as m1 -> mmin (the q-support collapses); the
+        # The per-m1 norm vanishes as m1 -> mmin_2 (the q-support collapses); the
         # resulting 0/0 is expected and cleaned up by nan_to_num below.
         with numpy.errstate(divide="ignore", invalid="ignore"):
             p_q = p_q / self._norm_p_q(
-                beta=beta, mmin=mmin, delta_m=delta_m, masses=dataset["mass_1"]
+                beta=beta,
+                mmin=mmin,
+                delta_m=delta_m,
+                masses=dataset["mass_1"],
+                mmin_2=mmin_2,
+                delta_m_2=delta_m_2,
             )
         return numpy.nan_to_num(p_q)
 
-    def _norm_p_q(self, beta, mmin, delta_m, masses):
+    def _norm_p_q(self, beta, mmin, delta_m, masses, mmin_2=None, delta_m_2=None):
         """Per-``m1`` mass-ratio norm, linearly interpolated onto ``masses``."""
-        p_q = powerlaw(self.qs_grid, beta, 1, mmin / self.m1s_grid)
+        mmin_2 = mmin if mmin_2 is None else mmin_2
+        delta_m_2 = delta_m if delta_m_2 is None else delta_m_2
+        p_q = powerlaw(self.qs_grid, beta, 1, mmin_2 / self.m1s_grid)
         p_q = p_q * smoothing(
-            self.m1s_grid * self.qs_grid, mmin=mmin, mmax=self.m1s_grid, delta_m=delta_m
+            self.m1s_grid * self.qs_grid,
+            mmin=mmin_2,
+            mmax=self.m1s_grid,
+            delta_m=delta_m_2,
         )
         norms = numpy.nan_to_num(numpy.trapezoid(p_q, self.qs, axis=0))
         return numpy.interp(masses, self.m1s, norms)

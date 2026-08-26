@@ -38,22 +38,212 @@ choices = [
 
 sampler_choices = ["importance_m1_m2", "importance_m1_q", "lint"]
 
+# BGP fiducials: the posterior medians of the O4b ``Default`` analysis released
+# with `arXiv:2605.27226 <https://arxiv.org/abs/2605.27226>`_, from
+# ``o4b_default_mass_TwoPeakBrokenPowerLawSmoothedMassDistribution_redshift_``
+# ``PowerLawRedshift_magnitude_iid_spin_magnitude_gaussian_tilt_iid_spin_``
+# ``orientation_result.hdf5``. The release spells several of them differently:
+# ``mlow_1`` is ``mmin``, ``delta_m_1`` is ``delta_m``, ``mlow_2`` is
+# ``mmin_2``, ``mmax`` is ``m_high`` and ``break_mass`` is ``m_break``.
+BGP_PARAMETERS = {
+    "alpha_1": 1.456442737,
+    "alpha_2": 5.100400428,
+    "m_break": 37.9806382,
+    "mmin": 4.489078237,
+    "delta_m": 3.123416382,
+    # The secondary gets its own Planck taper, independent of the primary's.
+    "mmin_2": 3.487749145,
+    "delta_m_2": 5.60056759,
+    # A delta-function prior in the analysis, not a measurement.
+    "m_high": 300.0,
+    "lam_0": 0.4206178692,
+    "lam_1": 0.5228817702,
+    # Peak 1 is the *narrow low-mass* one and carries the larger weight; peak 2
+    # is the broad ~33 Msun feature. The pre-O4b defaults had them the other way
+    # round, which is worth knowing when reading an old config.
+    "mpp_1": 9.989384122,
+    "sigpp_1": 0.6601839103,
+    "mpp_2": 33.2656028,
+    "sigpp_2": 4.582221363,
+    "beta": 0.8049660633,
+    # Upper edge of the evaluation grid, not a model parameter.
+    "maximum_mass": 300.0,
+}
+
+CONDITIONAL_SAMPLING_CHUNK = 4096
+
+NODES_PER_PEAK_WIDTH = 40
+
+# Bounds on the primary-mass grid size. The floor is the historical default;
+# the ceiling keeps the (m1, q) mesh in ``_norm_p_q`` to a few hundred MB.
+MINIMUM_MASS_GRID_NODES = 1000
+MAXIMUM_MASS_GRID_NODES = 40000
+
+
+def primary_mass_grid_nodes(parameters, minimum_mass, maximum_mass):
+    """
+    Number of primary-mass grid nodes needed to resolve the narrowest peak.
+
+    The smoothed mass models are sampled by wrapping the density in a
+    :class:`bilby.core.prior.Interped`, which builds a **linear interpolant** on
+    this grid and inverse-CDF samples from that. The interpolant, not the
+    density, is what the catalogue is drawn from, so the grid has to resolve
+    every feature the density has.
+
+    Parameters
+    ----------
+    parameters : dict
+        Mass-model parameters. Any key beginning with ``sigpp`` is treated as a
+        peak width; models without peaks keep the floor.
+    minimum_mass, maximum_mass : float
+        Range the grid spans.
+
+    Returns
+    -------
+    int
+        Clipped to ``[MINIMUM_MASS_GRID_NODES, MAXIMUM_MASS_GRID_NODES]``.
+    """
+    widths = [
+        float(value)
+        for name, value in parameters.items()
+        if name.startswith("sigpp") and float(value) > 0
+    ]
+    if not widths:
+        return MINIMUM_MASS_GRID_NODES
+    needed = NODES_PER_PEAK_WIDTH * (maximum_mass - minimum_mass) / min(widths)
+    nodes = int(numpy.clip(needed, MINIMUM_MASS_GRID_NODES, MAXIMUM_MASS_GRID_NODES))
+    if needed > MAXIMUM_MASS_GRID_NODES:
+        logging.warning(
+            "Resolving a peak of width %.3g Msun over [%g, %g] would need %d "
+            "grid nodes; capping at %d. The sampled distribution will be a "
+            "slightly smoothed version of the requested one.",
+            min(widths),
+            minimum_mass,
+            maximum_mass,
+            int(needed),
+            MAXIMUM_MASS_GRID_NODES,
+        )
+    return nodes
+
+
+def sample_mass_ratio_given_primary(
+    model, primary_samples, mass_ratio_parameters, random_state=None
+):
+    r"""Draw ``mass_ratio`` conditionally on ``mass_1``, by inverse CDF.
+
+    Parameters
+    ----------
+    model : BaseSmoothedMassDistribution
+        Supplies the ``m1s``/``qs`` grids and ``p_q``.
+    primary_samples : array_like
+        Sampled ``mass_1_source``.
+    mass_ratio_parameters : dict
+        ``beta``, ``mmin`` and ``delta_m``, and optionally ``mmin_2`` and
+        ``delta_m_2`` for models whose secondary has its own taper.
+    random_state : numpy.random.Generator or None
+        Defaults to numpy's global RNG, so a single seed governs it.
+
+    Returns
+    -------
+    numpy.ndarray
+        Mass-ratio samples, the same length as ``primary_samples``.
+    """
+    primary_samples = numpy.asarray(primary_samples, dtype=float)
+    m1s = model.m1s
+    # The secondary's own taper edge, which is where p(q | m_1) turns on. 
+    minimum_mass = mass_ratio_parameters.get(
+        "mmin_2", mass_ratio_parameters["mmin"]
+    )
+
+    fraction = numpy.linspace(0.0, 1.0, len(model.qs))
+    lowest_ratio = numpy.clip(minimum_mass / m1s, 0.0, 1.0)[:, numpy.newaxis]
+    ratio_grid = lowest_ratio + (1.0 - lowest_ratio) * fraction[numpy.newaxis, :]
+    primary_grid = numpy.broadcast_to(
+        m1s[:, numpy.newaxis], ratio_grid.shape
+    )
+    conditional = model.p_q(
+        {"mass_1": primary_grid, "mass_ratio": ratio_grid}, **mass_ratio_parameters
+    )
+
+    # Row-wise cumulative integral: the grids differ per row, so this is a
+    # trapezoid over each row's own spacing rather than a shared one.
+    widths = numpy.diff(ratio_grid, axis=1)
+    increments = 0.5 * (conditional[:, 1:] + conditional[:, :-1]) * widths
+    cumulative = numpy.concatenate(
+        [numpy.zeros((len(m1s), 1)), numpy.cumsum(increments, axis=1)], axis=1
+    )
+    totals = cumulative[:, -1:]
+    # Rows where the conditional has no support at all (m1 below mmin, so no q
+    # gives a valid secondary) would divide by zero; they are never selected,
+    # because p_m1 vanishes there too.
+    cumulative = numpy.divide(
+        cumulative, totals, out=numpy.zeros_like(cumulative), where=totals > 0
+    )
+
+    uniform = (
+        numpy.random.uniform(size=primary_samples.size)
+        if random_state is None
+        else random_state.uniform(size=primary_samples.size)
+    )
+    upper = numpy.clip(numpy.searchsorted(m1s, primary_samples), 1, len(m1s) - 1)
+    lower = upper - 1
+    weight = (primary_samples - m1s[lower]) / (m1s[upper] - m1s[lower])
+
+    samples = numpy.empty(primary_samples.size)
+    for start in range(0, primary_samples.size, CONDITIONAL_SAMPLING_CHUNK):
+        stop = start + CONDITIONAL_SAMPLING_CHUNK
+        piece = slice(start, stop)
+        draws = uniform[piece]
+        below = _invert_rows(
+            cumulative[lower[piece]], ratio_grid[lower[piece]], draws
+        )
+        above = _invert_rows(
+            cumulative[upper[piece]], ratio_grid[upper[piece]], draws
+        )
+        samples[piece] = (1.0 - weight[piece]) * below + weight[piece] * above
+    # The bracketing rows have slightly different support edges
+    return numpy.clip(samples, minimum_mass / primary_samples, 1.0)
+
+
+def _invert_rows(cumulative, support, draws):
+    """Invert one CDF per row at one draw per row, by linear interpolation.
+
+    Parameters
+    ----------
+    cumulative : numpy.ndarray
+        ``(n_rows, n_nodes)`` normalised CDFs.
+    support : numpy.ndarray
+        ``(n_rows, n_nodes)`` nodes -- one grid per row, because each primary
+        mass has its own mass-ratio support edge.
+    draws : numpy.ndarray
+        ``(n_rows,)`` uniform draws.
+
+    Returns
+    -------
+    numpy.ndarray
+    """
+    index = numpy.clip(
+        numpy.sum(cumulative < draws[:, numpy.newaxis], axis=1),
+        1,
+        cumulative.shape[1] - 1,
+    )
+    rows = numpy.arange(len(draws))
+    low = cumulative[rows, index - 1]
+    high = cumulative[rows, index]
+    span = high - low
+    fraction = numpy.divide(
+        draws - low, span, out=numpy.zeros_like(draws), where=span > 0
+    )
+    left = support[rows, index - 1]
+    return left + fraction * (support[rows, index] - left)
+
 
 class Mass:
     def __init__(
         self,
         mass_model,
         number_of_samples,
-        parameters={
-            "alpha": 3.37,
-            "beta": 0.76,
-            "delta_m": 5.23,
-            "mmin": 4.89,
-            "mmax": 88.81,
-            "lam": 0.04,
-            "mpp": 33.60,
-            "sigpp": 4.59,
-        },
+        parameters=None,
         full_pop_sampler="importance_m1_m2",
     ):
         """
@@ -64,13 +254,19 @@ class Mass:
         number_of_samples : (int)
             The number of samples to generate. [Ideal: Exactly same as redshift samples]
         parameters: (dict, optional)
-            A dictionary of model parameters. Default is provided assuming PowerLawPeak
+            A dictionary of model parameters. Omit it to get the model's
+            fiducial values from :data:`BGP_PARAMETERS` -- the GWTC-5.0
+            medians for BGP if mass_model is "bgp".
         full_pop_sampler : str
             Sampler to be used for full pop gwtc-4 model. [Options: {}] [Default: importance_m1_m2]
         """.format(choices, sampler_choices)
         self.mass_model = utils.remove_special_characters(mass_model.lower())
         self.number_of_samples = number_of_samples
-        self.parameters = parameters
+        if parameters is None:
+            parameters = BGP_PARAMETERS if self.mass_model == "bgp" else {}
+        # Copy so the module-level defaults above cannot be mutated through an
+        # instance, and so a caller's dictionary is left alone.
+        self.parameters = dict(parameters)
         self.full_pop_sampler = full_pop_sampler
 
     def sample(self, **sampler_kwargs):
@@ -91,38 +287,62 @@ class Mass:
             # Parameters not passed to the primary-mass model (beta drives the mass
             # ratio; maximum_mass only sizes the BGP evaluation grid).
             excluded_from_primary = ("beta",)
+            # BGP's Gaussian peaks are only left-truncated, so it needs a wider
+            # evaluation grid than the 100 Msun default the others use.
+            maximum_mass = (
+                self.parameters.get("maximum_mass", 200)
+                if "bgp" in self.mass_model
+                else 100
+            )
+            minimum_mass = self.parameters.get("mmin", 2)
+            # Enough nodes to resolve the narrowest peak, for the same reason.
+            nodes = primary_mass_grid_nodes(
+                self.parameters, minimum_mass, maximum_mass
+            )
+            logging.info(
+                "Primary-mass grid: %d nodes over [%g, %g] Msun",
+                nodes,
+                minimum_mass,
+                maximum_mass,
+            )
             if "powerlawpeak" in self.mass_model:
                 from ._smoothed_mass import SinglePeakSmoothedMassDistribution
 
                 model = SinglePeakSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
+                    mmin=minimum_mass, normalization_shape=(nodes, 1000)
                 )
             elif "multipeak" in self.mass_model:
                 from ._smoothed_mass import MultiPeakSmoothedMassDistribution
 
                 model = MultiPeakSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
+                    mmin=minimum_mass, normalization_shape=(nodes, 1000)
                 )
             elif "brokenpowerlaw" in self.mass_model:
                 from ._smoothed_mass import BrokenPowerLawSmoothedMassDistribution
 
                 model = BrokenPowerLawSmoothedMassDistribution(
-                    normalization_shape=(1000, 1000)
+                    mmin=minimum_mass, normalization_shape=(nodes, 1000)
                 )
             elif "bgp" in self.mass_model:
                 from ._smoothed_mass import (
                     BrokenPowerLawTwoPeakSmoothedMassDistribution,
                 )
 
-                # BGP's Gaussian peaks are only left-truncated, so allow a wider
-                # evaluation grid than the default 100 Msun upper bound.
-                maximum_mass = self.parameters.get("maximum_mass", 200)
                 model = BrokenPowerLawTwoPeakSmoothedMassDistribution(
-                    mmax=maximum_mass, normalization_shape=(1000, 1000)
+                    mmin=minimum_mass,
+                    mmax=maximum_mass,
+                    normalization_shape=(nodes, 1000),
                 )
-                excluded_from_primary = ("beta", "maximum_mass")
+                # These describe the mass ratio, not the primary mass, and
+                # maximum_mass only sizes the evaluation grid.
+                excluded_from_primary = (
+                    "beta",
+                    "maximum_mass",
+                    "mmin_2",
+                    "delta_m_2",
+                )
 
-            mass1, mass_ratio = model.m1s, model.qs
+            mass1 = model.m1s
 
             # Create dictionaries for supported parameters
             mass_parameters = {
@@ -133,13 +353,10 @@ class Mass:
             mass_ratio_parameters = {
                 param: self.parameters[param]
                 for param in self.parameters
-                if param in ("beta", "mmin", "delta_m")
+                if param in ("beta", "mmin", "delta_m", "mmin_2", "delta_m_2")
             }
 
             prob_mass_1 = model.p_m1({"mass_1": mass1}, **mass_parameters)
-            prob_mass_ratio = model.p_q(
-                {"mass_ratio": mass_ratio, "mass_1": mass1}, **mass_ratio_parameters
-            )
 
             primary_mass_prior = bilby.core.prior.Interped(
                 mass1,
@@ -148,22 +365,16 @@ class Mass:
                 maximum=numpy.max(mass1),
                 name="mass_1_source",
             )
-
-            mass_ratio_prior = bilby.core.prior.Interped(
-                mass_ratio,
-                prob_mass_ratio,
-                minimum=numpy.min(mass_ratio),
-                maximum=numpy.max(mass_ratio),
-                name="mass_ratio",
+            samples["mass_1_source"] = primary_mass_prior.sample(
+                self.number_of_samples
             )
-            mass_prior = bilby.gw.prior.BBHPriorDict(
-                dictionary=utils.reference_prior_dict
+            # p(q | m_1), not a marginal p(q): the conditional's support is
+            # q >= mmin / m_1, so drawing q independently of m_1 puts secondaries
+            # below mmin, outside the model's own support. See
+            # sample_mass_ratio_given_primary.
+            samples["mass_ratio"] = sample_mass_ratio_given_primary(
+                model, samples["mass_1_source"], mass_ratio_parameters
             )
-            mass_prior["mass_ratio"] = mass_ratio_prior
-            mass_prior["mass_1_source"] = primary_mass_prior
-            prior_samples = mass_prior.sample(self.number_of_samples)
-            samples["mass_1_source"] = prior_samples["mass_1_source"]
-            samples["mass_ratio"] = prior_samples["mass_ratio"]
 
         elif self.mass_model == "fullpopgwtc4":
             logging.info("Generating samples using {} model".format(self.mass_model))

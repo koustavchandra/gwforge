@@ -39,6 +39,7 @@ import logging
 import numpy
 
 from .derivatives import WaveformDerivatives
+from .parameters import DEFAULT_PARAMETERS, strip_shadowed_parameters
 from .stepsize import TARGET_FRACTIONAL_CHANGE
 from .inner_product import inner_product_matrix
 
@@ -156,6 +157,19 @@ class FisherMatrix:
             :class:`GWForge.fisher.derivatives.WaveformDerivatives`.
         """
         self.order = check_order(order)
+        # An injection read from a population file carries every mass and spin
+        # parametrisation at once, and bilby's conversion prefers the component
+        # masses -- so displacing chirp_mass would displace a key the waveform
+        # ignores and hand back a zero derivative without raising.
+        parameters, shadowed = strip_shadowed_parameters(
+            parameters, fisher_parameters or DEFAULT_PARAMETERS
+        )
+        if shadowed:
+            logging.info(
+                "Dropped %s from the source parameters: they duplicate a Fisher "
+                "parameter and the waveform would have used them instead.",
+                ", ".join(shadowed),
+            )
         self.parameters = dict(parameters)
         self.derivatives = WaveformDerivatives(
             interferometers,

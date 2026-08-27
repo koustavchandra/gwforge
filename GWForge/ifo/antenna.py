@@ -1,12 +1,9 @@
 import logging
 
 import numpy
-from bilby.core.utils import ra_dec_to_theta_phi, speed_of_light
+from bilby.core.utils import ra_dec_to_theta_phi
 from bilby_cython.geometry import greenwich_mean_sidereal_time
-
-#: :math:`GM_\odot/c^3` in seconds. Matches GWFast's ``GMsun_over_c3`` so the
-#: time-frequency relation is bit-comparable in the cross-validation test.
-SOLAR_MASS_IN_SECONDS = 4.925491025543576e-06
+from lal import C_SI, MTSUN_SI
 
 RESPONSE_PARAMETERS = (
     "ra",
@@ -69,10 +66,7 @@ def time_to_coalescence(frequency, chirp_mass, symmetric_mass_ratio, mode=2):
     :math:`\tau(f)` seconds before merger, so the Earth's orientation there is
     the orientation at ``geocent_time - tau(f)``.
 
-    Uses eq. (3.8b) of `arXiv:0907.0700 <https://arxiv.org/abs/0907.0700>`_ --
-    deliberately the same expression as GWFast's ``tau_star``, so the
-    cross-validation test compares *geometry* rather than two different
-    time-frequency relations.
+    Uses eq. (3.8b) of `arXiv:0907.0700 <https://arxiv.org/abs/0907.0700>`_.
 
     Parameters
     ----------
@@ -95,9 +89,7 @@ def time_to_coalescence(frequency, chirp_mass, symmetric_mass_ratio, mode=2):
     if mode != 2:
         frequency = 2.0 * frequency / mode
 
-    total_mass = (
-        chirp_mass * SOLAR_MASS_IN_SECONDS / (symmetric_mass_ratio ** (3.0 / 5.0))
-    )
+    total_mass = chirp_mass * MTSUN_SI / (symmetric_mass_ratio ** (3.0 / 5.0))
     # Guard f = 0 (the DC bin): tau diverges there, and the bin is masked out of
     # every analysis anyway.
     with numpy.errstate(divide="ignore", invalid="ignore"):
@@ -272,7 +264,7 @@ def antenna_response(
         projection_x = -numpy.dot(omega.T, interferometer.geometry.x)
         projection_y = -numpy.dot(omega.T, interferometer.geometry.y)
         arm_length_in_wavelengths = (
-            frequencies * interferometer.geometry.length * 1e3 / speed_of_light
+            frequencies * interferometer.geometry.length * 1e3 / C_SI
         )
         transfer_x = finite_size_factor(arm_length_in_wavelengths, projection_x)
         transfer_y = finite_size_factor(arm_length_in_wavelengths, projection_y)
@@ -286,7 +278,7 @@ def antenna_response(
 
     vertex = interferometer.geometry.vertex
     if earth_rotation:
-        vertex_delay = -numpy.dot(omega.T, vertex) / speed_of_light
+        vertex_delay = -numpy.dot(omega.T, vertex) / C_SI
     else:
         # Every column of omega is the same here, so the (len(frequencies), 3) @ (3,)
         # product would compute one value len(frequencies) times over just to keep the
@@ -295,7 +287,7 @@ def antenna_response(
         # varies between builds and shifts tau by an ulp.
         vertex_delay = (
             -(omega[0, 0] * vertex[0] + omega[1, 0] * vertex[1] + omega[2, 0] * vertex[2])
-            / speed_of_light
+            / C_SI
         )
     tau = (geocent_time - start_time) + vertex_delay
 

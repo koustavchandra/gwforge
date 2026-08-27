@@ -13,15 +13,15 @@ import pylab
 
 from ..utils import GWLATEX_LABELS
 
-#: Contour levels at one, two and three sigma in two dimensions.
+# Contour levels at one, two and three sigma in two dimensions.
 CONTOUR_LEVELS = (
     1 - numpy.exp(-0.5),
     1 - numpy.exp(-2),
     1 - numpy.exp(-9 / 2.0),
 )
 
-#: Colour cycle for overlaid datasets, colourblind-safe and distinguishable in
-#: greyscale.
+# Colour cycle for overlaid datasets, colourblind-safe and distinguishable in
+# greyscale.
 OVERLAY_COLOURS = ("#ca0020", "#0571b0", "#4daf4a", "#984ea3")
 
 

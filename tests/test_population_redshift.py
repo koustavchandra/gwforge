@@ -164,3 +164,41 @@ def test_psi_of_z_closed_forms():
     )  # normalised to 1 at z=0
     assert numpy.isclose(power_law_psi_of_z(0.0, lamb=3.0), 1.0)
     assert numpy.isclose(power_law_psi_of_z(1.0, lamb=3.0), 2.0**3)
+
+
+def test_madau_dickinson_psi_matches_gwpopulation():
+    gwpop_redshift = pytest.importorskip("gwpopulation.models.redshift")
+    z = numpy.linspace(1e-6, 20, 2500)
+    new = madau_dickinson_psi_of_z(z, **MD_PARAMS)
+    gw = gwpop_redshift.MadauDickinsonRedshift(z_max=20).psi_of_z(
+        redshift=z, **MD_PARAMS
+    )
+    assert numpy.allclose(new, gw, rtol=1e-12, atol=0)
+
+
+def test_power_law_psi_matches_gwpopulation():
+    gwpop_redshift = pytest.importorskip("gwpopulation.models.redshift")
+    z = numpy.linspace(1e-6, 20, 2500)
+    new = power_law_psi_of_z(z, lamb=3.0)
+    gw = gwpop_redshift.PowerLawRedshift(z_max=20).psi_of_z(redshift=z, lamb=3.0)
+    assert numpy.allclose(new, gw, rtol=1e-12, atol=0)
+
+
+# ---------------------------------------------------------------------------
+# Extrinsic parameters
+# ---------------------------------------------------------------------------
+
+
+def test_schutz_inclination_uses_sin_jacobian():
+    # With the sin(theta) Jacobian, samples concentrate away from the poles
+    # (theta = 0, pi). Without it, the poles would be over-weighted.
+    from GWForge.population.extrinsic import Extrinsic
+
+    e = Extrinsic(number_of_samples=8000, inclination_distribution="schutz")
+    samples = e.sample()
+    theta = numpy.asarray(samples["theta_jn"])
+    assert (theta > 0).all() and (theta < numpy.pi).all()
+    equatorial_fraction = numpy.mean(
+        (theta > numpy.pi / 4) & (theta < 3 * numpy.pi / 4)
+    )
+    assert equatorial_fraction > 0.4

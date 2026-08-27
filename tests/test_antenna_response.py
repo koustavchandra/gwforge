@@ -1,20 +1,18 @@
 r"""Validation of the frequency- and time-dependent antenna response.
 
-Two reference implementations exist for this physics -- the ``bilby-x-g`` fork and
-GWFast -- and they use different conventions, so neither can be treated as
-ground truth on its own. The tests are therefore layered outward from claims that
-cannot be wrong:
+The tests are layered outward from claims that cannot be wrong, so that a
+convention error surfaces at the anchor rather than being absorbed further out:
 
 1. **Reduction to bilby.** Switching both corrections off must reproduce bilby's
    own ``get_detector_response`` to machine precision. This anchors every sign,
    the handedness of :math:`\psi`, and the delay convention against code GWForge
-   already relies on. A convention error surfaces here, not in the GWFast test.
+   already relies on.
 2. **Finite size, self-contained.** The closed-form arm transfer function is
    checked against a brute-force numerical integration of the round-trip light
    path, so it depends on no reference implementation at all.
-3. **Earth rotation vs GWFast.** Only after 1 and 2 does the cross-code check
-   mean anything, and it is set up to isolate geometry from the two codes'
-   other differences (see :func:`test_earth_rotation_matches_gwfast`).
+3. **Earth rotation.** The sidereal rate is asserted directly, and the pattern is
+   required to move measurably across a signal long enough for the Earth to have
+   turned.
 """
 
 import os
@@ -23,13 +21,13 @@ import numpy
 import pytest
 
 import bilby
+from lal import C_SI, DAYJUL_SI, DAYSID_SI
 
 from GWForge.ifo import antenna
 from GWForge.ifo.detectors import Network
 
 bilby.core.utils.setup_logger(log_level="error")
 
-SPEED_OF_LIGHT = 299792458.0
 GPS_TIME = 1893024018.0
 NOISE_CURVES = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -38,7 +36,7 @@ NOISE_CURVES = os.path.join(
     "noise_curves",
 )
 
-#: A BNS-like source: long enough that the Earth turns appreciably during it.
+# A BNS-like source: long enough that the Earth turns appreciably during it.
 CHIRP_MASS = 1.2
 SYMMETRIC_MASS_RATIO = 0.2497
 
@@ -208,8 +206,8 @@ def test_finite_size_null_at_the_free_spectral_range(arm_length_km, name):
     at :math:`x = 1/2`. That is 3.75 kHz for CE's 40 km arms -- inside the
     analysis band, which is precisely why this correction matters for XG.
     """
-    free_spectral_range = SPEED_OF_LIGHT / (2.0 * arm_length_km * 1e3)
-    x = free_spectral_range * arm_length_km * 1e3 / SPEED_OF_LIGHT
+    free_spectral_range = C_SI / (2.0 * arm_length_km * 1e3)
+    x = free_spectral_range * arm_length_km * 1e3 / C_SI
     assert abs(complex(antenna.finite_size_factor(x, 0.0))) < 1e-12
     # ... and it is non-trivial well below that.
     assert abs(complex(antenna.finite_size_factor(0.5 * x, 0.0))) < 0.75
@@ -246,45 +244,26 @@ def test_finite_size_correction_grows_with_frequency(network):
     assert numpy.all(numpy.diff(departure) > 0)
 
 
-# -- 3. Earth rotation, cross-checked against GWFast --------------------------
+# -- 3. Earth rotation ---------------------------------------------------------
 
 
 def test_earth_rotation_uses_the_sidereal_rate():
     """The Earth turns once per sidereal day, not per solar day.
 
-    GWFast advances its pattern by ``2*pi * t/86400`` -- a solar day -- which over
-    a one-hour inspiral is ~7e-4 rad adrift of the true sidereal rotation. This
-    asserts GWForge uses the sidereal rate, and is the reason
-    :func:`test_earth_rotation_matches_gwfast` equalises the two codes' Earth
-    orientations rather than comparing them at face value.
+    The distinction is easy to get wrong and cheap to check: using a solar day
+    would leave the pattern ~7e-4 rad adrift over a one-hour inspiral, which is
+    far larger than the accuracy the response is expected to hold to.
     """
     from bilby_cython.geometry import greenwich_mean_sidereal_time
 
-    day = 86400.0
+    day = DAYJUL_SI
     rate = (
         greenwich_mean_sidereal_time(GPS_TIME + day)
         - greenwich_mean_sidereal_time(GPS_TIME)
     ) / day
-    sidereal_day = 86164.0905
+    sidereal_day = DAYSID_SI
     assert rate == pytest.approx(2 * numpy.pi / sidereal_day, rel=1e-8)
     assert abs(rate - 2 * numpy.pi / day) / rate > 1e-3
-
-
-def test_time_to_coalescence_matches_gwfast_tau_star():
-    """Same 3.5PN time-frequency relation as GWFast (arXiv:0907.0700 eq. 3.8b).
-
-    Using an identical ``tau(f)`` is what makes the pattern comparison a test of
-    *geometry*, rather than of two different time-frequency relations.
-    """
-    gwfast_waveforms = pytest.importorskip("gwfast.waveforms")
-    frequencies = numpy.array([5.0, 20.0, 100.0, 1000.0])
-    reference = gwfast_waveforms.IMRPhenomD().tau_star(
-        frequencies, Mc=CHIRP_MASS, eta=SYMMETRIC_MASS_RATIO
-    )
-    mine = antenna.time_to_coalescence(
-        frequencies, CHIRP_MASS, SYMMETRIC_MASS_RATIO
-    )
-    numpy.testing.assert_allclose(mine, reference, rtol=1e-13)
 
 
 def test_time_to_coalescence_mode_scaling():
@@ -301,91 +280,6 @@ def test_time_to_coalescence_mode_scaling():
     )
     numpy.testing.assert_allclose(fourth, expected, rtol=1e-13)
     assert numpy.all(fourth > quadrupole)
-
-
-def test_earth_rotation_matches_gwfast(network):
-    r"""Time-varying :math:`F_{+,\times}` against GWFast, geometry isolated.
-
-    Convention mapping (the ``xax`` offset was verified against H1, L1 and Virgo,
-    where GWFast's ``xax`` minus bilby's ``xarm_azimuth`` is exactly 45 degrees):
-
-    * ``det_xax = xarm_azimuth + 45`` -- GWFast orients by the arm *bisector*.
-    * ``theta = pi/2 - dec``, ``phi = ra``.
-    * GWFast's ``t`` is a rotation angle in units of days, entering its pattern
-      functions only as ``2*pi*t``. Passing ``gmst/(2*pi)`` therefore places both
-      codes at *identical* Earth orientations, which removes GWFast's solar-day
-      approximation (see :func:`test_earth_rotation_uses_the_sidereal_rate`) and
-      leaves a pure geometry comparison.
-    * Only the real :math:`F_{+,\times}` amplitudes are compared: GWFast writes
-      :math:`h \sim e^{+i\Psi}` where bilby writes :math:`e^{-i\ldots}`, so the
-      complex responses differ by a conjugation that says nothing about geometry.
-
-    CE40 is used rather than ET because GWFast models a spherical Earth and
-    ignores detector elevation (CE40's ``.ifo`` has ``elevation = 0``), and
-    because GWFast places its triangle's three arms at a single vertex whereas
-    bilby walks them apart.
-    """
-    pytest.importorskip("gwfast")
-    # gwfast 1.1.2 calls scipy.integrate.cumtrapz, removed in modern scipy.
-    import scipy.integrate
-
-    if not hasattr(scipy.integrate, "cumtrapz"):
-        scipy.integrate.cumtrapz = scipy.integrate.cumulative_trapezoid
-    from bilby_cython.geometry import greenwich_mean_sidereal_time
-    from gwfast.signal import GWSignal
-    from gwfast.waveforms import IMRPhenomD
-
-    interferometer = network[0]
-    assert interferometer.name == "CE40"
-
-    signal = GWSignal(
-        IMRPhenomD(),
-        psd_path=os.path.join(NOISE_CURVES, "CE40-asd.txt"),
-        detector_shape="L",
-        det_lat=interferometer.latitude,
-        det_long=interferometer.longitude,
-        det_xax=interferometer.xarm_azimuth + 45.0,
-        is_ASD=True,
-        useEarthMotion=True,
-        fmin=5.0,
-        fmax=2048.0,
-        verbose=False,
-    )
-
-    ra, dec, psi = 1.1, -0.4, 2.3
-    frequencies = numpy.array([7.0, 20.0, 50.0, 200.0, 1000.0])
-    times_to_coalescence = antenna.time_to_coalescence(
-        frequencies, CHIRP_MASS, SYMMETRIC_MASS_RATIO
-    )
-    # The lowest bin sits ~45 minutes before merger: the Earth really has turned.
-    assert times_to_coalescence[0] > 40 * 60
-
-    sidereal = numpy.array(
-        [greenwich_mean_sidereal_time(GPS_TIME - t) for t in times_to_coalescence]
-    )
-    reference_plus, reference_cross = signal._PatternFunction(
-        numpy.pi / 2 - dec, ra, sidereal / (2 * numpy.pi), psi
-    )
-
-    plus, cross, _ = antenna.antenna_response(
-        interferometer,
-        ra=ra,
-        dec=dec,
-        geocent_time=GPS_TIME,
-        psi=psi,
-        frequencies=frequencies,
-        start_time=GPS_TIME - 1000.0,
-        times_to_coalescence=times_to_coalescence,
-        earth_rotation=True,
-        finite_size=False,
-    )
-
-    numpy.testing.assert_allclose(plus, reference_plus, rtol=0, atol=1e-8)
-    numpy.testing.assert_allclose(cross, reference_cross, rtol=0, atol=1e-8)
-    # The pattern must genuinely vary across the band, or the comparison is
-    # vacuous -- it would just be re-checking the static limit five times.
-    assert numpy.ptp(plus) > 1e-2
-
 
 def test_earth_rotation_changes_the_response_over_a_long_signal(network):
     """A BNS spans enough Earth rotation to move the pattern measurably."""

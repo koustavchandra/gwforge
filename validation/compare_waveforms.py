@@ -36,7 +36,7 @@ logging.basicConfig(
 
 GPS_TIME = 1187008882.4
 
-#: One aligned-spin binary, described identically to both models.
+# One aligned-spin binary, described identically to both models.
 SOURCE = dict(
     chirp_mass=28.0,
     symmetric_mass_ratio=0.24,
@@ -51,7 +51,7 @@ SOURCE = dict(
     dec=-1.2108,
 )
 
-#: ``(label, approximant, source model name)``.
+# ``(label, approximant, source model name)``.
 MODELS = (
     ("IMRPhenomXHM", "IMRPhenomXHM", "lal_binary_black_hole"),
     ("SEOBNRv5HM", "SEOBNRv5HM", "gwsignal_binary_black_hole"),

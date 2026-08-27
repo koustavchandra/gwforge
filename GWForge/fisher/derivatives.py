@@ -179,13 +179,13 @@ def analytic_derivatives(
     return response, first, second
 
 
-#: Offsets and weights of the fourth-order five-point first-derivative stencil,
-#: in units of the step size. The centre point has zero weight here but is
-#: reused by the second-derivative stencil below.
+# Offsets and weights of the fourth-order five-point first-derivative stencil,
+# in units of the step size. The centre point has zero weight here but is
+# reused by the second-derivative stencil below.
 _FIRST_STENCIL = ((-2, 1.0), (-1, -8.0), (1, 8.0), (2, -1.0))
 _FIRST_DENOMINATOR = 12.0
 
-#: Fourth-order five-point second-derivative stencil, sharing the same points.
+# Fourth-order five-point second-derivative stencil, sharing the same points.
 _SECOND_STENCIL = ((-2, -1.0), (-1, 16.0), (0, -30.0), (1, 16.0), (2, -1.0))
 _SECOND_DENOMINATOR = 12.0
 
@@ -299,11 +299,11 @@ class WaveformDerivatives:
             for name in self.numerical
         }
 
-        #: Approximate relative error of each numerical derivative, caused by
-        #: the waveform model's own numerical noise. Zero means the model is
-        #: smooth at the scale of its step; a value approaching one means that
-        #: derivative -- and so that row of the Fisher matrix -- is not
-        #: determined. See :func:`estimate_noise`.
+        # Approximate relative error of each numerical derivative, caused by
+        # the waveform model's own numerical noise. Zero means the model is
+        # smooth at the scale of its step; a value approaching one means that
+        # derivative -- and so that row of the Fisher matrix -- is not
+        # determined. See :func:`estimate_noise`.
         self.noise_ratios = dict.fromkeys(self.numerical, 0.0)
         self.waveform_evaluations = 0
         self._cache = {}

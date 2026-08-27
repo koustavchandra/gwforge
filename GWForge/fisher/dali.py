@@ -25,9 +25,9 @@ import numpy
 from bilby.core.likelihood import Likelihood
 from bilby.core.prior import Constraint, PriorDict
 
-#: Hard physical ranges applied when ``enforce_physicality`` is on. Sampling a
-#: DALI posterior is sampling a truncated Taylor expansion, which knows nothing
-#: about these and will happily wander past them.
+# Hard physical ranges applied when ``enforce_physicality`` is on. Sampling a
+# DALI posterior is sampling a truncated Taylor expansion, which knows nothing
+# about these and will happily wander past them.
 PHYSICAL_RANGES = {
     "symmetric_mass_ratio": (0.0, 0.25),
     "mass_ratio": (0.0, 1.0),
@@ -156,11 +156,11 @@ class DALILikelihood(Likelihood):
         return 0.0
 
 
-#: Warn when a prior spans fewer than this many Fisher sigmas either side of the
-#: fiducial value. A prior narrower than the likelihood silently dominates the
-#: posterior, and the resulting "DALI" width is really just the prior width --
-#: an easy mistake to make when the prior file is written by hand.
-#: Will use it for lower SNR signals :)
+# Warn when a prior spans fewer than this many Fisher sigmas either side of the
+# fiducial value. A prior narrower than the likelihood silently dominates the
+# posterior, and the resulting "DALI" width is really just the prior width --
+# an easy mistake to make when the prior file is written by hand.
+# Will use it for lower SNR signals :)
 NARROW_PRIOR_SIGMAS = 3.0
 
 
@@ -278,8 +278,8 @@ def _add_physical_constraints(priors, names):
                 "[{}, {}].".format(name, prior.minimum, prior.maximum)
             )
 
-#: If I don't stick to bilby interface this can be sped up by vectorisation.
-#: But I am being lazy and this is fast enough for now.
+# If I don't stick to bilby interface this can be sped up by vectorisation.
+# But I am being lazy and this is fast enough for now.
 def sample_posterior(
     likelihood,
     priors,

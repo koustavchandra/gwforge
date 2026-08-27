@@ -43,11 +43,11 @@ from .parameters import DEFAULT_PARAMETERS, strip_shadowed_parameters
 from .stepsize import TARGET_FRACTIONAL_CHANGE
 from .inner_product import inner_product_matrix
 
-#: Orders this module knows how to build.
+# Orders this module knows how to build.
 SUPPORTED_ORDERS = (1, 2)
 
-#: Above this the Fisher matrix is too ill-conditioned for the inverse to mean
-#: anything in double precision, and the covariance is reported with a warning.
+# Above this the Fisher matrix is too ill-conditioned for the inverse to mean
+# anything in double precision, and the covariance is reported with a warning.
 CONDITION_NUMBER_WARNING = 1e15
 
 
@@ -272,7 +272,7 @@ def covariance(fisher, names=None, condition_number_warning=CONDITION_NUMBER_WAR
     Fisher matrices for a gravitational-wave network are badly scaled -- a
     chirp-mass entry and a time entry differ by many orders of magnitude -- so
     the matrix is normalised by its diagonal before inversion and un-normalised
-    afterwards. GWFast's ``CovMatr`` does the same thing for the same reason.
+    afterwards.
 
     Parameters
     ----------

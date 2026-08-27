@@ -19,50 +19,50 @@ import numpy
 
 from .parameters import bounded_step
 
-#: Target for :func:`calibrate_step`: the fractional change
-#: :math:`\\lVert\\Delta h\\rVert/\\lVert h\\rVert` a single step should produce.
-#:
-#: This is the single most important accuracy knob in the module, and 1e-2 is
-#: measured rather than guessed. Below roughly 1e-3 the Fisher matrix for
-#: ``IMRPhenomXHM`` starts to drift and then diverges as the step shrinks --
-#: sigma(eta) moves by 150% over a decade -- because LAL places each ``(l, m)``
-#: mode's onset at a mass-dependent frequency, so differencing across that edge
-#: contributes a spurious term growing like ``1/step``. Above 1e-3 the Fisher is
-#: flat to a fraction of a percent for every parameter, and truncation is
-#: harmless: a fractional change of 1e-2 means a phase change of ~1e-2 rad per
-#: step, so the fourth-order stencil truncates at ``(1e-2)**4 / 30 ~ 3e-10``.
+# Target for :func:`calibrate_step`: the fractional change
+# :math:`\\lVert\\Delta h\\rVert/\\lVert h\\rVert` a single step should produce.
+#
+# This is the single most important accuracy knob in the module, and 1e-2 is
+# measured rather than guessed. Below roughly 1e-3 the Fisher matrix for
+# ``IMRPhenomXHM`` starts to drift and then diverges as the step shrinks --
+# sigma(eta) moves by 150% over a decade -- because LAL places each ``(l, m)``
+# mode's onset at a mass-dependent frequency, so differencing across that edge
+# contributes a spurious term growing like ``1/step``. Above 1e-3 the Fisher is
+# flat to a fraction of a percent for every parameter, and truncation is
+# harmless: a fractional change of 1e-2 means a phase change of ~1e-2 rad per
+# step, so the fourth-order stencil truncates at ``(1e-2)**4 / 30 ~ 3e-10``.
 TARGET_FRACTIONAL_CHANGE = 1e-2
 
 
-#: How far the change across one step must exceed the model's measured noise.
-#: The derivative's relative error is roughly the reciprocal, so 100 buys ~1%.
+# How far the change across one step must exceed the model's measured noise.
+# The derivative's relative error is roughly the reciprocal, so 100 buys ~1%.
 NOISE_MARGIN = 100.0
 
-#: Derivative relative error above which a parameter is worth warning about.
+# Derivative relative error above which a parameter is worth warning about.
 _NOISE_WARNING_ERROR = 0.05
 
-#: Acceptance window and iteration budget for the fractional-change search.
-#:
-#: The window used to be a factor of two either side, which let the search stop
-#: almost anywhere within a factor of four and made the chosen step depend on
-#: where it started. That mattered: for SEOBNRv5HM the usable plateau in
-#: ``chi_1`` begins around a step of 3e-4, and a loose window let some starting
-#: guesses settle just below it, moving ``sigma(chi_1)`` by a factor of four.
-#: The fractional change is very nearly linear in the step, so tightening the
-#: window costs at most an iteration or two.
+# Acceptance window and iteration budget for the fractional-change search.
+#
+# The window used to be a factor of two either side, which let the search stop
+# almost anywhere within a factor of four and made the chosen step depend on
+# where it started. That mattered: for SEOBNRv5HM the usable plateau in
+# ``chi_1`` begins around a step of 3e-4, and a loose window let some starting
+# guesses settle just below it, moving ``sigma(chi_1)`` by a factor of four.
+# The fractional change is very nearly linear in the step, so tightening the
+# window costs at most an iteration or two.
 _CALIBRATION_TOLERANCE_LOW = 0.8
 _CALIBRATION_TOLERANCE_HIGH = 1.25
 _CALIBRATION_ITERATIONS = 5
 
-#: Points used by :func:`estimate_noise`. Moré and Wild find ``m = 6`` (seven
-#: points) enough for a stochastic function but recommend ``m = 8`` for a
-#: deterministic one whose noise comes from adaptive internal tolerances --
-#: which is exactly what a LAL or EOB waveform is.
+# Points used by :func:`estimate_noise`. Moré and Wild find ``m = 6`` (seven
+# points) enough for a stochastic function but recommend ``m = 8`` for a
+# deterministic one whose noise comes from adaptive internal tolerances --
+# which is exactly what a LAL or EOB waveform is.
 NOISE_SAMPLE_POINTS = 9
 
-#: Successive noise estimates must agree within this factor before one is
-#: accepted. From the reference implementation; it also sets the accuracy one
-#: can expect, so two independent estimates may legitimately differ by 16.
+# Successive noise estimates must agree within this factor before one is
+# accepted. From the reference implementation; it also sets the accuracy one
+# can expect, so two independent estimates may legitimately differ by 16.
 _NOISE_RATIO_TOLERANCE = 4.0
 
 

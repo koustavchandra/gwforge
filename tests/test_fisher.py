@@ -22,7 +22,7 @@ from GWForge.fisher import (
 from GWForge.fisher.dali import DALILikelihood, build_priors
 from GWForge.fisher.antenna_derivatives import AntennaDerivatives
 from GWForge.fisher.derivatives import WaveformDerivatives
-from GWForge.fisher.parameters import bounded_step
+from GWForge.fisher.parameters import bounded_step, strip_shadowed_parameters
 from GWForge.fisher.matrix import check_order
 from GWForge.ifo import antenna
 from GWForge.ifo.detectors import Network
@@ -609,3 +609,90 @@ def test_analytic_parameters_cost_no_extra_waveform_evaluations(
     assert (
         with_analytic.waveform_evaluations == without.waveform_evaluations
     ), "the closed-form parameters should be free"
+
+
+# ---------------------------------------------------------------------------
+# Redundant parametrisations
+# ---------------------------------------------------------------------------
+#
+# A gwforge_population catalogue carries every mass parametrisation at once, and
+# bilby's conversion prefers the component masses over chirp_mass. Feeding one
+# straight to a Fisher over (chirp_mass, symmetric_mass_ratio) therefore
+# displaced keys the waveform ignored: the mass derivatives came back *exactly*
+# zero and sigma(chirp_mass) was wrong by six orders of magnitude, with nothing
+# raised. These pin the fix.
+
+
+@pytest.mark.parametrize(
+    "varied, shadowed",
+    [
+        (("chirp_mass", "symmetric_mass_ratio"), ("mass_1", "mass_2", "mass_ratio")),
+        (("chirp_mass", "symmetric_mass_ratio"), ("mass_1_source", "mass_2_source")),
+        (("mass_1", "mass_2"), ("chirp_mass", "symmetric_mass_ratio")),
+        (("chi_1",), ("a_1", "tilt_1", "spin_1z")),
+    ],
+)
+def test_shadowed_parameters_are_removed(varied, shadowed):
+    """Whatever duplicates a varied parameter is dropped; the varied ones stay."""
+    parameters = dict(
+        mass_1=30.0,
+        mass_2=25.0,
+        mass_1_source=25.0,
+        mass_2_source=20.8,
+        chirp_mass=23.8,
+        symmetric_mass_ratio=0.2469,
+        mass_ratio=0.8333,
+        total_mass=55.0,
+        redshift=0.2,
+        luminosity_distance=1000.0,
+        chi_1=0.3,
+        a_1=0.3,
+        tilt_1=0.0,
+        spin_1z=0.3,
+        ra=1.375,
+    )
+    stripped, removed = strip_shadowed_parameters(parameters, varied)
+    for name in shadowed:
+        assert name in removed
+        assert name not in stripped
+    for name in varied:
+        assert stripped[name] == parameters[name]
+    # Untouched groups are left alone.
+    assert stripped["ra"] == parameters["ra"]
+    assert stripped["luminosity_distance"] == parameters["luminosity_distance"]
+
+
+def test_a_catalogue_row_still_constrains_the_masses(network, waveform_generator):
+    """The regression itself: a Fisher built from a full catalogue row.
+
+    Every redundant name a population file carries is present. Without the
+    strip, ``convert_to_lal_binary_black_hole_parameters`` rebuilds mass_1 and
+    mass_2 from the component or source masses, the chirp-mass derivative is
+    identically zero, and sigma(chirp_mass) runs away to ~1e5 instead of ~1e-2.
+    """
+    row = dict(PARAMETERS)
+    row.update(
+        mass_1=32.06,
+        mass_2=32.06,
+        mass_ratio=1.0,
+        total_mass=64.12,
+        redshift=0.3,
+        mass_1_source=24.66,
+        mass_2_source=24.66,
+        spin_1z=0.3,
+        spin_2z=-0.2,
+    )
+    fisher = FisherMatrix(
+        network,
+        waveform_generator,
+        row,
+        fisher_parameters=["chirp_mass", "symmetric_mass_ratio", "luminosity_distance"],
+    )
+    assert "mass_1" not in fisher.parameters
+    assert "mass_1_source" not in fisher.parameters
+    assert fisher.parameters["chirp_mass"] == PARAMETERS["chirp_mass"]
+
+    sigma = fisher.sigmas["chirp_mass"] / PARAMETERS["chirp_mass"]
+    # A CE40+CE20 source at 1.5 Gpc is loud; the point is only that the mass is
+    # measured at all, which the shadowed version failed by ~1e6.
+    assert 0.0 < sigma < 1e-2

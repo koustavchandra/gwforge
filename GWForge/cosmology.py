@@ -8,28 +8,28 @@ from scipy.special import roots_legendre
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
-#: Speed of light in km/s, so that ``c / H0`` is Mpc for ``H0`` in km/s/Mpc.
+# Speed of light in km/s, so that ``c / H0`` is Mpc for ``H0`` in km/s/Mpc.
 SPEED_OF_LIGHT = C_SI / 1000.0
 
-#: Gauss-Legendre order for the comoving-distance integral. 1/E is smooth on
-#: [0, z], so convergence is geometric: measured against ``scipy.integrate.quad``
-#: this reaches ~1e-14 relative by order 32 and is flat thereafter. 64 is used
-#: because the cost is one matrix product either way.
+# Gauss-Legendre order for the comoving-distance integral. 1/E is smooth on
+# [0, z], so convergence is geometric: measured against ``scipy.integrate.quad``
+# this reaches ~1e-14 relative by order 32 and is flat thereafter. 64 is used
+# because the cost is one matrix product either way.
 QUADRATURE_ORDER = 64
 
-#: Newton iterations for :meth:`FlatwCDM.redshift_of_distance`. The bracketing
-#: table gives ~1e-3 and Newton doubles the digits each step, so 4 is already
-#: past double precision; the residual is checked rather than assumed.
+# Newton iterations for :meth:`FlatwCDM.redshift_of_distance`. The bracketing
+# table gives ~1e-3 and Newton doubles the digits each step, so 4 is already
+# past double precision; the residual is checked rather than assumed.
 NEWTON_ITERATIONS = 6
 
-#: Redshift nodes for the initial guess in the distance inversion. Log-spaced
-#: because d_L(z) is close to linear in z at low z and the low-z end is where
-#: the events are.
+# Redshift nodes for the initial guess in the distance inversion. Log-spaced
+# because d_L(z) is close to linear in z at low z and the low-z end is where
+# the events are.
 _GUESS_NODES = numpy.concatenate(
     [[0.0], numpy.logspace(-4, numpy.log10(100.0), 512)]
 )
 
-#: Parameters :meth:`FlatwCDM.derivatives` knows how to differentiate.
+# Parameters :meth:`FlatwCDM.derivatives` knows how to differentiate.
 COSMOLOGY_PARAMETERS = ("H0", "Om0", "w0")
 
 

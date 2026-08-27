@@ -20,8 +20,8 @@ derivatives are ever needed.
 """
 
 import numpy
-from bilby.core.utils import speed_of_light
 from bilby_cython.geometry import greenwich_mean_sidereal_time
+from lal import C_SI
 
 _SMALL = 1e-4
 
@@ -171,9 +171,9 @@ def _basis_derivatives(theta, phi):
     return basis
 
 
-#: The nine derivative labels tracked through the antenna calculation: the
-#: value, three first derivatives and five independent second derivatives with
-#: respect to the internal angles ``(phi, theta, psi)``.
+# The nine derivative labels tracked through the antenna calculation: the
+# value, three first derivatives and five independent second derivatives with
+# respect to the internal angles ``(phi, theta, psi)``.
 _LABELS = (
     "",
     "_phi",
@@ -419,7 +419,7 @@ class AntennaDerivatives:
         plus_y, cross_y = _polarization_projections(basis, psi, arm_y)
 
         if finite_size:
-            arm_length_in_wavelengths = frequencies * geometry.length * 1e3 / speed_of_light
+            arm_length_in_wavelengths = frequencies * geometry.length * 1e3 / C_SI
             transfer_x = _arm_transfer(basis, arm_x, arm_length_in_wavelengths)
             transfer_y = _arm_transfer(basis, arm_y, arm_length_in_wavelengths)
         else:
@@ -440,7 +440,7 @@ class AntennaDerivatives:
 
         vertex = geometry.vertex
         delay = {
-            key: -(vertex @ basis["omega" + key]) / speed_of_light
+            key: -(vertex @ basis["omega" + key]) / C_SI
             if ("omega" + key) in basis
             else numpy.zeros_like(basis["omega"][0])
             for key in _LABELS

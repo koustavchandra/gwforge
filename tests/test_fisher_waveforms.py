@@ -1,8 +1,8 @@
 """The Fisher module against waveforms it was not developed on.
 
-:mod:`GWForge.fisher` was validated against GWFast for ``IMRPhenomXHM`` — an
-aligned-spin, quasi-circular LAL waveform reached through
-``lal_binary_black_hole``. Its whole point, though, is that it works with any
+:mod:`GWForge.fisher` was developed against ``IMRPhenomXHM`` — an aligned-spin,
+quasi-circular LAL waveform reached through ``lal_binary_black_hole``. Its whole
+point, though, is that it works with any
 waveform :class:`bilby.gw.WaveformGenerator` can produce, and a single
 well-behaved model is a weak test of that. These four each break something
 different:
@@ -50,7 +50,7 @@ warnings.filterwarnings("ignore", message=".*UNREVIEWED.*")
 
 GPS_TIME = 1187008882.4
 
-#: Extrinsic parameters shared by every configuration.
+# Extrinsic parameters shared by every configuration.
 EXTRINSIC = dict(
     luminosity_distance=1000.0,
     theta_jn=0.9,
@@ -61,9 +61,9 @@ EXTRINSIC = dict(
     dec=-1.2108,
 )
 
-#: Spins chosen well away from zero. A tilt of exactly zero makes ``phi_12`` and
-#: ``phi_jl`` unmeasurable and the Fisher singular, so a precessing test at zero
-#: tilt would be testing nothing.
+# Spins chosen well away from zero. A tilt of exactly zero makes ``phi_12`` and
+# ``phi_jl`` unmeasurable and the Fisher singular, so a precessing test at zero
+# tilt would be testing nothing.
 PRECESSING_SPINS = dict(
     a_1=0.5, tilt_1=0.6, phi_12=1.7, a_2=0.4, tilt_2=1.0, phi_jl=0.3
 )
@@ -396,14 +396,14 @@ def test_every_parameter_is_measured(fisher, setup):
     assert not dead, "{}: no response to {}".format(setup["label"], dead)
 
 
-#: Noise-to-signal at which a derivative stops meaning anything. Measured
-#: values are far below it -- 0.3% at worst, for SEOBNRv5HM's masses and spins
-#: -- so in practice nothing is excluded and the reproducibility check below
-#: applies to every parameter. It is kept as a guard for a future model that is
-#: genuinely undifferentiable.
+# Noise-to-signal at which a derivative stops meaning anything. Measured
+# values are far below it -- 0.3% at worst, for SEOBNRv5HM's masses and spins
+# -- so in practice nothing is excluded and the reproducibility check below
+# applies to every parameter. It is kept as a guard for a future model that is
+# genuinely undifferentiable.
 NOISE_DOMINATED = 0.05
 
-#: Below this a derivative is limited by something other than the model's noise.
+# Below this a derivative is limited by something other than the model's noise.
 NEGLIGIBLE_NOISE = 1e-4
 
 

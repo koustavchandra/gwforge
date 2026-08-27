@@ -183,7 +183,7 @@ class BaseSmoothedMassDistribution:
     and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
     """
 
-    #: set by subclasses to one of the module-level primary-mass functions
+    # set by subclasses to one of the module-level primary-mass functions
     primary_model = None
 
     def __init__(self, mmin=2, mmax=100, normalization_shape=(1000, 500)):

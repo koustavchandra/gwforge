@@ -79,9 +79,9 @@ def hdf_append(f, key, value):
         f[key] = numpy.atleast_1d(value)
 
 
-#: LaTeX axis labels for every parameter GWForge passes around. Module level so
-#: the Fisher plotting in :mod:`GWForge.fisher.plot` labels its axes the same way
-#: :func:`cornerplot` does rather than keeping a second copy.
+# LaTeX axis labels for every parameter GWForge passes around. Module level so
+# the Fisher plotting in :mod:`GWForge.fisher.plot` labels its axes the same way
+# :func:`cornerplot` does rather than keeping a second copy.
 GWLATEX_LABELS = {
     "luminosity_distance": r"$d_{L} [\mathrm{Mpc}]$",
     "geocent_time": r"$t_{c} [\mathrm{s}]$",

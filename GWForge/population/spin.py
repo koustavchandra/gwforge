@@ -28,7 +28,7 @@ choices = [
 # analysis released with `arXiv:2605.27226 <https://arxiv.org/abs/2605.27226>`_.
 # The release calls ``mu_t`` and ``sigma_t`` ``mu_spin`` and ``sigma_spin``.
 # ``sigma_chi`` is a standard deviation, not the variance the Beta models take.
-#:
+#
 # This is the *only* copy of these numbers; the Fisher model
 # (:class:`GWForge.population_fisher.DefaultSpin`) and the shipped configs read
 # from here.

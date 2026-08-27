@@ -68,13 +68,13 @@ Two things worth knowing about the size of this effect:
 
 ### Earth rotation
 
-The frequency bin at $f$ was emitted $\tau(f)$ seconds before merger, so the Earth's orientation there is its orientation at `geocent_time - tau(f)`. GWForge uses the 3.5PN time-to-coalescence of [arXiv:0907.0700](https://arxiv.org/abs/0907.0700) eq. (3.8b) — deliberately the same expression GWFast uses, so the cross-validation below compares *geometry* rather than two different time-frequency relations. Mode $m$ reaches frequency $f$ when the quadrupole is at $2f/m$, i.e. $\tau_m(f) = \tau_2(2f/m)$.
+The frequency bin at $f$ was emitted $\tau(f)$ seconds before merger, so the Earth's orientation there is its orientation at `geocent_time - tau(f)`. GWForge uses the 3.5PN time-to-coalescence of [arXiv:0907.0700](https://arxiv.org/abs/0907.0700) eq. (3.8b). Mode $m$ reaches frequency $f$ when the quadrupole is at $2f/m$, i.e. $\tau_m(f) = \tau_2(2f/m)$.
 
 The sidereal angle is advanced at the **sidereal** rate, $2\pi/86164.09\,\mathrm{s}$.
 
 ## Validation
 
-Two reference implementations of this physics exist and they disagree on conventions, so `tests/test_antenna_response.py` layers its checks outward from claims that cannot be wrong.
+`tests/test_antenna_response.py` layers its checks outward from claims that cannot be wrong.
 
 | Check | Result |
 |---|---|
@@ -82,18 +82,5 @@ Two reference implementations of this physics exist and they disagree on convent
 | $D(x,y)$ vs brute-force integration of the round-trip light path (shares no code) | $<10^{-9}$ |
 | $D(0,y) = 1$; null at $f = c/2L$ | exact |
 | First-order term is $-i\pi xy$, residual scales as $x^2$ | confirmed |
-| $\tau(f)$ vs GWFast `IMRPhenomD.tau_star` | $10^{-13}$ relative |
-| Time-varying $F_{+,\times}$ vs GWFast `_PatternFunction`, CE40 | $<10^{-8}$ absolute |
 
-The first row is the important one: it anchors every sign, the handedness of $\psi$, and the delay convention against code GWForge already relies on, so a convention error surfaces there rather than being absorbed into the cross-code comparison.
-
-### Notes on the GWFast comparison
-
-GWFast is an independent code with its own conventions; matching it required establishing these, and each was verified rather than assumed:
-
-* **`det_xax = xarm_azimuth + 45`.** GWFast orients a detector by the *bisector* of its arms, bilby by the x-arm. Verified against H1, L1 and Virgo, where GWFast's tabulated `xax` minus bilby's `xarm_azimuth` is exactly 45.0 in all three cases.
-* **`theta = pi/2 - dec`, `phi = ra`.**
-* **Only the real $F_{+,\times}$ amplitudes are compared.** GWFast writes $h \sim e^{+i\Psi}$ where bilby writes $e^{-i\ldots}$, so the complex responses differ by a conjugation that says nothing about geometry.
-* **The two codes are placed at identical Earth orientations.** GWFast advances its pattern by $2\pi t/86400$ — a *solar* day — which over a one-hour inspiral is ~$7\times10^{-4}$ rad adrift of true sidereal rotation. GWFast's `t` enters its pattern functions only as $2\pi t$, so passing it $\mathrm{GMST}/2\pi$ removes that approximation and leaves a pure geometry comparison. GWForge uses the sidereal rate; a separate test asserts this.
-
-GWFast is also not used for ET: it models a spherical Earth and ignores detector elevation, and it places a triangle's three arms at a single vertex, whereas bilby walks them apart. ET's three arms are instead checked against bilby directly, and asserted to have genuinely distinct responses (otherwise the null stream would be wrong).
+The first row is the anchor: it pins every sign, the handedness of $\psi$, and the delay convention against code GWForge already relies on, so a convention error surfaces there rather than being absorbed into the corrections layered on top.

@@ -2,6 +2,7 @@ numpy>=1.16.0,!=1.19.0
 pandas>=2.1.4
 astropy>=6.0.0
 bilby>=2.7.0
+lalsuite
 numdifftools>=0.9.41
 emcee>=3.1.6
 corner>=2.2.0

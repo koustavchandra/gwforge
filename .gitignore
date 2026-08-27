@@ -6,6 +6,7 @@ __pycache__
 *.so
 
 # Other generated files
+population_fisher_output/
 *.ipynb_checkpoints
 *.h5
 *.h5.old
@@ -47,3 +48,12 @@ docs/_build
 
 # uv files
 uv.lock
+
+# validation/gwtc5_population_check.py output
+population_check/
+
+# validation/population_fisher_vs_seminumeric.py output
+population_fisher_comparison/
+
+# validation/population_detection_fraction.py output
+detection_fraction/

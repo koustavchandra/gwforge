@@ -1,8 +1,7 @@
 # Fisher and DALI Forecasts
 
 `gwforge_fisher` forecasts how well a network will measure the parameters of a
-source, without running parameter estimation. It works with **any** waveform
-`bilby.gw.WaveformGenerator` can produce.
+source. It works with **any** waveform `bilby.gw.WaveformGenerator` can produce.
 
 At `order = 1` this is the Fisher matrix of
 [Vallisneri (2008)](https://arxiv.org/abs/gr-qc/0703086),
@@ -61,7 +60,7 @@ dec = -1.2108
 ; end-index = 100
 
 [Waveform_Generator]
-waveform-approximant = IMRPhenomXHM
+waveform-approximant = SEOBNRv5HM_ROM
 waveform-minimum-frequency = 20
 frequency-domain-source-model = lal_binary_black_hole
 
@@ -77,9 +76,29 @@ output-file = fisher.pkl
 plot-corner = True
 ```
 
+```{important}
+**Point `injection-file` at a catalogue and the redundant parametrisations are
+stripped for you.** A `gwforge_population` file carries `mass_1`, `mass_2`,
+`chirp_mass`, `symmetric_mass_ratio`, `mass_ratio`, `total_mass` *and* the
+`_source` variants, all at once. bilby's
+`convert_to_lal_binary_black_hole_parameters` prefers the component masses and
+never looks at `chirp_mass`, so a Fisher over `(chirp_mass,
+symmetric_mass_ratio)` would displace keys the waveform ignores: the mass
+derivatives came back **exactly zero**, the Fisher was singular in the mass
+block, and nothing raised — $\sigma(\mathcal{M})$ was wrong by six orders of
+magnitude. {func}`GWForge.fisher.parameters.strip_shadowed_parameters` now
+removes whatever duplicates a varied parameter, and logs what it dropped. The
+same shadowing applies to spins, where `a_1` wins over `chi_1`.
+
+If you build a {class}`~GWForge.fisher.matrix.FisherMatrix` yourself, this is
+handled in its constructor; if you assemble derivatives directly, call the
+helper first.
+```
+
 `frequency-domain-source-model` accepts `lal_binary_black_hole`,
 `lal_binary_neutron_star`, `gwsignal_binary_black_hole`,
-`lal_eccentric_binary_black_hole_no_spins` and `EFPE_binary_black_hole`.
+`lal_eccentric_binary_black_hole_no_spins` and `EFPE_binary_black_hole` now.
+You can plugin any waveform generator pretty easily.
 
 Three named parameter sets are available, and picking the right one matters:
 `DEFAULT_PARAMETERS` (aligned spin), `PRECESSING_PARAMETERS` and
@@ -93,45 +112,13 @@ forecast an aligned-spin binary.
 [git](https://github.com/gw-models/pyEFPEHM). `pyEFPEHM` ignores
 `minimum_frequency`: set `f22_start` in the waveform arguments instead, and set
 it *below* the analysis band, because its eccentric harmonics radiate below the
-quadrupole start frequency.
+quadrupole start frequency. Similarly, for `TEOBResumS` install `teobresums`.
 
 The segment length is chosen per source from
 {func}`GWForge.conversion.get_safe_signal_durations`, the same estimate
 `gwforge_optimal_snr` uses, so a forecast and an SNR see the same signal.
 
-## Which derivatives are exact
-
-A bilby source model returns $\tilde h_+$ and $\tilde h_\times$ from the
-intrinsic parameters plus `theta_jn`, `phase` and `luminosity_distance`. It has
-**no** dependence on `ra`, `dec`, `psi` or `geocent_time` — those reach the
-strain only through the detector projection
-
-$$\tilde h(f) = \left[F_+ \tilde h_+ + F_\times \tilde h_\times\right] e^{-2\pi i f \tau}.$$
-
-So those four, plus `luminosity_distance` (an overall $1/d_L$ scaling), are
-differentiated in closed form. This stays true under the frequency-dependent,
-Earth-rotating response of {mod}`GWForge.ifo.antenna`: freezing the
-polarizations and differentiating only the response reproduces the full
-derivative *bit-identically*.
-
-For `psi` the closed form is a one-liner that survives complex,
-frequency-dependent pattern functions, because the transfer functions multiply
-the contracted tensors linearly:
-
-$$\frac{\partial h}{\partial \psi} = 2\left(F_\times \tilde h_+ - F_+ \tilde h_\times\right)e^{-2\pi i f\tau},
-\qquad \frac{\partial^2 h}{\partial\psi^2} = -4h.$$
-
-For `geocent_time` the closed form is not an optimisation but a necessity. A
-central difference is squeezed between roundoff on the $\sim 10^9$ GPS
-subtraction and truncation against the oscillatory $2\pi f$ factor, and never
-does better than about a part in a thousand at *any* step size.
-
-Everything else — masses, spins, `theta_jn`, `phase`, tides — is differenced
-with fourth-order five-point stencils. Note `phase` is *not* analytic for
-higher-mode waveforms, because each $(\ell,m)$ carries $e^{-im\phi_c}$ and the
-mode decomposition is not exposed.
-
-## Step sizes
+## Step sizes (Claudio speaking)
 
 Finite-difference steps are calibrated per source so that one step changes the
 waveform by a fixed fraction, $\lVert\Delta h\rVert/\lVert h\rVert \approx 10^{-2}$.
@@ -209,11 +196,6 @@ finite-size = True
 Both default to `True`, matching how `gwforge_inject` projects the same signal.
 Turning both off recovers bilby's static long-wavelength response.
 
-With `earth-rotation = True` the masses enter the *response* as well as the
-waveform, through the time-frequency relation $\tau(f)$, so numerical
-derivatives are taken on the full detector response rather than on the
-polarizations alone.
-
 ## Priors
 
 ```ini
@@ -257,8 +239,7 @@ afterwards is pure tensor contraction.
 `validation/compare_waveforms.py` forecasts the same aligned-spin binary with
 `IMRPhenomXHM` and `SEOBNRv5HM` and overlays the two error ellipses. Both models
 describe the source equally well, so the difference between them is a lower
-bound on the waveform systematic in any Fisher forecast — something a
-cross-validation against another *code* cannot reveal.
+bound on the waveform systematic in any Fisher forecast.
 
 ```bash
 python validation/compare_waveforms.py --outdir waveform_comparison
@@ -279,33 +260,3 @@ closely; the mass–spin–time–phase block, which is where the two models act
 differ, does not. This is a genuine waveform systematic, not a numerical
 artefact — the measured noise in both models is three orders of magnitude too
 small to explain it.
-
-## Validation against GWFast
-
-`validation/fisher_vs_gwfast.py` runs ten sources through both GWForge and
-[GWFast](https://github.com/CosmoStatGW/gwfast) and compares them:
-
-```bash
-python validation/fisher_vs_gwfast.py --output comparison.h5
-python validation/plot_fisher_comparison.py comparison.h5 --outdir plots
-```
-
-With a non-higher-mode approximant (`--approximant IMRPhenomXAS`) every Fisher
-element agrees to **0.01–0.9%** and the network SNR to 0.03%. With
-`IMRPhenomXHM` the median agreement is **0.4–1.4%** per parameter.
-
-Two things are worth knowing about that comparison:
-
-* GWFast's default finite-difference step (`1e-5`) sits below the noise floor of
-  a LAL waveform. With it, GWFast's own `iota` Fisher entry is off by a factor of
-  2.05; raised to `1e-3` it lands on the same plateau GWForge calibrates onto.
-  The validation sets it explicitly.
-* GWFast applies the coalescence phase as one global factor on top of a
-  `phiRef = 0` LAL call. That is exact for the quadrupole, but for a higher-mode
-  waveform each $(\ell,m)$ should pick up $e^{-im\phi}$. The disagreement in the
-  `phase` entry therefore tracks the higher-mode content, from 0% at $\eta = 0.24$
-  to 20% at $\eta = 0.14$. This is GWFast approximating, not GWForge.
-
-ET is excluded from that comparison because GWFast models a spherical Earth,
-ignores elevation, and collapses a triangle's arms onto one vertex. It is fully
-supported by `gwforge_fisher` itself.

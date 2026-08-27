@@ -24,8 +24,8 @@ DEFAULT_PARAMETERS = (
     "chi_2",
 )
 
-# Parameters for a precessing waveform 
-# Note the Fisher is singular at exactly zero tilt, 
+# Parameters for a precessing waveform
+# Note the Fisher is singular at exactly zero tilt,
 # Same is true for say inclination for π/2
 PRECESSING_PARAMETERS = (
     "chirp_mass",
@@ -45,7 +45,7 @@ PRECESSING_PARAMETERS = (
     "phi_jl",
 )
 
-# Parameters for a precessing *and* eccentric waveform 
+# Parameters for a precessing *and* eccentric waveform
 ECCENTRIC_PRECESSING_PARAMETERS = PRECESSING_PARAMETERS + (
     "eccentricity",
     "mean_anomaly",

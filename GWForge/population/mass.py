@@ -150,7 +150,7 @@ def sample_mass_ratio_given_primary(
     """
     primary_samples = numpy.asarray(primary_samples, dtype=float)
     m1s = model.m1s
-    # The secondary's own taper edge, which is where p(q | m_1) turns on. 
+    # The secondary's own taper edge, which is where p(q | m_1) turns on.
     minimum_mass = mass_ratio_parameters.get(
         "mmin_2", mass_ratio_parameters["mmin"]
     )

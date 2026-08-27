@@ -72,3 +72,41 @@ The *white* noise stitches across chunks exactly, but the *coloured* noise does 
 ```{deprecated} 0.1
 `noise-type` (which used to select a `bilby` or `pycbc` backend) and `fft-scheme` are ignored. GWForge now generates all noise itself, and numpy's FFT has no size limit to work around. Both keys log a warning and are otherwise harmless.
 ```
+
+## Overriding a detector's noise curve
+
+Detector tokens carry a sensitivity with them. `CE40`, `CE20` and `ET` come from
+GWForge's own `.ifo` files; everything else falls through to bilby, and bilby's
+choices are not always the ones a study wants. In particular, `H1` and `L1`
+carry `aLIGO_O4_high_asd.txt` and `V1` carries `AdV_psd.txt` — of the 2G
+detectors only `A1` (LIGO-India) is A+ out of the box.
+
+`gwforge_optimal_snr --psd-dict` replaces the curve without touching the
+geometry:
+
+```bash
+gwforge_optimal_snr --injection-file bbh_population.h5 \
+                    --output-file bbh_snr_aplus.h5 --ifos H1 L1 A1 \
+                    --psd-dict "{'H1': 'GWForge/ifo/noise_curves/aplus.txt',
+                                 'L1': 'GWForge/ifo/noise_curves/aplus.txt',
+                                 'A1': 'GWForge/ifo/noise_curves/aplus.txt'}" \
+                    --waveform-approximant IMRPhenomXPHM \
+                    --minimum-frequency 20 --sampling-frequency 4096
+```
+
+`gwforge_fisher` takes the same thing as `[IFOS] psd-dict` in its ini. Both
+route to {class}`GWForge.ifo.detectors.Network`, which decides ASD versus PSD
+from the magnitude of the array, so either file type works and no flag says
+which. Detectors left out of the dict keep their shipped curve.
+
+```{important}
+`--psd-dict` sets the **noise curve only**. The integration band still comes
+from the interferometer's own `minimum_frequency` and `maximum_frequency`, which
+`--minimum-frequency` does not change — that flag sets where the *waveform*
+starts. So `--minimum-frequency 5` against a detector whose `.ifo` says
+`minimum_frequency = 6` still yields an SNR integrated from 6 Hz.
+```
+
+A quick way to confirm an override took: run a handful of events with and
+without it. A no-op leaves the SNRs bit-identical, and swapping A+ for
+O4-high moves H1 and L1 by a factor of about two.

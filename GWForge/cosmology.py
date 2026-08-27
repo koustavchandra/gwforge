@@ -1,4 +1,5 @@
 import logging
+from lal import C_SI
 
 import numpy
 from astropy import units
@@ -7,9 +8,8 @@ from scipy.special import roots_legendre
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
-from lal import C_SI  
 #: Speed of light in km/s, so that ``c / H0`` is Mpc for ``H0`` in km/s/Mpc.
-SPEED_OF_LIGHT = C_SI / 1000.0  
+SPEED_OF_LIGHT = C_SI / 1000.0
 
 #: Gauss-Legendre order for the comoving-distance integral. 1/E is smooth on
 #: [0, z], so convergence is geometric: measured against ``scipy.integrate.quad``
@@ -40,8 +40,8 @@ def astropy_cosmology(
 
     Setting ``Tcmb0 = 0`` removes radiation and massive neutrinos, which makes
     the result *identical* to ``FlatwCDM(H0, Om0, w0=-1)`` when
-    ``Ode0 = 1 - Om0``. 
-    
+    ``Ode0 = 1 - Om0``.
+
     Parameters
     ----------
     name : str
@@ -80,7 +80,7 @@ def astropy_cosmology(
         )
     logging.info("Building a custom LambdaCDM cosmology for '%s'", name)
     settings = {"H0": H0, "Om0": Om0, "Ode0": Ode0, "Tcmb0": Tcmb0}
-    # astropy 8 rejects an explicit Ob0=None 
+    # astropy 8 rejects an explicit Ob0=None
     if Ob0 is not None:
         settings["Ob0"] = Ob0
     return astropy_module.LambdaCDM(**settings)

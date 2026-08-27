@@ -11,6 +11,7 @@ from GWForge.population.mass import Mass
 from GWForge.population.spin import Spin
 from GWForge.population.redshift import Redshift
 from GWForge.population.extrinsic import Extrinsic
+from GWForge.cosmology import luminosity_distance
 from lal import YRJUL_SI
 
 # Set up logging configuration
@@ -113,12 +114,30 @@ z = Redshift(
 redshift_samples = z.sample()
 for key in redshift_samples.keys():
     samples[key] = redshift_samples[key]
-samples["luminosity_distance"] = redshift_to_luminosity_distance(samples["redshift"])
+# Use *the configured* cosmology, not bilby's default. bilby's
+# redshift_to_luminosity_distance falls back to Planck15.
+samples["luminosity_distance"] = luminosity_distance(
+    z.import_cosmology(), samples["redshift"]
+)
+
+def optional_parameters(section, option):
+    """The ``{section}`` model's parameters, or ``None`` if the ini omits them.
+
+    ``None`` means "use the model's own defaults", which for BGP and the Default
+    BBH spins are the GWTC-5.0 medians the model modules carry.
+    """
+    if not config.has_option(section, option):
+        logging.warning(
+            "%s not provided; using the model's default values", option
+        )
+        return None
+    return json.loads(config.get(section, option).replace("'", '"'))
+
 
 # Generate mass samples
 logging.info("Generating mass samples")
 mass_model = config.get("Mass", "mass-model")
-parameters = json.loads(config.get("Mass", "mass-parameters").replace("'", '"'))
+parameters = optional_parameters("Mass", "mass-parameters")
 
 # Create Mass object and generate samples
 m = Mass(
@@ -135,11 +154,7 @@ for key in mass_samples.keys():
 # Generate spin samples
 logging.info("Generating spin samples")
 spin_model = config.get("Spin", "spin-model")
-try:
-    parameters = json.loads(config.get("Spin", "spin-parameters").replace("'", '"'))
-except Exception:
-    logging.warning("spin_parameters not provided. Assuming default values")
-    parameters = {}
+parameters = optional_parameters("Spin", "spin-parameters")
 
 # Create Spin object and generate samples
 s = Spin(

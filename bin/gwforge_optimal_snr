@@ -8,6 +8,7 @@ import logging
 import bilby
 import h5py
 import argparse
+import json
 from multiprocessing import Pool
 from functools import partial
 from rich.progress import track
@@ -18,6 +19,34 @@ from GWForge.ifo.antenna import inject_signal_with_response
 from GWForge.utils import hdf_append
 
 
+def coalescence_time(injection_parameters):
+    """The coalescence GPS time of one injection.
+
+    ``gwforge_population`` writes ``geocent_time``; older files (and
+    ``GWForge.inject.pycbc_inject``) call the same quantity ``tc``. Accept
+    either, preferring the current name.
+
+    Parameters
+    ----------
+    injection_parameters : dict or pandas.Series
+
+    Returns
+    -------
+    float
+
+    Raises
+    ------
+    KeyError
+        If neither name is present.
+    """
+    for name in ("geocent_time", "tc"):
+        if name in injection_parameters:
+            return injection_parameters[name]
+    raise KeyError(
+        "Injection has neither 'geocent_time' nor 'tc'; cannot place the signal."
+    )
+
+
 def get_optimal_snr(
     injection_parameters,
     parameters,
@@ -26,11 +55,13 @@ def get_optimal_snr(
     sampling_frequency=8192,
     earth_rotation=True,
     finite_size=True,
+    psd_files=None,
 ):
     bilby.core.utils.setup_logger(log_level="warning")
-    ifos = Network(ifos=detectors).initialise_ifos()
+    ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
     duration = numpy.ceil(injection_parameters["duration"] + 5)
-    gps_start_time = injection_parameters["tc"] - duration
+    merger_time = coalescence_time(injection_parameters)
+    gps_start_time = merger_time - duration
     ifos.set_strain_data_from_power_spectral_densities(
         sampling_frequency=sampling_frequency,
         duration=duration,
@@ -47,7 +78,7 @@ def get_optimal_snr(
     signal_parameters = {}
     for parameter in parameters:
         signal_parameters[parameter] = injection_parameters[parameter]
-    signal_parameters["geocent_time"] = injection_parameters["tc"]
+    signal_parameters["geocent_time"] = merger_time
     # bilby's inject_signal hard-codes the long-wavelength, static-pattern
     # response; use GWForge's frequency-dependent one instead.
     inject_signal_with_response(
@@ -61,6 +92,10 @@ def get_optimal_snr(
         signal_parameters["{}_optimal_snr".format(ifo.name)] = ifo.meta_data[
             "optimal_SNR"
         ]
+    # Added after the injection, not before, so the waveform generator never
+    # sees it: this is bookkeeping, letting the SNR file be joined back to the
+    # injection file by row rather than by assumed ordering.
+    signal_parameters["index"] = injection_parameters["index"]
     return signal_parameters
 
 
@@ -68,9 +103,11 @@ def multiprocess(
     parameters,
     detectors,
     waveform_arguments,
+    sampling_frequency,
     chunk,
     earth_rotation=True,
     finite_size=True,
+    psd_files=None,
 ):
     results_list = []
     for idx, row in chunk.iterrows():
@@ -79,8 +116,10 @@ def multiprocess(
             parameters=parameters,
             detectors=detectors,
             waveform_arguments=waveform_arguments,
+            sampling_frequency=sampling_frequency,
             earth_rotation=earth_rotation,
             finite_size=finite_size,
+            psd_files=psd_files,
         )
         results_list.append(meta_data)
     return results_list
@@ -135,6 +174,26 @@ def main():
         help="Minimum frequency for the waveform",
     )
     parser.add_argument(
+        "--sampling-frequency",
+        type=float,
+        default=8192,
+        help="Sampling frequency of the strain the SNR is computed on. The "
+        "cost of the whole pass is linear in this, and 2048 Hz already covers "
+        "the ringdown of every stellar-mass binary, so lower it for large "
+        "catalogues",
+    )
+    parser.add_argument(
+        "--psd-dict",
+        default=None,
+        help="Override the noise curve of one or more detectors, as a "
+        "single-quoted dict of detector name to ASD or PSD file, e.g. "
+        "\"{'H1': 'aplus.txt', 'L1': 'aplus.txt'}\". The file type is "
+        "detected from the magnitude of the array, so ASDs and PSDs are both "
+        "accepted. Note this sets the *noise curve* only: the integration band "
+        "still comes from the interferometer's own minimum_frequency and "
+        "maximum_frequency, which --minimum-frequency does not change",
+    )
+    parser.add_argument(
         "--cores",
         type=int,
         default=10,
@@ -162,11 +221,36 @@ def main():
         "minimum_frequency": opts.minimum_frequency,
     }
 
+    psd_files = None
+    if opts.psd_dict:
+        try:
+            psd_files = json.loads(opts.psd_dict.replace("'", '"'))
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                "Could not parse --psd-dict {!r}; expected a dict such as "
+                "\"{{'H1': 'aplus.txt'}}\"".format(opts.psd_dict)
+            ) from error
+        missing = [name for name in psd_files if name not in opts.ifos]
+        if missing:
+            raise ValueError(
+                "--psd-dict names {} which are not in --ifos {}. The override "
+                "would be silently ignored.".format(missing, opts.ifos)
+            )
+        logging.info(
+            "Overriding noise curves: %s",
+            ", ".join("{} -> {}".format(k, v) for k, v in psd_files.items()),
+        )
+        psd_files = {name: psd_files.get(name) for name in opts.ifos}
+
     detectors = opts.ifos
     logging.info("Reading injections")
     samples = {}
     with h5py.File(opts.injection_file, "r") as f:
         for key in f.keys():
+            # gwforge_population --save-config writes a 'config' *group*, which
+            # is not a per-injection array; skip anything that is not a dataset.
+            if not isinstance(f[key], h5py.Dataset):
+                continue
             if len(f[key]) != 1:
                 samples[key] = f[key][:]
         if len(f["spin_1x"][:]) != 1:
@@ -211,10 +295,18 @@ def main():
         waveform_minimum_frequency=waveform_arguments["minimum_frequency"],
     )
 
+    # Row index into the injection file, carried through to the output.
+    samples["index"] = numpy.arange(len(samples["mass_1"]))
+
     samples = pd.DataFrame.from_dict(samples)
     sub = samples.iloc[opts.start_index : opts.end_index]
-    # Split the DataFrame into chunks
-    chunks = numpy.array_split(sub, opts.cores)
+    # Split the DataFrame into bits and pieces. Split the *positions* rather than the
+    # frame: numpy.array_split stopped preserving DataFrames at numpy 2.3 /
+    # pandas 3.0 and hands back bare ndarrays, which have no .iterrows().
+    chunks = [
+        sub.iloc[positions]
+        for positions in numpy.array_split(numpy.arange(len(sub)), opts.cores)
+    ]
     logging.info("Calculating optimal snr")
     with Pool(processes=opts.cores) as pool:
         partial_multiprocess = partial(
@@ -222,8 +314,10 @@ def main():
             parameters,
             detectors,
             waveform_arguments,
+            opts.sampling_frequency,
             earth_rotation=not opts.no_earth_rotation,
             finite_size=not opts.no_finite_size,
+            psd_files=psd_files,
         )
         results_list = list(
             track(
@@ -237,6 +331,7 @@ def main():
         detectors.remove("ET")
         detectors.extend(["ET1", "ET2", "ET3"])
 
+    parameters.append("index")
     for ifo in detectors:
         parameters.append("{}_optimal_snr".format(ifo))
     samples = {}

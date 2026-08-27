@@ -43,11 +43,11 @@ OKABE_ITO = (
     "#000000",
 )
 
-_OKABE_ITO_RAMP = ("#0072b2", 
+_OKABE_ITO_RAMP = ("#0072b2",
                    "#56b4e9",
-                   "#009e73", 
-                   "#f0e442", 
-                   "#e69f00", 
+                   "#009e73",
+                   "#f0e442",
+                   "#e69f00",
                    "#d55e00")
 
 # Default palette name.

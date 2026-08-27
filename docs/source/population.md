@@ -2,20 +2,20 @@
 
 GWForge can simulate a wide range of **binary** source populations (at the moment). This page tells you how you can use them.
 
-The first step in generating a source population is to determine the distribution of sources in luminosity distance $\(D_L\)$ (or equivalently redshift $\(z\))$ and the expected number of signals in the data. So, we will start by setting up the `[Redshift]` section.
+The first step in generating a source population is to determine the distribution of sources in luminosity distance $D_L$ (or equivalently redshift $z$) and the expected number of signals in the data. So, we will start by setting up the `[Redshift]` section.
 
 ## Redshift
  For this, you need to specify:
 
 - Redshift distribution model
-- Local merger rate density in $\(Gpc^{-3}yr^{-1}\)$
+- Local merger rate density in $Gpc^{-3}yr^{-1}$
 - Maximum redshift of the source
-- Cosmological parameters such as $H_0,~O_{m0}, O_{de0}$ and $T_{cmb0}$, assuming [LambdaCDM cosmology](http://hyperphysics.phy-astr.gsu.edu/hbase/Astro/lambda.html)
+- Cosmological parameters such as $H_0,~O_{m0}, O_{de0}$ and $T^{cmb}_0$, assuming [LambdaCDM cosmology](http://hyperphysics.phy-astr.gsu.edu/hbase/Astro/lambda.html)
 - A reference start time when you switch on your detector.
 
 The last is optional. If not provided, GWForge assumes [Planck18](https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html) cosmology. 
 $$
-H_0 = 67.66~km/s/Mpc,~O_{m0} = 0.30966,~T_{cmb0} = 2.7255 K
+H_0 = 67.66~km/s/Mpc,~O_{m0} = 0.30966,~T^{cmb}_0 = 2.7255 K
 $$
 
 Alternatively, you can select any of the [cosmological realisations implemented in astropy](https://docs.astropy.org/en/stable/cosmology/realizations.html).
@@ -117,7 +117,7 @@ The currently available mass distribution models and their parameters are:
   |[`PowerLaw+Peak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.SinglePeakSmoothedMassDistribution.html#gwpopulation.models.mass.SinglePeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, mpp, sigpp, delta_m` | Powerlaw + peak model for two-dimensional mass distribution with low mass smoothing.
   |[`MultiPeak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.MultiPeakSmoothedMassDistribution.html#gwpopulation.models.mass.MultiPeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, lam_1, mpp_1, mpp_2, sigpp_1, sigp_2, delta_m` | Powerlaw + two peak model for two-dimensional mass distribution with low mass smoothing.
   |[`BrokenPowerLaw`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution.html#gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution)| `alpha_1, alpha_2, beta, break_fraction, mmin, mmax, delta_m` | Broken power law for two-dimensional mass distribution with low mass smoothing. |
-  |`BGP`| `alpha_1, alpha_2, m_break, mmin, m_high, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, delta_m, beta` | Broken power law + two Gaussian peaks — the fiducial BBH mass model from GWTC-4.0/5.0. See [below](#the-bgp-model). |
+  |`BGP`| `alpha_1, alpha_2, m_break, mmin, delta_m, mmin_2, delta_m_2, m_high, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, beta` | Broken power law + two Gaussian peaks — the fiducial BBH mass model from GWTC-4.0/5.0. See [below](#the-bgp-model). |
   |`UniformSecondary`| `alpha, beta, delta_m, mmin, mmax, 88.81, lam, mpp, sigpp, minimum_secondary_mass, maximum_secondary_mass` | PowerLaw + Peak for primary mass and uniform for secondary |
   |`DoubleGaussian`| `mu_1, sigma_1, mu_2, sigma_2, breaking_fraction, mmin, mmax` | Truncated Gaussian distribution for primary and secondary
   |`LogNormal`| `mu, sigma` | Log-normal distribution with mean mu and width sigma for primary and secondary | 
@@ -146,25 +146,44 @@ GWForge overlooks special characters and converts everything to lower cases. So 
 $$
 \pi(m_1) \propto \Big[\lambda_0\, p_\mathrm{BP}(m_1) + \lambda_1\, N_\mathrm{lt}(m_1 | \mu_1, \sigma_1) + (1 - \lambda_0 - \lambda_1)\, N_\mathrm{lt}(m_1 | \mu_2, \sigma_2)\Big]\, S(m_1 | m_\mathrm{min}, \delta_m),
 $$
-where the broken power law switches from slope $-\alpha_1$ to $-\alpha_2$ at $m_\mathrm{break}$ over $[m_\mathrm{min}, m_\mathrm{high}]$, and $N_\mathrm{lt}$ is a normal distribution truncated below at $m_\mathrm{min}$. The mass ratio is a power law $\propto q^{\beta}$ with the same low-mass taper applied to the secondary. For example:
+where the broken power law switches from slope $-\alpha_1$ to $-\alpha_2$ at $m_\mathrm{break}$ over $[m_\mathrm{min}, m_\mathrm{high}]$, and $N_\mathrm{lt}$ is a normal distribution truncated below at $m_\mathrm{min}$. The mass ratio is a power law with its **own** low-mass taper on the secondary,
+
+$$p(m_2 \mid m_1) \propto m_2^{\beta}\, S(m_2 \mid m_\mathrm{min,2}, \delta_{m,2}),$$
+
+with $m_\mathrm{min,2}$ and $\delta_{m,2}$ independent of the primary's pair (GWTC-5.0 Tab. 5, prior $m_\mathrm{min,2} \sim U(3, m_\mathrm{min})$ — the secondary generally turns on *below* the primary). Both default to their primary counterparts if omitted. These are the shipped defaults, so `mass-parameters` may be left out entirely and you get exactly the block below:
 
 ```ini
 [Mass]
 mass-model = BGP
-mass-parameters = {'alpha_1': 1.6, 'alpha_2': 5.0, 'm_break': 38.0, 'mmin': 5.0, 'm_high': 100.0, 'lam_0': 0.9, 'lam_1': 0.05, 'mpp_1': 33.0, 'sigpp_1': 4.0, 'mpp_2': 10.0, 'sigpp_2': 1.5, 'delta_m': 4.8, 'beta': 1.1}
+mass-parameters = {'alpha_1': 1.456442737, 'alpha_2': 5.100400428, 'm_break': 37.9806382, 'mmin': 4.489078237, 'delta_m': 3.123416382, 'mmin_2': 3.487749145, 'delta_m_2': 5.60056759, 'm_high': 300.0, 'lam_0': 0.4206178692, 'lam_1': 0.5228817702, 'mpp_1': 9.989384122, 'sigpp_1': 0.6601839103, 'mpp_2': 33.2656028, 'sigpp_2': 4.582221363, 'beta': 0.8049660633, 'maximum_mass': 300}
 ```
 
 | parameter | description |
 | --- | --- |
 | `alpha_1, alpha_2` | Power-law slopes below and above the break |
 | `m_break` | Mass at which the power law breaks |
-| `mmin, m_high` | Lower and upper edges of the power-law component |
+| `mmin, m_high` | Lower and upper edges of the power-law component ($m_\mathrm{1,low}$, $m_\mathrm{high}$) |
+| `delta_m` | Width of the low-mass taper on the **primary** ($\delta_{m,1}$) |
+| `mmin_2, delta_m_2` | Edge and width of the low-mass taper on the **secondary**. Default to `mmin`, `delta_m` |
 | `lam_0, lam_1` | Mixing fractions of the power law and the first peak (the second peak gets $1 - \lambda_0 - \lambda_1$) |
-| `mpp_1, sigpp_1` | Location and width of the first (high-mass) Gaussian peak |
-| `mpp_2, sigpp_2` | Location and width of the second (low-mass) Gaussian peak |
-| `delta_m` | Width of the low-mass smoothing |
+| `mpp_1, sigpp_1` | Location and width of the **first** Gaussian peak |
+| `mpp_2, sigpp_2` | Location and width of the **second** Gaussian peak |
 | `beta` | Power-law slope of the mass ratio |
-| `maximum_mass` | *(optional)* upper bound of the evaluation grid, default `200` $M_\odot$ |
+
+```{note}
+Which peak is which is a matter of the values you supply, not of the name: at
+the O4b medians peak *1* is the narrow low-mass one (9.99 ± 0.66 $M_\odot$),
+carrying 52% of the mixture, and peak 2 is the broad 33.3 $M_\odot$ one carrying
+5.7%. An earlier version of this page used an illustrative example with the two
+the other way round and the weights almost reversed.
+
+These values are written down once, as
+{data}`GWForge.population.mass.BGP_PARAMETERS`, and read from there by
+everything that needs them — the Fisher model and the shipped configs included.
+The Default BBH spin values below live the same way, in
+{data}`GWForge.population.spin.DEFAULT_BBH_SPIN_PARAMETERS`.
+```
+| `maximum_mass` | *(optional)* upper bound of the evaluation grid, default `200` $M_\odot$. Must exceed `m_high` |
 
 The exact definitions are Eqs. (B10)–(B14) of the [GWTC-5.0 population paper](https://arxiv.org/abs/2605.27226).
 
@@ -227,7 +246,56 @@ Here is the list of currently available spin distribution
   |`Isotropic-Beta`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi` | Spin Magnitudes sampled from Beta distribution. Isotropic distribution of spin angles
   |`Isotropic-Beta_Gaussian`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t` | Spin magnitudes sampled from Beta distribution. Truncated Gaussian distribution for cosine tilt angles.
   |`Isotropic-Beta_Gaussian_Uniform`| `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t, xi_spin` | Spin magnitudes sampled from Beta distribution. A fraction of the binaries have cosine tilt angles from Truncated Gaussian distribution and the rest from a uniform distribution between (-1,1)|
-  | `Default` | `minimum_primary_spin, minimum_secondary_spin, maximum_primary_spin, maximum_secondary_spin, mu_chi, sigma_squared_chi, sigma_t, xi_spin` | Same as `Isotropic-Beta_Gaussian_Uniform` |
+  | `Default` | `mu_chi, sigma_chi, mu_t, sigma_t, xi_spin` (optionally `amax`, `t_min`) | The GWTC-4.0/5.0 **Default BBH** model, Eqs. B15–B16 of [arXiv:2605.27226](https://arxiv.org/abs/2605.27226). See [below](#the-default-bbh-spin-model). |
+
+```{warning}
+`Default` used to be an alias for `Isotropic-Beta_Gaussian_Uniform`. It is not
+the same model, and a config written for the old meaning will now raise rather
+than silently sample something else: `sigma_squared_chi` (a **variance**, for the
+Beta) has become `sigma_chi` (a **standard deviation**, for a truncated
+Gaussian), and the tilt Gaussian's mean `mu_t` is now a parameter instead of
+being pinned at $\cos\theta = 1$. The old model is unchanged and still
+available under its own name.
+```
+
+### The Default BBH spin model
+
+Spin magnitudes are independent and identically distributed truncated Gaussians
+on $[0, a_{\max}]$ (Eq. B15),
+
+$$\pi(\chi_1, \chi_2 \mid \mu_\chi, \sigma_\chi)
+   = N_{[0, a_{\max}]}(\chi_1 \mid \mu_\chi, \sigma_\chi)\,
+     N_{[0, a_{\max}]}(\chi_2 \mid \mu_\chi, \sigma_\chi),$$
+
+and the cosine tilts are identically but **not independently** distributed
+(Eq. B16),
+
+$$\pi(\cos\theta_1, \cos\theta_2 \mid \mu_t, \sigma_t, \xi)
+   = \xi\, N_{[t_{\min}, 1]}(\cos\theta_1 \mid \mu_t, \sigma_t)\,
+             N_{[t_{\min}, 1]}(\cos\theta_2 \mid \mu_t, \sigma_t)
+   + \frac{1 - \xi}{(1 - t_{\min})^2}.$$
+
+The mixture is over the **binary**: one draw decides whether *both* tilts come
+from the Gaussian, so the two are correlated. Drawing the split independently
+for each component gives identical marginals and the wrong joint, which is why
+`tests/test_population_spin.py` checks the correlation between the two tilts
+rather than their histograms.
+
+| parameter | description |
+| --- | --- |
+| `mu_chi`, `sigma_chi` | Location and **width** of the spin-magnitude Gaussian, truncated to $[0, a_{\max}]$ |
+| `mu_t`, `sigma_t` | Location and width of the cos-tilt Gaussian. The posterior files call these `mu_spin` and `sigma_spin` |
+| `xi_spin` | Fraction of binaries in the Gaussian component ($\zeta$ in the paper) |
+| `amax` | *(optional)* upper edge of the spin magnitude, default 1 |
+| `t_min` | *(optional)* lower edge of $\cos\theta$, default −1 |
+
+These too are the shipped defaults, so a `[Spin]` section naming the model is enough:
+
+```ini
+[Spin]
+spin-model = Default
+spin-parameters = {'mu_chi': 0.0751318233, 'sigma_chi': 0.3667469243, 'mu_t': 0.2788662234, 'sigma_t': 0.9661688072, 'xi_spin': 0.6650168221}
+```
 
 For more details, refer to the following publications:
 * [Binary Black Hole Population Properties Inferred from the First and Second Observing Runs of Advanced LIGO and Advanced Virgo](https://inspirehep.net/literature/1706043)
@@ -304,6 +372,17 @@ By default `gwforge_population` generates a year's worth of population. If you w
 
 A few more example configuration files ship with the package under `GWForge/population/population_configuration_files/` (inside your environment's `site-packages`, or in the [source tree](https://github.com/koustavchandra/gwforge/tree/main/GWForge/population/population_configuration_files)). Feel free to modify them and see what you get.
 
+The one to start from is `bgp-gwtc5.ini`: the GWTC-5.0 `Default BBH` population, with every mass and spin value a posterior median of the O4b analysis and a header recording where each came from. It generates about 33,700 BBH mergers a year out to $z = 10$:
+
+```bash
+gwforge_population --config-file bgp-gwtc5.ini --output-file bbh.h5 \
+                   --source-type bbh --seed 250114 --save-config
+```
+
+```{note}
+Its `[Redshift]` block is deliberately *not* the paper's. GWForge reads Madau-Dickinson as the star-formation rate and convolves it with a formation-to-merger time delay, so what comes out is a delayed population rather than a rate evolving as $\psi(z)$ directly.
+```
+
 ### Naive way to check the population
 You can check the binary parameters of the population by doing the following:
 ```python
@@ -311,3 +390,18 @@ from GWForge.utils import cornerplot
 cornerplot(file='bbh.h5', parameters=['mass_1_source', 'mass_2_source', 'spin_1z','spin_2z',  'redshift'], save='pop.png')
 ```
 This will create a plot called `pop.png` in the current working directory with the parameters. The list of parameters can be found by doing `h5ls -r bbh.h5`. It list all the keys of an HDF5 file.
+
+### Checking the population against the model
+
+That corner shows you *what was drawn*. To check it is what the model *says*, run
+
+```bash
+python validation/gwtc5_population_check.py --population bbh.h5 \
+    --config GWForge/population/population_configuration_files/bgp-gwtc5.ini \
+    --output-directory population_check
+```
+
+It draws an eleven-parameter corner with the analytic density overlaid on every diagonal, and behind each panel runs a numerical comparison: the histogram against the density integrated over each bin, in units of that bin's counting noise. Two of the checks cannot be seen in any one-dimensional histogram, and both are places this package has had bugs:
+
+* $p(q \mid m_1)$ is a **conditional**, so it is checked in bins of $m_1$. Drawing $q$ from the marginal instead reproduces the marginal perfectly and the conditional not at all.
+* the cos-tilt mixture is **joint** over the binary, so it is checked through the correlation between the two tilts. Factorising it leaves both marginals untouched and sets that correlation to zero.

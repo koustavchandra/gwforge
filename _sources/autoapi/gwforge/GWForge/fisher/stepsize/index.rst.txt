@@ -1,0 +1,161 @@
+gwforge.GWForge.fisher.stepsize
+===============================
+
+.. py:module:: gwforge.GWForge.fisher.stepsize
+
+.. autoapi-nested-parse::
+
+   Choosing finite-difference steps, and measuring what limits them.
+
+   Two things bound a usable step from opposite sides. Too large and the difference
+   stops being local; too small and it drowns in the waveform model's own numerical
+   noise. The constants here are measured rather than guessed, and the measurements
+   are recorded beside them because they are the whole justification.
+
+   :func:`calibrate_step` handles the upper bound by targeting a fixed fractional
+   change in the waveform. :func:`estimate_noise` handles the lower one, using the
+   ECNoise procedure of Moré and Wild, *Estimating Computational Noise*, SIAM J.
+   Sci. Comput. 33(3):1292--1314 (2011): a smooth function's k-th finite differences
+   shrink like :math:`h^k` while noise does not shrink at all, so the level at which
+   the difference table stops changing is the noise.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.stepsize.TARGET_FRACTIONAL_CHANGE
+   gwforge.GWForge.fisher.stepsize.NOISE_MARGIN
+   gwforge.GWForge.fisher.stepsize._NOISE_WARNING_ERROR
+   gwforge.GWForge.fisher.stepsize._CALIBRATION_TOLERANCE_LOW
+   gwforge.GWForge.fisher.stepsize._CALIBRATION_TOLERANCE_HIGH
+   gwforge.GWForge.fisher.stepsize._CALIBRATION_ITERATIONS
+   gwforge.GWForge.fisher.stepsize.NOISE_SAMPLE_POINTS
+   gwforge.GWForge.fisher.stepsize._NOISE_RATIO_TOLERANCE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.stepsize.estimate_noise
+   gwforge.GWForge.fisher.stepsize.sample_around
+   gwforge.GWForge.fisher.stepsize.calibrate_step
+
+
+Module Contents
+---------------
+
+.. py:data:: TARGET_FRACTIONAL_CHANGE
+   :value: 0.01
+
+
+.. py:data:: NOISE_MARGIN
+   :value: 100.0
+
+
+.. py:data:: _NOISE_WARNING_ERROR
+   :value: 0.05
+
+
+.. py:data:: _CALIBRATION_TOLERANCE_LOW
+   :value: 0.8
+
+
+.. py:data:: _CALIBRATION_TOLERANCE_HIGH
+   :value: 1.25
+
+
+.. py:data:: _CALIBRATION_ITERATIONS
+   :value: 5
+
+
+.. py:data:: NOISE_SAMPLE_POINTS
+   :value: 9
+
+
+.. py:data:: _NOISE_RATIO_TOLERANCE
+   :value: 4.0
+
+
+.. py:function:: estimate_noise(values)
+
+   Estimate the numerical noise of a computed function from its values.
+
+   Implements the ECNoise procedure of Moré and Wild, *Estimating Computational
+   Noise*, SIAM J. Sci. Comput. 33(3):1292--1314 (2011), which is the standard
+   way to measure how much of a simulated function's output is numerical
+   scatter rather than signal.
+
+   The idea is that for a smooth :math:`f` the :math:`k`-th finite difference
+   over a spacing :math:`h` shrinks like :math:`h^k`, while iid noise does not
+   shrink at all -- it merely gets amplified by a known binomial factor. So
+   build the difference table and look for the level at which the estimates
+   stop changing:
+
+   .. math::
+
+      \sigma_k^2 = \frac{\gamma_k}{m + 1 - k} \sum_i \big(\Delta^k f_i\big)^2,
+      \qquad \gamma_k = \frac{(k!)^2}{(2k)!}.
+
+   :param values: Function values at equally spaced points. At least four, preferably
+                  :data:`NOISE_SAMPLE_POINTS`. The spacing itself never enters.
+   :type values: array_like
+
+   :returns: ``(noise, status)``. ``status`` is ``1`` when the noise was detected,
+             ``2`` when the spacing was too *small* (half the first differences came
+             out exactly zero -- widen it by ~100), and ``3`` when it was too *large*
+             (no level settled, or the values already differ in their first digit --
+             narrow it by ~100). ``noise`` is ``0.0`` unless ``status`` is ``1``.
+   :rtype: tuple
+
+
+.. py:function:: sample_around(evaluate, half_width, points=NOISE_SAMPLE_POINTS)
+
+   Evaluate a function at equally spaced points centred on zero.
+
+   The spacing convention follows Moré and Wild's driver: ``half_width`` is the
+   half-width of the span, not the gap between points.
+
+   :param evaluate: ``evaluate(offset) -> float``.
+   :type evaluate: callable
+   :param half_width: Half the total span.
+   :type half_width: float
+   :param points: Number of evaluations.
+   :type points: int
+
+   :rtype: numpy.ndarray
+
+
+.. py:function:: calibrate_step(evaluate, name, value, initial, target=TARGET_FRACTIONAL_CHANGE)
+
+   Rescale a step so one displacement changes the waveform by ``target``.
+
+   The fractional change is linear in the step over many decades, so a single
+   probe fixes the scale; a second probe confirms it and catches the
+   non-linear case. See :data:`TARGET_FRACTIONAL_CHANGE` for why the target is
+   what it is.
+
+   :param evaluate: ``evaluate(step) -> float`` returning
+                    :math:`\lVert\Delta h\rVert / \lVert h\rVert` for that displacement.
+   :type evaluate: callable
+   :param name: Parameter name, used for the bound check and for logging.
+   :type name: str
+   :param value: Fiducial value.
+   :type value: float
+   :param initial: Starting step.
+   :type initial: float
+   :param target: Desired fractional change.
+   :type target: float
+
+   :returns: ``(step, noise_ratio)``. The step is bounded. The noise ratio is always
+             ``0.0`` here -- measuring it is
+             :meth:`WaveformDerivatives._apply_noise_estimate`'s job, which uses
+             :func:`estimate_noise`. Falls back to ``initial`` if the waveform does
+             not depend on the parameter at all.
+   :rtype: tuple
+
+

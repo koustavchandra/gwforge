@@ -1,0 +1,202 @@
+gwforge.GWForge.ifo.antenna
+===========================
+
+.. py:module:: gwforge.GWForge.ifo.antenna
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.antenna.RESPONSE_PARAMETERS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.antenna.finite_size_factor
+   gwforge.GWForge.ifo.antenna.time_to_coalescence
+   gwforge.GWForge.ifo.antenna.chirp_mass_and_symmetric_mass_ratio
+   gwforge.GWForge.ifo.antenna._arm_outer_products
+   gwforge.GWForge.ifo.antenna.antenna_response
+   gwforge.GWForge.ifo.antenna.detector_response
+   gwforge.GWForge.ifo.antenna.inject_signal_with_response
+
+
+Module Contents
+---------------
+
+.. py:data:: RESPONSE_PARAMETERS
+   :value: ('ra', 'dec', 'psi', 'geocent_time', 'chirp_mass', 'symmetric_mass_ratio', 'mass_1', 'mass_2',...
+
+
+.. py:function:: finite_size_factor(x, y)
+
+   Single-arm transfer function for finite light travel time.
+
+   This is the frequency-domain response of one Fabry-Perot arm to a wave
+   arriving from direction :math:`\hat\Omega`, from Rakhmanov, Romano & Whelan
+   (`arXiv:0808.3805 <https://arxiv.org/abs/0808.3805>`_):
+
+   .. math::
+
+      D(x, y) = \tfrac{1}{2}\left[
+           e^{-i\pi x(1+y)}\,\mathrm{sinc}\big(x(1-y)\big)
+         + e^{ i\pi x(1-y)}\,\mathrm{sinc}\big(x(1+y)\big)\right]
+
+   :param x: :math:`fL/c`, the arm length in wavelengths.
+   :type x: array_like
+   :param y: :math:`-\hat\Omega\cdot\hat{a}`, the cosine of the angle between the arm
+             and the direction of propagation.
+   :type y: array_like
+
+   :returns: Complex transfer function. ``D(0, y) == 1`` for every ``y``, which is the
+             long-wavelength limit -- so setting this to 1 recovers bilby exactly.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Notes
+
+   ``numpy.sinc(z)`` is :math:`\sin(\pi z)/(\pi z)`, which is what the formula
+   above already assumes; do not insert an extra factor of :math:`\pi`.
+
+
+.. py:function:: time_to_coalescence(frequency, chirp_mass, symmetric_mass_ratio, mode=2)
+
+   Time remaining to merger at a given frequency, to 3.5PN.
+
+   This is the time-frequency relation that turns the frequency-domain response
+   into a time-dependent one: the bin at frequency :math:`f` is emitted
+   :math:`\tau(f)` seconds before merger, so the Earth's orientation there is
+   the orientation at ``geocent_time - tau(f)``.
+
+   Uses eq. (3.8b) of `arXiv:0907.0700 <https://arxiv.org/abs/0907.0700>`_.
+
+   :param frequency: Frequency in Hz.
+   :type frequency: array_like
+   :param chirp_mass: Detector-frame chirp mass in solar masses.
+   :type chirp_mass: float
+   :param symmetric_mass_ratio: :math:`\eta = m_1 m_2 / (m_1+m_2)^2`.
+   :type symmetric_mass_ratio: float
+   :param mode: Harmonic mode number. Mode ``m`` reaches a given frequency when the
+                dominant quadrupole is at :math:`2f/m`, so ``tau_m(f) = tau_2(2f/m)``.
+   :type mode: int
+
+   :returns: Seconds before coalescence, positive and decreasing with frequency.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: chirp_mass_and_symmetric_mass_ratio(parameters)
+
+   Extract ``(chirp_mass, symmetric_mass_ratio)`` from a parameter dict.
+
+   Accepts any of the mass parameterisations GWForge and bilby pass around:
+   component masses, chirp mass with mass ratio, or chirp mass with symmetric
+   mass ratio.
+
+   :returns: ``None`` when the masses cannot be determined -- e.g. a custom non-CBC
+             source model -- in which case the caller falls back to a static response.
+   :rtype: tuple of float, or None
+
+
+.. py:function:: _arm_outer_products(interferometer)
+
+   Return ``(xx, yy)``, the half-outer-products of the arm unit vectors.
+
+   ``xx - yy`` is exactly bilby's ``detector_tensor``; splitting it in two is
+   what lets each arm carry its own frequency-dependent transfer function.
+
+
+.. py:function:: antenna_response(interferometer, ra, dec, geocent_time, psi, frequencies, start_time, times_to_coalescence=None, earth_rotation=True, finite_size=True)
+
+   Antenna pattern and arrival delay, per frequency bin.
+
+   :param interferometer: Detector whose geometry is used. For ET this is one triangle arm; the
+                          three arms are separate ``Interferometer`` objects with their own
+                          vertices, so their responses differ correctly.
+   :type interferometer: bilby.gw.detector.Interferometer
+   :param ra: Sky position in radians.
+   :type ra: float
+   :param dec: Sky position in radians.
+   :type dec: float
+   :param geocent_time: GPS time of coalescence at the geocentre.
+   :type geocent_time: float
+   :param psi: Polarisation angle in radians, counter-clockwise about the propagation
+               direction (bilby's convention).
+   :type psi: float
+   :param frequencies: Frequencies in Hz at which to evaluate the response.
+   :type frequencies: array_like
+   :param start_time: GPS start time of the data segment; the returned delay is measured from
+                      it, matching bilby's ``get_detector_response``.
+   :type start_time: float
+   :param times_to_coalescence: :math:`\tau(f)`, same length as ``frequencies``. Required when
+                                ``earth_rotation`` is True; ignored otherwise.
+   :type times_to_coalescence: array_like or None
+   :param earth_rotation: Evolve the antenna pattern and the arrival delay along :math:`t(f)`.
+   :type earth_rotation: bool
+   :param finite_size: Apply the per-arm finite-light-travel-time transfer function.
+   :type finite_size: bool
+
+   :returns: ``(F_plus, F_cross, tau)``. The first two are complex when
+             ``finite_size`` is True and real-valued otherwise; ``tau`` is the delay
+             from ``start_time`` to arrival at this detector's vertex. The caller
+             applies :math:`e^{-2\pi i f \tau}` -- keeping it separate leaves the
+             rapidly oscillating factor available in closed form.
+   :rtype: tuple of (numpy.ndarray, numpy.ndarray, numpy.ndarray or float)
+
+
+.. py:function:: detector_response(interferometer, waveform_polarizations, parameters, frequencies=None, earth_rotation=True, finite_size=True)
+
+   Project polarizations onto one detector.
+
+   Drop-in replacement for :meth:`bilby.gw.detector.Interferometer.get_detector_response`
+   with the same masking and return contract: a full-length frequency-domain
+   array, zero outside the interferometer's ``frequency_mask``.
+
+   :param interferometer: Detector with strain data already set (its ``start_time`` is used).
+   :type interferometer: bilby.gw.detector.Interferometer
+   :param waveform_polarizations: ``{'plus': ..., 'cross': ...}`` frequency-domain polarizations.
+   :type waveform_polarizations: dict
+   :param parameters: Source parameters. Needs ``ra``, ``dec``, ``psi``, ``geocent_time``, and
+                      -- when ``earth_rotation`` is True -- enough mass information to evaluate
+                      the time-frequency relation.
+   :type parameters: dict
+   :param frequencies: Evaluate at these frequencies instead of the interferometer's own array.
+                       When given, no frequency masking is applied.
+   :type frequencies: array_like or None
+   :param earth_rotation: Switch the two corrections off to recover bilby's response exactly.
+   :type earth_rotation: bool
+   :param finite_size: Switch the two corrections off to recover bilby's response exactly.
+   :type finite_size: bool
+
+   :returns: Complex frequency-domain strain in this detector.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: inject_signal_with_response(interferometers, waveform_generator, parameters, earth_rotation=True, finite_size=True)
+
+   Inject a signal into a network using the frequency-dependent response.
+
+   bilby's ``InterferometerList.inject_signal`` calls ``get_detector_response``
+   internally and so cannot be reused. This mirrors
+   ``Interferometer.inject_signal_from_waveform_polarizations``, including the
+   ``meta_data`` it populates, so downstream code that reads
+   ``ifo.meta_data['optimal_SNR']`` is unaffected.
+
+   :param interferometers: Network with strain data already set.
+   :type interferometers: bilby.gw.detector.InterferometerList
+   :param waveform_generator: Generator matched to the network's duration and sampling frequency.
+   :type waveform_generator: bilby.gw.WaveformGenerator
+   :param parameters: Injection parameters.
+   :type parameters: dict
+   :param earth_rotation: Response options; see :func:`detector_response`.
+   :type earth_rotation: bool
+   :param finite_size: Response options; see :func:`detector_response`.
+   :type finite_size: bool
+
+   :returns: The waveform polarizations that were injected.
+   :rtype: dict
+
+

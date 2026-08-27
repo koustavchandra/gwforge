@@ -1,0 +1,552 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.fisher.config - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../../../_sources/autoapi/gwforge/GWForge/fisher/config/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-gwforge.GWForge.fisher.config">
+<span id="gwforge-gwforge-fisher-config"></span><h1>gwforge.GWForge.fisher.config<a class="headerlink" href="#module-gwforge.GWForge.fisher.config" title="Link to this heading">¶</a></h1>
+<p>Configuration handling for <code class="docutils literal notranslate"><span class="pre">gwforge_fisher</span></code>.</p>
+<p>Kept out of the executable so the parsing is importable and testable, and so the
+CLI stays a thin driver like the other <code class="docutils literal notranslate"><span class="pre">bin/</span></code> scripts.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.SOURCE_MODELS" title="gwforge.GWForge.fisher.config.SOURCE_MODELS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SOURCE_MODELS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS" title="gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PARAMETER_CONVERSIONS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config._optional_source_model" title="gwforge.GWForge.fisher.config._optional_source_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_optional_source_model</span></code></a>(module_name, attribute)</p></td>
+<td><p>Import a source model from an optional package, or None if absent.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.parse_collection" title="gwforge.GWForge.fisher.config.parse_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_collection</span></code></a>(config, section, option[, fallback])</p></td>
+<td><p>Read a list or dict written with single quotes from an ini file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.read_injections" title="gwforge.GWForge.fisher.config.read_injections"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_injections</span></code></a>(config[, section])</p></td>
+<td><p>Collect the sources to forecast.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config._read_injection_file" title="gwforge.GWForge.fisher.config._read_injection_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_read_injection_file</span></code></a>(path[, start, end])</p></td>
+<td><p>Read a <code class="docutils literal notranslate"><span class="pre">gwforge_population</span></code> HDF5 into a list of parameter dicts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.waveform_settings" title="gwforge.GWForge.fisher.config.waveform_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">waveform_settings</span></code></a>(config[, section])</p></td>
+<td><p>Waveform arguments, source model and parameter conversion.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.fisher_settings" title="gwforge.GWForge.fisher.config.fisher_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fisher_settings</span></code></a>(config[, section])</p></td>
+<td><p>Read the <code class="docutils literal notranslate"><span class="pre">[Fisher]</span></code> section.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.prior_settings" title="gwforge.GWForge.fisher.config.prior_settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prior_settings</span></code></a>(config, order[, section])</p></td>
+<td><p>Read the <code class="docutils literal notranslate"><span class="pre">[Priors]</span></code> section and enforce the order-dependent rule.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config._aligned_spin" title="gwforge.GWForge.fisher.config._aligned_spin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_aligned_spin</span></code></a>(parameters, component)</p></td>
+<td><p>Aligned spin component, however the parameters happen to spell it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.config.segment_duration" title="gwforge.GWForge.fisher.config.segment_duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segment_duration</span></code></a>(parameters, minimum_frequency, ...[, ...])</p></td>
+<td><p>Segment length long enough to hold the signal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config._optional_source_model">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">_optional_source_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#_optional_source_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config._optional_source_model" title="Link to this definition">¶</a></dt>
+<dd><p>Import a source model from an optional package, or None if absent.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.SOURCE_MODELS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">SOURCE_MODELS</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#SOURCE_MODELS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.SOURCE_MODELS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">PARAMETER_CONVERSIONS</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#PARAMETER_CONVERSIONS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.parse_collection">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">parse_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#parse_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.parse_collection" title="Link to this definition">¶</a></dt>
+<dd><p>Read a list or dict written with single quotes from an ini file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>configparser.ConfigParser</em>)</p></li>
+<li><p><strong>section</strong> (<em>str</em>)</p></li>
+<li><p><strong>option</strong> (<em>str</em>)</p></li>
+<li><p><strong>fallback</strong> (<em>object</em><em> or </em><em>None</em>) – Returned when the option is absent or empty.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.read_injections">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">read_injections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Injection_Parameters'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#read_injections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.read_injections" title="Link to this definition">¶</a></dt>
+<dd><p>Collect the sources to forecast.</p>
+<p>Accepts either parameters written inline in the configuration, or an
+<code class="docutils literal notranslate"><span class="pre">injection-file</span></code> pointing at a <code class="docutils literal notranslate"><span class="pre">gwforge_population</span></code> HDF5, optionally
+sliced with <code class="docutils literal notranslate"><span class="pre">start-index</span></code> and <code class="docutils literal notranslate"><span class="pre">end-index</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>configparser.ConfigParser</em>)</p></li>
+<li><p><strong>section</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One dict of parameters per source.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the section is missing or defines no source.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config._read_injection_file">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">_read_injection_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#_read_injection_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config._read_injection_file" title="Link to this definition">¶</a></dt>
+<dd><p>Read a <code class="docutils literal notranslate"><span class="pre">gwforge_population</span></code> HDF5 into a list of parameter dicts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.waveform_settings">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">waveform_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Waveform_Generator'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#waveform_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.waveform_settings" title="Link to this definition">¶</a></dt>
+<dd><p>Waveform arguments, source model and parameter conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>configparser.ConfigParser</em>)</p></li>
+<li><p><strong>section</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>With keys <code class="docutils literal notranslate"><span class="pre">waveform_arguments</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency_domain_source_model</span></code>,
+<code class="docutils literal notranslate"><span class="pre">parameter_conversion</span></code> and <code class="docutils literal notranslate"><span class="pre">minimum_frequency</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the named source model is unknown or unavailable in this bilby.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.fisher_settings">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">fisher_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Fisher'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#fisher_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.fisher_settings" title="Link to this definition">¶</a></dt>
+<dd><p>Read the <code class="docutils literal notranslate"><span class="pre">[Fisher]</span></code> section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>configparser.ConfigParser</em>)</p></li>
+<li><p><strong>section</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>With keys <code class="docutils literal notranslate"><span class="pre">order</span></code>, <code class="docutils literal notranslate"><span class="pre">earth_rotation</span></code>, <code class="docutils literal notranslate"><span class="pre">finite_size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">step_sizes</span></code>, <code class="docutils literal notranslate"><span class="pre">calibrate</span></code> and <code class="docutils literal notranslate"><span class="pre">target_change</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.prior_settings">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">prior_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Priors'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#prior_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.prior_settings" title="Link to this definition">¶</a></dt>
+<dd><p>Read the <code class="docutils literal notranslate"><span class="pre">[Priors]</span></code> section and enforce the order-dependent rule.</p>
+<p>Order 1 is a closed-form covariance and needs no prior; order 2 samples a
+truncated Taylor expansion, which is only meaningful inside bounds, so a
+prior file is required there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>configparser.ConfigParser</em>)</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – Expansion order, from <a class="reference internal" href="#gwforge.GWForge.fisher.config.fisher_settings" title="gwforge.GWForge.fisher.config.fisher_settings"><code class="xref py py-func docutils literal notranslate"><span class="pre">fisher_settings()</span></code></a>.</p></li>
+<li><p><strong>section</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>With keys <code class="docutils literal notranslate"><span class="pre">prior_file</span></code> and <code class="docutils literal notranslate"><span class="pre">enforce_physicality</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">&gt;=</span> <span class="pre">2</span></code> and no <code class="docutils literal notranslate"><span class="pre">prior-file</span></code> is given.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config._aligned_spin">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">_aligned_spin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#_aligned_spin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config._aligned_spin" title="Link to this definition">¶</a></dt>
+<dd><p>Aligned spin component, however the parameters happen to spell it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">convert_to_lal_binary_black_hole_parameters</span></code> produces <code class="docutils literal notranslate"><span class="pre">a_1</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cos_tilt_1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">spin_1z</span></code>, so reading <code class="docutils literal notranslate"><span class="pre">spin_1z</span></code> alone
+silently treats every binary as non-spinning and shortens the estimated
+duration.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.config.segment_duration">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.config.</span></span><span class="sig-name descname"><span class="pre">segment_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approximant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/fisher/config.html#segment_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.config.segment_duration" title="Link to this definition">¶</a></dt>
+<dd><p>Segment length long enough to hold the signal.</p>
+<p>Getting this wrong is not a subtle error: a segment shorter than the inspiral wraps it, and the
+resulting derivatives are meaningless.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<em>dict</em>) – Source parameters; needs component masses and aligned spins, which are
+derived from whatever mass parametrisation is present.</p></li>
+<li><p><strong>minimum_frequency</strong> (<em>float</em>) – Waveform starting frequency in Hz.</p></li>
+<li><p><strong>approximant</strong> (<em>str</em>)</p></li>
+<li><p><strong>maximum</strong> (<em>float</em><em> or </em><em>None</em>) – Cap on the returned duration, in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Duration in seconds, rounded up to a power of two.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">gwforge.GWForge.fisher.config</a><ul>
+<li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config._optional_source_model"><code class="docutils literal notranslate"><span class="pre">_optional_source_model()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.SOURCE_MODELS"><code class="docutils literal notranslate"><span class="pre">SOURCE_MODELS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS"><code class="docutils literal notranslate"><span class="pre">PARAMETER_CONVERSIONS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.parse_collection"><code class="docutils literal notranslate"><span class="pre">parse_collection()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.read_injections"><code class="docutils literal notranslate"><span class="pre">read_injections()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config._read_injection_file"><code class="docutils literal notranslate"><span class="pre">_read_injection_file()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.waveform_settings"><code class="docutils literal notranslate"><span class="pre">waveform_settings()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.fisher_settings"><code class="docutils literal notranslate"><span class="pre">fisher_settings()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.prior_settings"><code class="docutils literal notranslate"><span class="pre">prior_settings()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config._aligned_spin"><code class="docutils literal notranslate"><span class="pre">_aligned_spin()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.config.segment_duration"><code class="docutils literal notranslate"><span class="pre">segment_duration()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

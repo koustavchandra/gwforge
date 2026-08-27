@@ -1,0 +1,240 @@
+gwforge.GWForge.population._smoothed_mass
+=========================================
+
+.. py:module:: gwforge.GWForge.population._smoothed_mass
+
+.. autoapi-nested-parse::
+
+   Numpy/SciPy reimplementations of the ``gwpopulation`` smoothed mass models.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution
+   gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution
+   gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution
+   gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution
+   gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population._smoothed_mass.powerlaw
+   gwforge.GWForge.population._smoothed_mass.truncnorm
+   gwforge.GWForge.population._smoothed_mass.smoothing
+   gwforge.GWForge.population._smoothed_mass.two_component_single
+   gwforge.GWForge.population._smoothed_mass.three_component_single
+   gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass
+   gwforge.GWForge.population._smoothed_mass.left_truncated_normal
+   gwforge.GWForge.population._smoothed_mass.broken_power_law
+   gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak
+
+
+Module Contents
+---------------
+
+.. py:function:: powerlaw(xx, alpha, high, low)
+
+   Normalised power-law pdf ``p(x) ∝ x**alpha`` on ``[low, high]``.
+
+   Matches ``gwpopulation.utils.powerlaw``. ``alpha`` is the spectral index
+   (``alpha == -1`` uses the logarithmic normalisation).
+
+
+.. py:function:: truncnorm(xx, mu, sigma, high, low)
+
+   Truncated-normal pdf on ``[low, high]``.
+
+   Matches ``gwpopulation.utils.truncnorm`` (which reproduces scipy's truncated
+   normal normalisation via the error function).
+
+
+.. py:function:: smoothing(masses, mmin, mmax, delta_m)
+
+   One-sided Planck-taper window applied to a mass pdf.
+
+   ``S`` rises smoothly from 0 to 1 over ``(mmin, mmin + delta_m]`` and is a hard
+   step at ``mmax``. Reproduces ``gwpopulation``'s ``BaseSmoothedMassDistribution
+   .smoothing`` (Talbot & Thrane 2018, Eqs. 7-8). ``delta_m == 0`` -> no taper.
+
+
+.. py:function:: two_component_single(mass, alpha, mmin, mmax, lam, mpp, sigpp, gaussian_mass_maximum=100)
+
+   Power law + single Gaussian peak primary-mass model (unsmoothed).
+
+
+.. py:function:: three_component_single(mass, alpha, mmin, mmax, lam, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, gaussian_mass_maximum=100)
+
+   Power law + two Gaussian peaks primary-mass model (unsmoothed).
+
+
+.. py:function:: double_power_law_primary_mass(mass, alpha_1, alpha_2, mmin, mmax, break_fraction)
+
+   Broken power-law primary-mass model (unsmoothed).
+
+
+.. py:function:: left_truncated_normal(mass, mu, sigma, low)
+
+   Normal pdf truncated below at ``low`` and unbounded above (N_lt).
+
+   Used by the BGP mass model (GWTC-5.0 Eq. B12). Implemented as the truncated
+   normal with an infinite upper bound.
+
+
+.. py:function:: broken_power_law(mass, alpha_1, alpha_2, m_break, mmin, m_high)
+
+   Broken power law of GWTC-5.0 Eq. B10, normalised via Eq. B11.
+
+   .. math::
+       p_{BP}(m) = \frac{1}{N} \begin{cases}
+           (m/m_{break})^{-\alpha_1} & m_{min} \le m < m_{break} \\
+           (m/m_{break})^{-\alpha_2} & m_{break} \le m < m_{high}
+       \end{cases}
+
+   with normalisation :math:`N = m_{break}\left[
+   \frac{1 - (m_{min}/m_{break})^{1-\alpha_1}}{1-\alpha_1}
+   + \frac{(m_{high}/m_{break})^{1-\alpha_2} - 1}{1-\alpha_2}\right]`.
+
+
+.. py:function:: broken_power_law_two_peak(mass, alpha_1, alpha_2, m_break, mmin, m_high, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2)
+
+   Broken power law + two left-truncated Gaussian peaks (GWTC-5.0 Eq. B12).
+
+   The mixture (before the low-mass Planck taper, which the base class applies):
+
+   .. math::
+       \pi(m) \propto \lambda_0\, p_{BP}(m)
+                    + \lambda_1\, N_{lt}(m | \mu_1, \sigma_1)
+                    + (1 - \lambda_0 - \lambda_1)\, N_{lt}(m | \mu_2, \sigma_2).
+
+   This is the "BGP" (Broken power law + Gaussian Peaks) fiducial BBH mass model
+   used in the GWTC-4.0/5.0 population analyses.
+
+
+.. py:class:: BaseSmoothedMassDistribution(mmin=2, mmax=100, normalization_shape=(1000, 500))
+
+   Mirrors ``gwpopulation.models.mass.BaseSmoothedMassDistribution`` closely enough
+   to be a drop-in replacement for GWForge's usage: it exposes ``m1s``/``qs`` grids
+   and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
+
+
+   .. py:attribute:: primary_model
+      :value: None
+
+
+
+   .. py:attribute:: mmin
+      :value: 2
+
+
+
+   .. py:attribute:: mmax
+      :value: 100
+
+
+
+   .. py:attribute:: m1s
+
+
+   .. py:attribute:: qs
+
+
+   .. py:method:: p_m1(dataset, **kwargs)
+
+
+   .. py:method:: norm_p_m1(delta_m, **kwargs)
+
+
+   .. py:method:: p_q(dataset, beta, mmin, delta_m, mmin_2=None, delta_m_2=None)
+
+      Mass-ratio distribution :math:`p(q \mid m_1) \propto q^\beta S(m_2)`.
+
+      :param dataset: ``mass_1`` and ``mass_ratio``.
+      :type dataset: dict
+      :param beta: Power-law index :math:`\beta_q`.
+      :type beta: float
+      :param mmin: The **primary** taper, :math:`(m_{1,\rm low}, \delta_{m,1})`.
+      :type mmin: float
+      :param delta_m: The **primary** taper, :math:`(m_{1,\rm low}, \delta_{m,1})`.
+      :type delta_m: float
+      :param mmin_2: The **secondary** taper, :math:`(m_{2,\rm low}, \delta_{m,2})`
+                     (the posterior's ``mlow_2``/``delta_m_2``). Each defaults to its
+                     primary counterpart, which is the single-taper behaviour the models
+                     without a separate secondary edge -- ``PowerLaw+Peak``,
+                     ``MultiPeak``, ``BrokenPowerLaw`` -- keep.
+      :type mmin_2: float or None
+      :param delta_m_2: The **secondary** taper, :math:`(m_{2,\rm low}, \delta_{m,2})`
+                        (the posterior's ``mlow_2``/``delta_m_2``). Each defaults to its
+                        primary counterpart, which is the single-taper behaviour the models
+                        without a separate secondary edge -- ``PowerLaw+Peak``,
+                        ``MultiPeak``, ``BrokenPowerLaw`` -- keep.
+      :type delta_m_2: float or None
+
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: _norm_p_q(beta, mmin, delta_m, masses, mmin_2=None, delta_m_2=None)
+
+      Per-``m1`` mass-ratio norm, linearly interpolated onto ``masses``.
+
+
+
+.. py:class:: SinglePeakSmoothedMassDistribution(mmin=2, mmax=100, normalization_shape=(1000, 500))
+
+   Bases: :py:obj:`BaseSmoothedMassDistribution`
+
+
+   Mirrors ``gwpopulation.models.mass.BaseSmoothedMassDistribution`` closely enough
+   to be a drop-in replacement for GWForge's usage: it exposes ``m1s``/``qs`` grids
+   and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
+
+
+   .. py:attribute:: primary_model
+
+
+.. py:class:: MultiPeakSmoothedMassDistribution(mmin=2, mmax=100, normalization_shape=(1000, 500))
+
+   Bases: :py:obj:`BaseSmoothedMassDistribution`
+
+
+   Mirrors ``gwpopulation.models.mass.BaseSmoothedMassDistribution`` closely enough
+   to be a drop-in replacement for GWForge's usage: it exposes ``m1s``/``qs`` grids
+   and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
+
+
+   .. py:attribute:: primary_model
+
+
+.. py:class:: BrokenPowerLawSmoothedMassDistribution(mmin=2, mmax=100, normalization_shape=(1000, 500))
+
+   Bases: :py:obj:`BaseSmoothedMassDistribution`
+
+
+   Mirrors ``gwpopulation.models.mass.BaseSmoothedMassDistribution`` closely enough
+   to be a drop-in replacement for GWForge's usage: it exposes ``m1s``/``qs`` grids
+   and ``p_m1``/``p_q`` with identical keyword names and normalisation conventions.
+
+
+   .. py:attribute:: primary_model
+
+
+.. py:class:: BrokenPowerLawTwoPeakSmoothedMassDistribution(mmin=2, mmax=100, normalization_shape=(1000, 500))
+
+   Bases: :py:obj:`BaseSmoothedMassDistribution`
+
+
+   BGP model: broken power law + two peaks, with low-mass Planck taper and a
+   power-law mass ratio (GWTC-5.0 App. B.4, Eqs. B10-B14).
+
+
+   .. py:attribute:: primary_model
+
+

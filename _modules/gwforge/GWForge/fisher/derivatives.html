@@ -1,0 +1,976 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.fisher.derivatives - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for gwforge.GWForge.fisher.derivatives</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">"""First and second derivatives of the detector response.</span>
+
+<span class="sd">Most of the work is deciding which derivatives have to be numerical. A bilby</span>
+<span class="sd">source model returns :math:`\tilde h_+` and :math:`\tilde h_\times` from the</span>
+<span class="sd">intrinsic parameters plus ``theta_jn``, ``phase`` and ``luminosity_distance``,</span>
+<span class="sd">and has **no** dependence on ``ra``, ``dec``, ``psi`` or ``geocent_time`` -- so</span>
+<span class="sd">those four, plus ``luminosity_distance``, are exact. See</span>
+<span class="sd">:mod:`GWForge.fisher.antenna_derivatives` for the geometry and</span>
+<span class="sd">:mod:`GWForge.fisher.stepsize` for how the numerical steps are chosen.</span>
+
+<span class="sd">Everything else is differenced with fourth-order five-point stencils, which give</span>
+<span class="sd">the first and second derivative from the same five evaluations. Note ``phase``</span>
+<span class="sd">is *not* analytic for a higher-mode waveform: each :math:`(\ell, m)` carries</span>
+<span class="sd">:math:`e^{-i m \phi_c}` and the mode decomposition is not exposed.</span>
+
+<span class="sd">Mixed second derivatives between a numerical and an analytic parameter are taken</span>
+<span class="sd">by differencing the *exact analytic* derivative along the numerical stencil.</span>
+<span class="sd">That matters when ``earth_rotation`` is on, because the masses then reach the</span>
+<span class="sd">response through :math:`\tau(f)` as well as through the waveform.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..ifo</span><span class="w"> </span><span class="kn">import</span> <span class="n">antenna</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.antenna_derivatives</span><span class="w"> </span><span class="kn">import</span> <span class="n">AntennaDerivatives</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.inner_product</span><span class="w"> </span><span class="kn">import</span> <span class="n">inner_product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ANALYTIC_PARAMETERS</span><span class="p">,</span>
+    <span class="n">DEFAULT_PARAMETERS</span><span class="p">,</span>
+    <span class="n">bounded_step</span><span class="p">,</span>
+    <span class="n">step_size</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.stepsize</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NOISE_MARGIN</span><span class="p">,</span>
+    <span class="n">TARGET_FRACTIONAL_CHANGE</span><span class="p">,</span>
+    <span class="n">_NOISE_WARNING_ERROR</span><span class="p">,</span>
+    <span class="n">calibrate_step</span><span class="p">,</span>
+    <span class="n">estimate_noise</span><span class="p">,</span>
+    <span class="n">sample_around</span><span class="p">,</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="_masked_frequencies">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._masked_frequencies">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_masked_frequencies</span><span class="p">(</span><span class="n">interferometer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""In-band frequencies and the mask that selects them."""</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">interferometer</span><span class="o">.</span><span class="n">frequency_mask</span>
+    <span class="k">return</span> <span class="n">interferometer</span><span class="o">.</span><span class="n">frequency_array</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mask</span></div>
+
+
+
+<div class="viewcode-block" id="_times_to_coalescence">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._times_to_coalescence">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_times_to_coalescence</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">earth_rotation</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">""":math:`\\tau(f)` for the rotating response, or None if not needed."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">earth_rotation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">masses</span> <span class="o">=</span> <span class="n">antenna</span><span class="o">.</span><span class="n">chirp_mass_and_symmetric_mass_ratio</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"</span><span class="si">%s</span><span class="s2">: cannot determine the masses from the source parameters, so the "</span>
+            <span class="s2">"time-frequency relation is unavailable; falling back to a static "</span>
+            <span class="s2">"antenna pattern for the derivatives."</span><span class="p">,</span>
+            <span class="n">interferometer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">antenna</span><span class="o">.</span><span class="n">time_to_coalescence</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="o">*</span><span class="n">masses</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="analytic_derivatives">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.analytic_derivatives">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analytic_derivatives</span><span class="p">(</span>
+    <span class="n">interferometer</span><span class="p">,</span>
+    <span class="n">polarizations</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="p">,</span>
+    <span class="n">earth_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">finite_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Exact response and derivatives for the five closed-form parameters.</span>
+
+<span class="sd">    Writing :math:`h = P\,S` with :math:`P = F_+\tilde h_+ + F_\times\tilde h_\times`</span>
+<span class="sd">    and :math:`S = e^{-2\pi i f\tau}`,</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \partial_a h = \big(\partial_a P - 2\pi i f\,\partial_a\tau\,P\big) S,</span>
+
+<span class="sd">    and the second derivative follows from one more product rule. ``ra``,</span>
+<span class="sd">    ``dec``, ``psi`` and ``geocent_time`` enter through</span>
+<span class="sd">    :class:`AntennaDerivatives`; ``luminosity_distance`` is handled separately</span>
+<span class="sd">    because :math:`h \propto 1/d_L` makes every one of its derivatives a rescaling</span>
+<span class="sd">    of a derivative we already have.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    interferometer : bilby.gw.detector.Interferometer</span>
+<span class="sd">    polarizations : dict</span>
+<span class="sd">        ``{'plus': ..., 'cross': ...}`` on the interferometer's frequency grid.</span>
+<span class="sd">    parameters : dict</span>
+<span class="sd">        Source parameters.</span>
+<span class="sd">    earth_rotation, finite_size : bool</span>
+<span class="sd">        Response options; must match those used elsewhere.</span>
+<span class="sd">    order : int</span>
+<span class="sd">        ``2`` also returns second derivatives.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        ``(response, first, second)``. ``first`` maps a parameter name to a</span>
+<span class="sd">        full-length complex array; ``second`` maps a sorted name pair to one.</span>
+<span class="sd">        Both are zero outside the interferometer's frequency mask.</span>
+<span class="sd">    """</span>
+    <span class="n">frequencies</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">_masked_frequencies</span><span class="p">(</span><span class="n">interferometer</span><span class="p">)</span>
+    <span class="n">times_to_coalescence</span> <span class="o">=</span> <span class="n">_times_to_coalescence</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">earth_rotation</span><span class="p">,</span> <span class="n">interferometer</span>
+    <span class="p">)</span>
+    <span class="n">rotating</span> <span class="o">=</span> <span class="n">earth_rotation</span> <span class="ow">and</span> <span class="n">times_to_coalescence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="n">antenna_derivatives</span> <span class="o">=</span> <span class="n">AntennaDerivatives</span><span class="p">(</span>
+        <span class="n">interferometer</span><span class="p">,</span>
+        <span class="n">ra</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"ra"</span><span class="p">],</span>
+        <span class="n">dec</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"dec"</span><span class="p">],</span>
+        <span class="n">geocent_time</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"geocent_time"</span><span class="p">],</span>
+        <span class="n">psi</span><span class="o">=</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"psi"</span><span class="p">],</span>
+        <span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">interferometer</span><span class="o">.</span><span class="n">strain_data</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">times_to_coalescence</span><span class="o">=</span><span class="n">times_to_coalescence</span><span class="p">,</span>
+        <span class="n">earth_rotation</span><span class="o">=</span><span class="n">rotating</span><span class="p">,</span>
+        <span class="n">finite_size</span><span class="o">=</span><span class="n">finite_size</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">plus</span><span class="p">,</span> <span class="n">cross</span> <span class="o">=</span> <span class="n">polarizations</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span> <span class="n">polarizations</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">phase_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">frequencies</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">projected</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">plus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">*</span> <span class="n">plus</span> <span class="o">+</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">cross</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">*</span> <span class="n">cross</span>
+
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">phase_factor</span> <span class="o">*</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="s2">"value"</span><span class="p">])</span>
+    <span class="n">band_response</span> <span class="o">=</span> <span class="n">projected</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span> <span class="o">*</span> <span class="n">shift</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="n">full</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">full</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="k">return</span> <span class="n">full</span>
+
+    <span class="n">geometric</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"ra"</span><span class="p">,</span> <span class="s2">"dec"</span><span class="p">,</span> <span class="s2">"psi"</span><span class="p">,</span> <span class="s2">"geocent_time"</span><span class="p">)</span>
+    <span class="n">band_first</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">projected</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">phase_factor</span> <span class="o">*</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">*</span> <span class="n">projected</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">shift</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">geometric</span>
+    <span class="p">}</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">embed</span><span class="p">(</span><span class="n">band_response</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">embed</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">band_first</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">"luminosity_distance"</span><span class="p">]</span>
+    <span class="n">first</span><span class="p">[</span><span class="s2">"luminosity_distance"</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">response</span> <span class="o">/</span> <span class="n">distance</span>
+
+    <span class="n">second</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">left</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geometric</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">geometric</span><span class="p">[</span><span class="n">i</span><span class="p">:]:</span>
+                <span class="n">pair</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)))</span>
+                <span class="n">delay_left</span> <span class="o">=</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+                <span class="n">delay_right</span> <span class="o">=</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">projected</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">phase_factor</span> <span class="o">*</span> <span class="n">delay_left</span> <span class="o">*</span> <span class="n">projected</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">phase_factor</span> <span class="o">*</span> <span class="n">delay_right</span> <span class="o">*</span> <span class="n">projected</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">phase_factor</span> <span class="o">*</span> <span class="n">antenna_derivatives</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="o">*</span> <span class="n">projected</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">phase_factor</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">delay_left</span> <span class="o">*</span> <span class="n">delay_right</span> <span class="o">*</span> <span class="n">projected</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)</span>
+                <span class="p">)</span> <span class="o">*</span> <span class="n">shift</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span> <span class="o">=</span> <span class="n">embed</span><span class="p">(</span><span class="n">band</span><span class="p">)</span>
+        <span class="c1"># h = g(other parameters) / d_L, so every distance second derivative is</span>
+        <span class="c1"># a rescaling of something already computed.</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">geometric</span><span class="p">:</span>
+            <span class="n">second</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="s2">"luminosity_distance"</span><span class="p">)))]</span> <span class="o">=</span> <span class="o">-</span><span class="n">first</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">/</span> <span class="n">distance</span>
+        <span class="n">second</span><span class="p">[(</span><span class="s2">"luminosity_distance"</span><span class="p">,</span> <span class="s2">"luminosity_distance"</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">2.0</span> <span class="o">*</span> <span class="n">response</span> <span class="o">/</span> <span class="n">distance</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span></div>
+
+
+
+<span class="c1"># Offsets and weights of the fourth-order five-point first-derivative stencil,</span>
+<span class="c1"># in units of the step size. The centre point has zero weight here but is</span>
+<span class="c1"># reused by the second-derivative stencil below.</span>
+<div class="viewcode-block" id="_FIRST_STENCIL">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._FIRST_STENCIL">[docs]</a>
+<span class="n">_FIRST_STENCIL</span> <span class="o">=</span> <span class="p">((</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="_FIRST_DENOMINATOR">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._FIRST_DENOMINATOR">[docs]</a>
+<span class="n">_FIRST_DENOMINATOR</span> <span class="o">=</span> <span class="mf">12.0</span></div>
+
+
+<span class="c1"># Fourth-order five-point second-derivative stencil, sharing the same points.</span>
+<div class="viewcode-block" id="_SECOND_STENCIL">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._SECOND_STENCIL">[docs]</a>
+<span class="n">_SECOND_STENCIL</span> <span class="o">=</span> <span class="p">((</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">30.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="_SECOND_DENOMINATOR">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives._SECOND_DENOMINATOR">[docs]</a>
+<span class="n">_SECOND_DENOMINATOR</span> <span class="o">=</span> <span class="mf">12.0</span></div>
+
+
+
+<div class="viewcode-block" id="WaveformDerivatives">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WaveformDerivatives</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""First and second derivatives of the detector response for one source.</span>
+
+<span class="sd">    Combines the exact closed-form derivatives of :func:`analytic_derivatives`</span>
+<span class="sd">    with fourth-order finite differences for the parameters the waveform</span>
+<span class="sd">    actually depends on.</span>
+
+<span class="sd">    The waveform is evaluated once per stencil point and cached, because the</span>
+<span class="sd">    polarizations do not depend on which detector is looking; detectors are then</span>
+<span class="sd">    projected one at a time by :meth:`derivatives`. That ordering matters for</span>
+<span class="sd">    memory: a second-derivative array is ``n_parameters**2`` frequency series, so</span>
+<span class="sd">    holding one for every detector at once reaches gigabytes at a high sampling</span>
+<span class="sd">    frequency, while the cached polarizations are only ``2`` series per stencil</span>
+<span class="sd">    point.</span>
+
+<span class="sd">    For eleven parameters this is ``4 * n_numerical + 1`` waveform evaluations at</span>
+<span class="sd">    ``order = 1``, plus four per numerical pair at ``order = 2``.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    names : list of str</span>
+<span class="sd">        Parameter names, in the order used by the Fisher matrix.</span>
+<span class="sd">    analytic, numerical : list of str</span>
+<span class="sd">        The split of ``names`` by differentiation method.</span>
+<span class="sd">    steps : dict</span>
+<span class="sd">        Finite-difference step actually used for each numerical parameter.</span>
+<span class="sd">    waveform_evaluations : int</span>
+<span class="sd">        How many times the waveform generator was called.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interferometers</span><span class="p">,</span>
+        <span class="n">waveform_generator</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">,</span>
+        <span class="n">fisher_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">earth_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">finite_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">step_sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">calibrate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">target_change</span><span class="o">=</span><span class="n">TARGET_FRACTIONAL_CHANGE</span><span class="p">,</span>
+        <span class="n">estimate_noise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        interferometers : bilby.gw.detector.InterferometerList</span>
+<span class="sd">            Network with strain data already set.</span>
+<span class="sd">        waveform_generator : bilby.gw.WaveformGenerator</span>
+<span class="sd">            Any generator; the waveform is treated as a black box.</span>
+<span class="sd">        parameters : dict</span>
+<span class="sd">            Fiducial source parameters, containing every requested name.</span>
+<span class="sd">        fisher_parameters : sequence of str or None</span>
+<span class="sd">            Parameters to differentiate with respect to. Defaults to</span>
+<span class="sd">            :data:`DEFAULT_PARAMETERS`.</span>
+<span class="sd">        earth_rotation, finite_size : bool</span>
+<span class="sd">            Passed through to :func:`GWForge.ifo.antenna.detector_response`.</span>
+<span class="sd">        step_sizes : dict or None</span>
+<span class="sd">            Overrides for :data:`DEFAULT_STEP_SIZES`. These are starting guesses</span>
+<span class="sd">            unless ``calibrate`` is False, in which case they are used as given.</span>
+<span class="sd">        order : int</span>
+<span class="sd">            ``1`` for first derivatives only, ``2`` to also build second</span>
+<span class="sd">            derivatives.</span>
+<span class="sd">        calibrate : bool</span>
+<span class="sd">            Rescale each numerical step per source with :func:`calibrate_step`.</span>
+<span class="sd">            On by default because a fixed step cannot serve a whole population:</span>
+<span class="sd">            the same fractional step that is comfortably on the stable plateau</span>
+<span class="sd">            for a 28 solar-mass binary is far below the noise floor for a</span>
+<span class="sd">            neutron star. Costs up to two extra waveform evaluations per</span>
+<span class="sd">            numerical parameter.</span>
+<span class="sd">        target_change : float</span>
+<span class="sd">            Target fractional waveform change for the calibration.</span>
+<span class="sd">        estimate_noise : bool</span>
+<span class="sd">            Measure the waveform model's own numerical noise with</span>
+<span class="sd">            :func:`estimate_noise` and raise the step if it is too small to</span>
+<span class="sd">            clear it. Costs about :data:`NOISE_SAMPLE_POINTS` extra waveform</span>
+<span class="sd">            evaluations per numerical parameter, and never lowers a step.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If a requested parameter is missing from ``parameters``.</span>
+<span class="sd">        """</span>
+<div class="viewcode-block" id="WaveformDerivatives.interferometers">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.interferometers">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interferometers</span> <span class="o">=</span> <span class="n">interferometers</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.waveform_generator">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.waveform_generator">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform_generator</span> <span class="o">=</span> <span class="n">waveform_generator</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.parameters">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.parameters">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.names">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.names">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fisher_parameters</span> <span class="ow">or</span> <span class="n">DEFAULT_PARAMETERS</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.earth_rotation">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.earth_rotation">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">earth_rotation</span> <span class="o">=</span> <span class="n">earth_rotation</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.finite_size">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.finite_size">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finite_size</span> <span class="o">=</span> <span class="n">finite_size</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.order">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.order">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.estimate_noise">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.estimate_noise">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise</span> <span class="o">=</span> <span class="n">estimate_noise</span></div>
+
+
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">"Fisher parameters missing from the injection: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="WaveformDerivatives.index">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.index">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">position</span> <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)}</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.analytic">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.analytic">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analytic</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ANALYTIC_PARAMETERS</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.numerical">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.numerical">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ANALYTIC_PARAMETERS</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.steps">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.steps">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">step_size</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">step_sizes</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span>
+        <span class="p">}</span></div>
+
+
+        <span class="c1"># Approximate relative error of each numerical derivative, caused by</span>
+        <span class="c1"># the waveform model's own numerical noise. Zero means the model is</span>
+        <span class="c1"># smooth at the scale of its step; a value approaching one means that</span>
+        <span class="c1"># derivative -- and so that row of the Fisher matrix -- is not</span>
+        <span class="c1"># determined. See :func:`estimate_noise`.</span>
+<div class="viewcode-block" id="WaveformDerivatives.noise_ratios">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.noise_ratios">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives.waveform_evaluations">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.waveform_evaluations">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform_evaluations</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="WaveformDerivatives._cache">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/derivatives/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+        <span class="k">if</span> <span class="n">calibrate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate</span><span class="p">(</span><span class="n">target_change</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fill_cache</span><span class="p">()</span>
+
+<div class="viewcode-block" id="WaveformDerivatives._calibrate">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._calibrate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Choose every numerical step, then check the model can support it."""</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">({})</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">base</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">base</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">]])</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"The waveform is identically zero at the fiducial parameters; "</span>
+                <span class="s2">"check the injection and the minimum frequency."</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">change</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">shifted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">step</span><span class="p">})</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">shifted</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">shifted</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">]])</span> <span class="o">-</span> <span class="n">reference</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">difference</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibrate_step</span><span class="p">(</span>
+                <span class="n">change</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate_noise</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_apply_noise_estimate</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">"Calibrated finite-difference steps: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="s2">"</span><span class="si">{:.3e}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives._overlap">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._overlap">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_overlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Noise-weighted overlap :math:`\langle h(x + \delta) \mid h_0\rangle`.</span>
+
+<span class="sd">        The scalar functional the noise estimator runs on. It has to be *smooth*</span>
+<span class="sd">        in the parameter, which rules out the ``||dh|| / ||h||`` used for the</span>
+<span class="sd">        fractional-change target -- that has a kink at zero. An inner product</span>
+<span class="sd">        with the fiducial waveform is smooth, and is weighted by the PSD exactly</span>
+<span class="sd">        the way the Fisher matrix is, so the noise it reports is the noise that</span>
+<span class="sd">        actually reaches the answer.</span>
+
+<span class="sd">        Kept complex on purpose. The real part is stationary at the fiducial</span>
+<span class="sd">        point for a phase-like parameter -- for ``phase`` the overlap goes as</span>
+<span class="sd">        ``cos(2 dphi)`` -- so a real functional alone would report a vanishing</span>
+<span class="sd">        slope there and a meaningless noise ratio. The imaginary part is not</span>
+<span class="sd">        stationary, and using both sidesteps the issue for any parameter.</span>
+<span class="sd">        """</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">shifted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">offset</span><span class="p">})</span>
+        <span class="k">return</span> <span class="nb">complex</span><span class="p">(</span>
+            <span class="n">inner_product</span><span class="p">(</span><span class="n">shifted</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">reference</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">interferometer</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">inner_product</span><span class="p">(</span><span class="n">shifted</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">],</span> <span class="n">reference</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">],</span> <span class="n">interferometer</span><span class="p">),</span>
+            <span class="n">inner_product</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">shifted</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">reference</span><span class="p">[</span><span class="s2">"plus"</span><span class="p">],</span> <span class="n">interferometer</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">inner_product</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">shifted</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">],</span> <span class="n">reference</span><span class="p">[</span><span class="s2">"cross"</span><span class="p">],</span> <span class="n">interferometer</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives._apply_noise_estimate">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._apply_noise_estimate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_noise_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Raise the step if the model's own noise says it is too small.</span>
+
+<span class="sd">        Only ever *raises* it. For a smooth waveform the noise is at the level</span>
+<span class="sd">        of machine precision, the required step comes out far below the one the</span>
+<span class="sd">        fractional-change target already picked, and nothing changes -- which is</span>
+<span class="sd">        what keeps the validated IMRPhenomXHM results intact. It binds only for</span>
+<span class="sd">        a model whose output genuinely scatters.</span>
+<span class="sd">        """</span>
+        <span class="n">interferometer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interferometers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">real_part</span><span class="p">(</span><span class="n">offset</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">imaginary_part</span><span class="p">(</span><span class="n">offset</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span>
+
+        <span class="c1"># Probe well inside the calibrated step: the noise has to be measured</span>
+        <span class="c1"># where the signal is small enough not to swamp it.</span>
+        <span class="n">half_width</span> <span class="o">=</span> <span class="n">step</span> <span class="o">/</span> <span class="mf">100.0</span>
+        <span class="n">real_noise</span><span class="p">,</span> <span class="n">real_status</span> <span class="o">=</span> <span class="n">estimate_noise</span><span class="p">(</span><span class="n">sample_around</span><span class="p">(</span><span class="n">real_part</span><span class="p">,</span> <span class="n">half_width</span><span class="p">))</span>
+        <span class="n">imaginary_noise</span><span class="p">,</span> <span class="n">imaginary_status</span> <span class="o">=</span> <span class="n">estimate_noise</span><span class="p">(</span>
+            <span class="n">sample_around</span><span class="p">(</span><span class="n">imaginary_part</span><span class="p">,</span> <span class="n">half_width</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">real_status</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">imaginary_status</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">noise</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">real_noise</span><span class="p">,</span> <span class="n">imaginary_noise</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">noise</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">centre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">)</span>
+        <span class="n">slope</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_overlap</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">)</span> <span class="o">-</span> <span class="n">centre</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span>
+        <span class="k">if</span> <span class="n">slope</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Require the change across one step to clear the noise by the margin,</span>
+        <span class="c1"># which is the same as asking for a derivative error of 1 / NOISE_MARGIN.</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="n">bounded_step</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">NOISE_MARGIN</span> <span class="o">*</span> <span class="n">noise</span> <span class="o">/</span> <span class="n">slope</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="n">noise</span> <span class="o">/</span> <span class="p">(</span><span class="n">slope</span> <span class="o">*</span> <span class="n">step</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">required</span> <span class="o">&gt;</span> <span class="n">step</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">required</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">noise</span> <span class="o">/</span> <span class="p">(</span><span class="n">slope</span> <span class="o">*</span> <span class="n">required</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">"</span><span class="si">%s</span><span class="s2">: raised the step from </span><span class="si">%.3e</span><span class="s2"> to </span><span class="si">%.3e</span><span class="s2">; measured noise </span><span class="si">%.3e</span><span class="s2"> "</span>
+                <span class="s2">"leaves a derivative error of </span><span class="si">%.1f%%</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="n">step</span><span class="p">,</span>
+                <span class="n">required</span><span class="p">,</span>
+                <span class="n">noise</span><span class="p">,</span>
+                <span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">_NOISE_WARNING_ERROR</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"</span><span class="si">%s</span><span class="s2">: the waveform model's own numerical noise leaves this "</span>
+                <span class="s2">"derivative with a relative error of about </span><span class="si">%.0f%%</span><span class="s2">, and no step "</span>
+                <span class="s2">"size fixes it -- clearing the noise would need a step large "</span>
+                <span class="s2">"enough to leave the linear regime. Treat </span><span class="si">%s</span><span class="s2"> with caution."</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_ratios</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+                <span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives._point">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._point">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offsets</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Cache key, shifted parameters and polarizations at a stencil point."""</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">offsets</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="n">shifted</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">delta</span> <span class="ow">in</span> <span class="n">offsets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">shifted</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">shifted</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">waveform_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">shifted</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">waveform_generator</span><span class="o">.</span><span class="n">frequency_domain_strain</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">shifted</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives._fill_cache">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._fill_cache">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fill_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Evaluate the waveform at every stencil point this order needs."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">({})</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">multiple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">]})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">left</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]:</span>
+                    <span class="k">for</span> <span class="n">sign_left</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">sign_right</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">(</span>
+                                <span class="p">{</span>
+                                    <span class="n">left</span><span class="p">:</span> <span class="n">sign_left</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">left</span><span class="p">],</span>
+                                    <span class="n">right</span><span class="p">:</span> <span class="n">sign_right</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">right</span><span class="p">],</span>
+                                <span class="p">}</span>
+                            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives._analytic_at">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._analytic_at">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_analytic_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Closed-form response and derivatives at one cached stencil point."""</span>
+        <span class="n">shifted</span><span class="p">,</span> <span class="n">polarizations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">analytic_derivatives</span><span class="p">(</span>
+            <span class="n">interferometer</span><span class="p">,</span>
+            <span class="n">polarizations</span><span class="p">,</span>
+            <span class="n">shifted</span><span class="p">,</span>
+            <span class="n">earth_rotation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">earth_rotation</span><span class="p">,</span>
+            <span class="n">finite_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">finite_size</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WaveformDerivatives.derivatives">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives.derivatives">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">derivatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Response and derivative arrays for one detector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        interferometer : bilby.gw.detector.Interferometer</span>
+<span class="sd">            Must belong to the network this object was built with.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            ``(response, first, second)`` where ``first`` has shape</span>
+<span class="sd">            ``(n_parameters, n_frequencies)`` and ``second`` has shape</span>
+<span class="sd">            ``(n_parameters, n_parameters, n_frequencies)`` -- or is ``None``</span>
+<span class="sd">            when ``order &lt; 2``.</span>
+<span class="sd">        """</span>
+        <span class="n">index</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">analytic_first</span><span class="p">,</span> <span class="n">analytic_second</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytic_at</span><span class="p">(</span>
+            <span class="n">interferometer</span><span class="p">,</span> <span class="p">{},</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span>
+        <span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="c1"># Along each numerical axis the same five points give the first</span>
+        <span class="c1"># derivative, the diagonal second derivative and -- by differencing the</span>
+        <span class="c1"># closed-form derivatives evaluated there -- the mixed</span>
+        <span class="c1"># numerical-analytic second derivatives.</span>
+        <span class="n">axis_order</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="p">{</span>
+                <span class="n">multiple</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytic_at</span><span class="p">(</span>
+                    <span class="n">interferometer</span><span class="p">,</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">multiple</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">]},</span> <span class="n">axis_order</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span>
+        <span class="p">}</span>
+
+        <span class="n">first</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analytic</span><span class="p">:</span>
+            <span class="n">first</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">analytic_first</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="n">first</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stencil_first</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">multiple</span><span class="p">:</span> <span class="n">axis</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">multiple</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span><span class="p">},</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">second</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pair</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">analytic_second</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">index</span> <span class="ow">and</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">values</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">index</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">values</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+            <span class="n">step</span><span class="p">,</span> <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="n">multiple</span><span class="p">:</span> <span class="n">axis</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">multiple</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span><span class="p">}</span>
+            <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span>
+            <span class="n">second</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stencil_second</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+            <span class="c1"># Mixed numerical x analytic: difference the *exact* analytic</span>
+            <span class="c1"># derivative along the numerical axis. This keeps the term by which</span>
+            <span class="c1"># the masses reach the response through tau(f) when earth_rotation</span>
+            <span class="c1"># is on, which applying a frozen projection to differenced</span>
+            <span class="c1"># polarizations would drop.</span>
+            <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analytic</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="s2">"luminosity_distance"</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">mixed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stencil_first</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="n">multiple</span><span class="p">:</span> <span class="n">axis</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">multiple</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">other</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span>
+                    <span class="p">},</span>
+                    <span class="n">step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">index</span><span class="p">[</span><span class="n">other</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mixed</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">other</span><span class="p">],</span> <span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixed</span>
+
+        <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">left</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]:</span>
+                <span class="n">corners</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="p">(</span><span class="n">sign_left</span><span class="p">,</span> <span class="n">sign_right</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analytic_at</span><span class="p">(</span>
+                        <span class="n">interferometer</span><span class="p">,</span>
+                        <span class="p">{</span>
+                            <span class="n">left</span><span class="p">:</span> <span class="n">sign_left</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">left</span><span class="p">],</span>
+                            <span class="n">right</span><span class="p">:</span> <span class="n">sign_right</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">right</span><span class="p">],</span>
+                        <span class="p">},</span>
+                        <span class="mi">1</span><span class="p">,</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">sign_left</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">sign_right</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="n">mixed</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">corners</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="n">corners</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">-</span> <span class="n">corners</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+                    <span class="o">+</span> <span class="n">corners</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">right</span><span class="p">])</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">index</span><span class="p">[</span><span class="n">right</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mixed</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">right</span><span class="p">],</span> <span class="n">index</span><span class="p">[</span><span class="n">left</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mixed</span>
+
+        <span class="c1"># h = g(everything else) / d_L, so the whole distance row is a rescaling</span>
+        <span class="c1"># of the first derivatives.</span>
+        <span class="k">if</span> <span class="s2">"luminosity_distance"</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="s2">"luminosity_distance"</span><span class="p">]</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"luminosity_distance"</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical</span><span class="p">:</span>
+                <span class="n">mixed</span> <span class="o">=</span> <span class="o">-</span><span class="n">first</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">/</span> <span class="n">distance</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mixed</span>
+                <span class="n">second</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">mixed</span>
+
+        <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="WaveformDerivatives._stencil_first">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._stencil_first">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stencil_first</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Fourth-order first derivative from the five-point stencil."""</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">weight</span> <span class="o">*</span> <span class="n">points</span><span class="p">[</span><span class="n">multiple</span><span class="p">]</span> <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">_FIRST_STENCIL</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total</span> <span class="o">/</span> <span class="p">(</span><span class="n">_FIRST_DENOMINATOR</span> <span class="o">*</span> <span class="n">step</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="WaveformDerivatives._stencil_second">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/index.html#gwforge.GWForge.fisher.derivatives.WaveformDerivatives._stencil_second">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stencil_second</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Fourth-order second derivative from the same five points."""</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">weight</span> <span class="o">*</span> <span class="n">points</span><span class="p">[</span><span class="n">multiple</span><span class="p">]</span> <span class="k">for</span> <span class="n">multiple</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">_SECOND_STENCIL</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total</span> <span class="o">/</span> <span class="p">(</span><span class="n">_SECOND_DENOMINATOR</span> <span class="o">*</span> <span class="n">step</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

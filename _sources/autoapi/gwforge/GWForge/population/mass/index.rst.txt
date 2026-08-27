@@ -1,0 +1,156 @@
+gwforge.GWForge.population.mass
+===============================
+
+.. py:module:: gwforge.GWForge.population.mass
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.choices
+   gwforge.GWForge.population.mass.sampler_choices
+   gwforge.GWForge.population.mass.BGP_PARAMETERS
+   gwforge.GWForge.population.mass.CONDITIONAL_SAMPLING_CHUNK
+   gwforge.GWForge.population.mass.NODES_PER_PEAK_WIDTH
+   gwforge.GWForge.population.mass.MINIMUM_MASS_GRID_NODES
+   gwforge.GWForge.population.mass.MAXIMUM_MASS_GRID_NODES
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.Mass
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.mass.notch_filter
+   gwforge.GWForge.population.mass.low_pass_filter
+   gwforge.GWForge.population.mass.primary_mass_grid_nodes
+   gwforge.GWForge.population.mass.sample_mass_ratio_given_primary
+   gwforge.GWForge.population.mass._invert_rows
+
+
+Module Contents
+---------------
+
+.. py:function:: notch_filter(val, parameters)
+
+.. py:function:: low_pass_filter(val, parameters)
+
+.. py:data:: choices
+   :value: ['PowerLaw+Peak', 'MultiPeak', 'BrokenPowerLaw', 'BGP', 'UniformSecondary', 'DoubleGaussian',...
+
+
+.. py:data:: sampler_choices
+   :value: ['importance_m1_m2', 'importance_m1_q', 'lint']
+
+
+.. py:data:: BGP_PARAMETERS
+
+.. py:data:: CONDITIONAL_SAMPLING_CHUNK
+   :value: 4096
+
+
+.. py:data:: NODES_PER_PEAK_WIDTH
+   :value: 40
+
+
+.. py:data:: MINIMUM_MASS_GRID_NODES
+   :value: 1000
+
+
+.. py:data:: MAXIMUM_MASS_GRID_NODES
+   :value: 40000
+
+
+.. py:function:: primary_mass_grid_nodes(parameters, minimum_mass, maximum_mass)
+
+   Number of primary-mass grid nodes needed to resolve the narrowest peak.
+
+   The smoothed mass models are sampled by wrapping the density in a
+   :class:`bilby.core.prior.Interped`, which builds a **linear interpolant** on
+   this grid and inverse-CDF samples from that. The interpolant, not the
+   density, is what the catalogue is drawn from, so the grid has to resolve
+   every feature the density has.
+
+   :param parameters: Mass-model parameters. Any key beginning with ``sigpp`` is treated as a
+                      peak width; models without peaks keep the floor.
+   :type parameters: dict
+   :param minimum_mass: Range the grid spans.
+   :type minimum_mass: float
+   :param maximum_mass: Range the grid spans.
+   :type maximum_mass: float
+
+   :returns: Clipped to ``[MINIMUM_MASS_GRID_NODES, MAXIMUM_MASS_GRID_NODES]``.
+   :rtype: int
+
+
+.. py:function:: sample_mass_ratio_given_primary(model, primary_samples, mass_ratio_parameters, random_state=None)
+
+   Draw ``mass_ratio`` conditionally on ``mass_1``, by inverse CDF.
+
+   :param model: Supplies the ``m1s``/``qs`` grids and ``p_q``.
+   :type model: BaseSmoothedMassDistribution
+   :param primary_samples: Sampled ``mass_1_source``.
+   :type primary_samples: array_like
+   :param mass_ratio_parameters: ``beta``, ``mmin`` and ``delta_m``, and optionally ``mmin_2`` and
+                                 ``delta_m_2`` for models whose secondary has its own taper.
+   :type mass_ratio_parameters: dict
+   :param random_state: Defaults to numpy's global RNG, so a single seed governs it.
+   :type random_state: numpy.random.Generator or None
+
+   :returns: Mass-ratio samples, the same length as ``primary_samples``.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: _invert_rows(cumulative, support, draws)
+
+   Invert one CDF per row at one draw per row, by linear interpolation.
+
+   :param cumulative: ``(n_rows, n_nodes)`` normalised CDFs.
+   :type cumulative: numpy.ndarray
+   :param support: ``(n_rows, n_nodes)`` nodes -- one grid per row, because each primary
+                   mass has its own mass-ratio support edge.
+   :type support: numpy.ndarray
+   :param draws: ``(n_rows,)`` uniform draws.
+   :type draws: numpy.ndarray
+
+   :rtype: numpy.ndarray
+
+
+.. py:class:: Mass(mass_model, number_of_samples, parameters=None, full_pop_sampler='importance_m1_m2')
+
+   .. py:attribute:: mass_model
+      :value: ''
+
+
+
+   .. py:attribute:: number_of_samples
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:attribute:: full_pop_sampler
+      :value: 'importance_m1_m2'
+
+
+
+   .. py:method:: sample(**sampler_kwargs)
+
+      Generate mass distribution samples based on the chosen parameterised model and its parameters.
+
+      Returns:
+      --------
+          dict: A dictionary containing source frame mass distribution samples.
+
+
+

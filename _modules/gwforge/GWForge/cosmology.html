@@ -1,0 +1,845 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.cosmology - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for gwforge.GWForge.cosmology</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lal</span><span class="w"> </span><span class="kn">import</span> <span class="n">C_SI</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">roots_legendre</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">"</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span>
+<span class="p">)</span>
+<span class="c1"># Speed of light in km/s, so that ``c / H0`` is Mpc for ``H0`` in km/s/Mpc.</span>
+<div class="viewcode-block" id="SPEED_OF_LIGHT">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.SPEED_OF_LIGHT">[docs]</a>
+<span class="n">SPEED_OF_LIGHT</span> <span class="o">=</span> <span class="n">C_SI</span> <span class="o">/</span> <span class="mf">1000.0</span></div>
+
+
+<span class="c1"># Gauss-Legendre order for the comoving-distance integral. 1/E is smooth on</span>
+<span class="c1"># [0, z], so convergence is geometric: measured against ``scipy.integrate.quad``</span>
+<span class="c1"># this reaches ~1e-14 relative by order 32 and is flat thereafter. 64 is used</span>
+<span class="c1"># because the cost is one matrix product either way.</span>
+<div class="viewcode-block" id="QUADRATURE_ORDER">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.QUADRATURE_ORDER">[docs]</a>
+<span class="n">QUADRATURE_ORDER</span> <span class="o">=</span> <span class="mi">64</span></div>
+
+
+<span class="c1"># Newton iterations for :meth:`FlatwCDM.redshift_of_distance`. The bracketing</span>
+<span class="c1"># table gives ~1e-3 and Newton doubles the digits each step, so 4 is already</span>
+<span class="c1"># past double precision; the residual is checked rather than assumed.</span>
+<div class="viewcode-block" id="NEWTON_ITERATIONS">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.NEWTON_ITERATIONS">[docs]</a>
+<span class="n">NEWTON_ITERATIONS</span> <span class="o">=</span> <span class="mi">6</span></div>
+
+
+<span class="c1"># Redshift nodes for the initial guess in the distance inversion. Log-spaced</span>
+<span class="c1"># because d_L(z) is close to linear in z at low z and the low-z end is where</span>
+<span class="c1"># the events are.</span>
+<div class="viewcode-block" id="_GUESS_NODES">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology._GUESS_NODES">[docs]</a>
+<span class="n">_GUESS_NODES</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[[</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">100.0</span><span class="p">),</span> <span class="mi">512</span><span class="p">)]</span>
+<span class="p">)</span></div>
+
+
+<span class="c1"># Parameters :meth:`FlatwCDM.derivatives` knows how to differentiate.</span>
+<div class="viewcode-block" id="COSMOLOGY_PARAMETERS">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.COSMOLOGY_PARAMETERS">[docs]</a>
+<span class="n">COSMOLOGY_PARAMETERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"H0"</span><span class="p">,</span> <span class="s2">"Om0"</span><span class="p">,</span> <span class="s2">"w0"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="astropy_cosmology">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.astropy_cosmology">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">astropy_cosmology</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"Planck18"</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Ode0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Tcmb0</span><span class="o">=</span><span class="mf">2.725</span><span class="p">,</span> <span class="n">Ob0</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Resolve a GWForge cosmology specification to an ``astropy`` cosmology.</span>
+
+<span class="sd">    Setting ``Tcmb0 = 0`` removes radiation and massive neutrinos, which makes</span>
+<span class="sd">    the result *identical* to ``FlatwCDM(H0, Om0, w0=-1)`` when</span>
+<span class="sd">    ``Ode0 = 1 - Om0``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        An ``astropy.cosmology`` realization name, or anything else (e.g.</span>
+<span class="sd">        ``"custom"``) to request an explicit ``LambdaCDM``.</span>
+<span class="sd">    H0 : float or None</span>
+<span class="sd">        Hubble constant in km/s/Mpc. Required if ``name`` is not a realization.</span>
+<span class="sd">    Om0, Ode0 : float or None</span>
+<span class="sd">        Present-day matter and dark-energy density parameters.</span>
+<span class="sd">    Tcmb0 : float</span>
+<span class="sd">        CMB temperature in K. ``0`` disables radiation and neutrinos.</span>
+<span class="sd">    Ob0 : float or None</span>
+<span class="sd">        Baryon density parameter.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    astropy.cosmology.FLRW</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``name`` is not a realization and the explicit parameters are</span>
+<span class="sd">        incomplete.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">cosmology</span> <span class="k">as</span> <span class="n">astropy_module</span>
+
+    <span class="n">realization</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">astropy_module</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">realization</span><span class="p">,</span> <span class="n">astropy_module</span><span class="o">.</span><span class="n">FLRW</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">realization</span>
+    <span class="k">if</span> <span class="n">H0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Om0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Ode0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"Cosmology '</span><span class="si">{}</span><span class="s2">' is not an astropy realization, and building a "</span>
+            <span class="s2">"custom LambdaCDM needs H0, Om0 and Ode0 (got </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">H0</span><span class="p">,</span> <span class="n">Om0</span><span class="p">,</span> <span class="n">Ode0</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Building a custom LambdaCDM cosmology for '</span><span class="si">%s</span><span class="s2">'"</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"H0"</span><span class="p">:</span> <span class="n">H0</span><span class="p">,</span> <span class="s2">"Om0"</span><span class="p">:</span> <span class="n">Om0</span><span class="p">,</span> <span class="s2">"Ode0"</span><span class="p">:</span> <span class="n">Ode0</span><span class="p">,</span> <span class="s2">"Tcmb0"</span><span class="p">:</span> <span class="n">Tcmb0</span><span class="p">}</span>
+    <span class="c1"># astropy 8 rejects an explicit Ob0=None</span>
+    <span class="k">if</span> <span class="n">Ob0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">"Ob0"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ob0</span>
+    <span class="k">return</span> <span class="n">astropy_module</span><span class="o">.</span><span class="n">LambdaCDM</span><span class="p">(</span><span class="o">**</span><span class="n">settings</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FlatwCDM">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FlatwCDM</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Flat dark-energy background with analytic parameter derivatives.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       E(z)^2 = \Omega_{m,0}(1 + z)^3</span>
+<span class="sd">                + (1 - \Omega_{m,0})(1 + z)^{3(1 + w_0)}</span>
+
+<span class="sd">    Usage</span>
+<span class="sd">    -----</span>
+<span class="sd">    &gt;&gt;&gt; cosmology = FlatwCDM(H0=67.66, Om0=0.3111)</span>
+<span class="sd">    &gt;&gt;&gt; cosmology.luminosity_distance(1.0)            # Mpc</span>
+<span class="sd">    &gt;&gt;&gt; cosmology.derivatives(1.0)["Om0"]["luminosity_distance"]</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    H0 : float</span>
+<span class="sd">        Hubble constant, km/s/Mpc.</span>
+<span class="sd">    Om0 : float</span>
+<span class="sd">        Present-day matter density parameter.</span>
+<span class="sd">    w0 : float</span>
+<span class="sd">        Dark-energy equation of state. ``-1`` is flat LCDM.</span>
+<span class="sd">    hubble_distance : float</span>
+<span class="sd">        :math:`D_H = c / H_0`, Mpc.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">67.66</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="mf">0.3111</span><span class="p">,</span> <span class="n">w0</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        H0 : float</span>
+<span class="sd">            Hubble constant in km/s/Mpc.</span>
+<span class="sd">        Om0 : float</span>
+<span class="sd">            Present-day matter density parameter, in ``(0, 1)``.</span>
+<span class="sd">        w0 : float</span>
+<span class="sd">            Dark-energy equation of state.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">Om0</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Om0 must lie in (0, 1), got </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Om0</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">H0</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"H0 must be positive, got </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">H0</span><span class="p">))</span>
+<div class="viewcode-block" id="FlatwCDM.H0">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.H0">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">H0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FlatwCDM.Om0">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.Om0">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Om0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FlatwCDM.w0">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.w0">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FlatwCDM.hubble_distance">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.hubble_distance">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">=</span> <span class="n">SPEED_OF_LIGHT</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span></div>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">roots_legendre</span><span class="p">(</span><span class="n">QUADRATURE_ORDER</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FlatwCDM.__repr__">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.__repr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">"FlatwCDM(H0=</span><span class="si">{}</span><span class="s2">, Om0=</span><span class="si">{}</span><span class="s2">, w0=</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">)</span></div>
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="FlatwCDM.from_astropy">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.from_astropy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_astropy</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cosmology</span><span class="p">,</span> <span class="n">w0</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">fold_neutrinos</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Build a :class:`FlatwCDM` matching an ``astropy`` cosmology.</span>
+
+<span class="sd">        ``astropy`` realizations carry radiation and massive neutrinos, which</span>
+<span class="sd">        this two-component background does not have. ``fold_neutrinos`` adds</span>
+<span class="sd">        ``Onu0`` to ``Om0``, treating neutrinos as cold matter -- a good</span>
+<span class="sd">        approximation at the redshifts gravitational-wave catalogues reach, and</span>
+<span class="sd">        the convention this module documents its residuals against.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cosmology : astropy.cosmology.FLRW</span>
+<span class="sd">        w0 : float</span>
+<span class="sd">            Equation of state to give the result.</span>
+<span class="sd">        fold_neutrinos : bool</span>
+<span class="sd">            Add ``Onu0`` to ``Om0``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        FlatwCDM</span>
+<span class="sd">        """</span>
+        <span class="n">matter</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cosmology</span><span class="o">.</span><span class="n">Om0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fold_neutrinos</span><span class="p">:</span>
+            <span class="n">matter</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cosmology</span><span class="o">.</span><span class="n">Onu0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cosmology</span><span class="o">.</span><span class="n">H0</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="n">Om0</span><span class="o">=</span><span class="n">matter</span><span class="p">,</span> <span class="n">w0</span><span class="o">=</span><span class="n">w0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.to_astropy">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.to_astropy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_astropy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The exactly equivalent ``astropy`` cosmology (no radiation, no neutrinos).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        astropy.cosmology.FlatLambdaCDM or astropy.cosmology.FlatwCDM</span>
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">astropy</span><span class="w"> </span><span class="kn">import</span> <span class="n">cosmology</span> <span class="k">as</span> <span class="n">astropy_module</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span> <span class="o">==</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">astropy_module</span><span class="o">.</span><span class="n">FlatLambdaCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">H0</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">,</span> <span class="n">Tcmb0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">astropy_module</span><span class="o">.</span><span class="n">FlatwCDM</span><span class="p">(</span>
+            <span class="n">H0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">H0</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">,</span> <span class="n">w0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">,</span> <span class="n">Tcmb0</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># -- background ------------------------------------------------------</span>
+
+<div class="viewcode-block" id="FlatwCDM.efunc">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.efunc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">efunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`E(z) = H(z) / H_0`."""</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_efunc_squared</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM._efunc_squared">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM._efunc_squared">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_efunc_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+        <span class="n">one_plus_z</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span> <span class="o">*</span> <span class="n">one_plus_z</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">)</span> <span class="o">*</span> <span class="n">one_plus_z</span> <span class="o">**</span> <span class="p">(</span>
+            <span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.defunc_dz">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.defunc_dz">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">defunc_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`dE/dz`.</span>
+
+<span class="sd">        Carries the dark-energy term. The LCDM expression</span>
+<span class="sd">        :math:`1.5\,\Omega_{m,0}(1+z)^2 / E` is the :math:`w_0 = -1` special</span>
+<span class="sd">        case only, and using it under wCDM is wrong by 26% at :math:`w_0 = -0.8`.</span>
+<span class="sd">        """</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">one_plus_z</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="n">matter</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span> <span class="o">*</span> <span class="n">one_plus_z</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">dark_energy</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">3.0</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">one_plus_z</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">matter</span> <span class="o">+</span> <span class="n">dark_energy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM._quadrature_nodes">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM._quadrature_nodes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_quadrature_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Gauss-Legendre nodes and half-width for ``[0, z]``, broadcast over ``z``.</span>
+
+<span class="sd">        Returns ``(sample_redshifts, half)`` with shapes ``(..., order)`` and</span>
+<span class="sd">        ``(..., 1)``, so the integral of ``f`` is ``(half * (weights * f).sum(-1))``.</span>
+<span class="sd">        """</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="n">redshift</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="k">return</span> <span class="n">half</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">half</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.comoving_distance">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.comoving_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">comoving_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`D_C(z) = D_H \int_0^z dz'/E(z')`, Mpc."""</span>
+        <span class="n">sample</span><span class="p">,</span> <span class="n">half</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quadrature_nodes</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="n">half</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">sample</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">*</span> <span class="n">integral</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.luminosity_distance">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.luminosity_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">luminosity_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`d_L = (1 + z) D_C(z)`, Mpc."""</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">comoving_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.ddL_dz">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.ddL_dz">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ddL_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`dd_L/dz = D_C(z) + (1 + z) D_H / E(z)`, Mpc."""</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comoving_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.d2dL_dz2">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.d2dL_dz2">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">d2dL_dz2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">""":math:`d^2 d_L/dz^2 = 2 D_H/E - (1 + z) D_H E'/E^2`, Mpc."""</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">efunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="mf">2.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">/</span> <span class="n">efunc</span>
+            <span class="o">-</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">defunc_dz</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">efunc</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.differential_comoving_volume">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.differential_comoving_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">differential_comoving_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Full-sky :math:`dV_c/dz = 4\pi D_C^2 D_H / E`, Mpc^3.</span>
+
+<span class="sd">        Note the :math:`4\pi`: ``astropy``'s method of the same name is *per</span>
+<span class="sd">        steradian*.</span>
+<span class="sd">        """</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">comoving</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comoving_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="mf">4.0</span>
+            <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span>
+            <span class="o">*</span> <span class="n">comoving</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span>
+            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.redshift_of_distance">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.redshift_of_distance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">redshift_of_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Invert :math:`d_L(z)`, by table-seeded Newton on the exact derivative.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        distance : array_like</span>
+<span class="sd">            Luminosity distance in Mpc.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">        """</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">_GUESS_NODES</span><span class="p">)</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">_GUESS_NODES</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NEWTON_ITERATIONS</span><span class="p">):</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span> <span class="o">-</span> <span class="n">distance</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">residual</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddL_dz</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+            <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">redshift</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redshift</span></div>
+
+
+    <span class="c1"># -- derivatives -----------------------------------------------------</span>
+
+<div class="viewcode-block" id="FlatwCDM._dinv_efunc">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM._dinv_efunc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dinv_efunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""``d(1/E)/dLambda`` for each cosmology parameter, as a dict of arrays.</span>
+
+<span class="sd">        These are the closed-form integrands that make</span>
+<span class="sd">        :meth:`derivatives` exact: the same Gauss-Legendre weights that build</span>
+<span class="sd">        :math:`D_C` also build :math:`\\partial D_C/\\partial\\Lambda`.</span>
+<span class="sd">        """</span>
+        <span class="n">one_plus_z</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="n">efunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">dark_energy_power</span> <span class="o">=</span> <span class="n">one_plus_z</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">))</span>
+        <span class="n">prefactor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">/</span> <span class="n">efunc</span><span class="o">**</span><span class="mi">3</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="c1"># E carries no H0; the H0 dependence is entirely in D_H.</span>
+            <span class="s2">"H0"</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">efunc</span><span class="p">),</span>
+            <span class="s2">"Om0"</span><span class="p">:</span> <span class="n">prefactor</span> <span class="o">*</span> <span class="p">(</span><span class="n">one_plus_z</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="n">dark_energy_power</span><span class="p">),</span>
+            <span class="s2">"w0"</span><span class="p">:</span> <span class="n">prefactor</span>
+            <span class="o">*</span> <span class="mf">3.0</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">dark_energy_power</span>
+            <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">one_plus_z</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM._defunc">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM._defunc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_defunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""``dE/dLambda`` at fixed ``z``, as a dict of arrays."""</span>
+        <span class="n">one_plus_z</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="n">efunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">dark_energy_power</span> <span class="o">=</span> <span class="n">one_plus_z</span> <span class="o">**</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"H0"</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">efunc</span><span class="p">),</span>
+            <span class="s2">"Om0"</span><span class="p">:</span> <span class="p">(</span><span class="n">one_plus_z</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="n">dark_energy_power</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">efunc</span><span class="p">),</span>
+            <span class="s2">"w0"</span><span class="p">:</span> <span class="mf">3.0</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">dark_energy_power</span>
+            <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">one_plus_z</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">efunc</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.derivatives">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.derivatives">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">derivatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">COSMOLOGY_PARAMETERS</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Analytic derivatives of the background quantities at fixed ``z``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        redshift : array_like</span>
+<span class="sd">        parameters : sequence of str</span>
+<span class="sd">            Any subset of :data:`COSMOLOGY_PARAMETERS`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            ``{parameter: {"comoving_distance": ..., "luminosity_distance": ...,</span>
+<span class="sd">            "ddL_dz": ..., "differential_comoving_volume": ...}}``, every entry</span>
+<span class="sd">            an array shaped like ``redshift``.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        ``H0`` enters only through :math:`D_H = c/H_0`, because :math:`E(z)` is</span>
+<span class="sd">        dimensionless and carries no :math:`H_0`. Hence</span>
+<span class="sd">        :math:`\partial_{H_0} D_C = -D_C/H_0`,</span>
+<span class="sd">        :math:`\partial_{H_0}(dV_c/dz) = -3 (dV_c/dz)/H_0` and</span>
+<span class="sd">        :math:`\partial_{H_0}(dd_L/dz) = -(dd_L/dz)/H_0` -- the</span>
+<span class="sd">        :math:`-3/H_0 + 1/H_0 = -2/H_0` that the spectral-siren measure term</span>
+<span class="sd">        reduces to.</span>
+<span class="sd">        """</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">COSMOLOGY_PARAMETERS</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"Unknown cosmology parameter(s) </span><span class="si">{}</span><span class="s2">; expected a subset of </span><span class="si">{}</span><span class="s2">."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">unknown</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">COSMOLOGY_PARAMETERS</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">one_plus_z</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">redshift</span>
+        <span class="n">efunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">comoving</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comoving_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">comoving</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">/</span> <span class="n">efunc</span>
+
+        <span class="n">sample</span><span class="p">,</span> <span class="n">half</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quadrature_nodes</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">dinv_efunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dinv_efunc</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+        <span class="n">defunc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defunc</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"H0"</span><span class="p">:</span>
+                <span class="n">dcomoving</span> <span class="o">=</span> <span class="o">-</span><span class="n">comoving</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span>
+                <span class="n">dhubble_over_efunc</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">/</span> <span class="p">(</span><span class="n">efunc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span><span class="p">)</span>
+                <span class="n">dvolume</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">volume</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dcomoving</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">*</span> <span class="n">half</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">*</span> <span class="n">dinv_efunc</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+                <span class="p">)</span>
+                <span class="n">dhubble_over_efunc</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">*</span> <span class="n">defunc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">/</span> <span class="n">efunc</span><span class="o">**</span><span class="mi">2</span>
+                <span class="p">)</span>
+                <span class="n">dvolume</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hubble_distance</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="mf">2.0</span> <span class="o">*</span> <span class="n">comoving</span> <span class="o">*</span> <span class="n">dcomoving</span> <span class="o">/</span> <span class="n">efunc</span>
+                    <span class="o">-</span> <span class="n">comoving</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">defunc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">/</span> <span class="n">efunc</span><span class="o">**</span><span class="mi">2</span>
+                <span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">"comoving_distance"</span><span class="p">:</span> <span class="n">dcomoving</span><span class="p">,</span>
+                <span class="s2">"luminosity_distance"</span><span class="p">:</span> <span class="n">one_plus_z</span> <span class="o">*</span> <span class="n">dcomoving</span><span class="p">,</span>
+                <span class="s2">"ddL_dz"</span><span class="p">:</span> <span class="n">dcomoving</span> <span class="o">+</span> <span class="n">one_plus_z</span> <span class="o">*</span> <span class="n">dhubble_over_efunc</span><span class="p">,</span>
+                <span class="s2">"differential_comoving_volume"</span><span class="p">:</span> <span class="n">dvolume</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.dredshift_dparameter">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.dredshift_dparameter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dredshift_dparameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redshift</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">COSMOLOGY_PARAMETERS</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``dz/dLambda`` at **fixed luminosity distance**.</span>
+
+<span class="sd">        Implicit differentiation of :math:`d_L(z;\Lambda) = \mathrm{const}`:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">           \frac{\partial z}{\partial\Lambda}</span>
+<span class="sd">             = -\left(\frac{\partial d_L}{\partial\Lambda}\right)_{\!z}</span>
+<span class="sd">                \Big/ \frac{d d_L}{d z}.</span>
+
+<span class="sd">        This is the chain that carries cosmology into the spectral-siren score:</span>
+<span class="sd">        a trial cosmology moves the redshift assigned to a measured distance,</span>
+<span class="sd">        which moves the source-frame masses and the merger-rate shape.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        redshift : array_like</span>
+<span class="sd">            Redshift at the fiducial cosmology.</span>
+<span class="sd">        parameters : sequence of str</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            ``{parameter: array}``.</span>
+<span class="sd">        """</span>
+        <span class="n">derivatives</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivatives</span><span class="p">(</span><span class="n">redshift</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">ddL_dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ddL_dz</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="o">-</span><span class="n">derivatives</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">"luminosity_distance"</span><span class="p">]</span> <span class="o">/</span> <span class="n">ddL_dz</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="FlatwCDM.parameters">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.FlatwCDM.parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The cosmology parameters as a plain dict."""</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"H0"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span><span class="p">,</span> <span class="s2">"Om0"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">Om0</span><span class="p">,</span> <span class="s2">"w0"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="differential_comoving_volume">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.differential_comoving_volume">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">differential_comoving_volume</span><span class="p">(</span><span class="n">cosmology</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Full-sky ``dV_c/dz`` in Mpc^3 for either cosmology flavour.</span>
+
+<span class="sd">    ``astropy``'s ``differential_comoving_volume`` is per steradian and carries</span>
+<span class="sd">    units; :class:`FlatwCDM`'s is already full-sky and unitless. Population code</span>
+<span class="sd">    wants one number either way, so it goes through here.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cosmology : FlatwCDM or astropy.cosmology.FLRW</span>
+<span class="sd">    redshift : array_like</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cosmology</span><span class="p">,</span> <span class="n">FlatwCDM</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">differential_comoving_volume</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">cosmology</span><span class="o">.</span><span class="n">differential_comoving_volume</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">sr</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">Mpc</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">value</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="luminosity_distance">
+<a class="viewcode-back" href="../../../autoapi/gwforge/GWForge/cosmology/index.html#gwforge.GWForge.cosmology.luminosity_distance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">luminosity_distance</span><span class="p">(</span><span class="n">cosmology</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Luminosity distance in Mpc for either cosmology flavour.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cosmology : FlatwCDM or astropy.cosmology.FLRW</span>
+<span class="sd">    redshift : array_like</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cosmology</span><span class="p">,</span> <span class="n">FlatwCDM</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">Mpc</span><span class="p">)</span><span class="o">.</span><span class="n">value</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

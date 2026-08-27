@@ -1,0 +1,650 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.fisher.matrix - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for gwforge.GWForge.fisher.matrix</h1><div class="highlight"><pre>
+<span></span><span class="sa">r</span><span class="sd">"""Fisher matrix and doublet-DALI tensors for a detector network.</span>
+
+<span class="sd">Expanding the Gaussian log-likelihood</span>
+<span class="sd">:math:`\log L = -\tfrac{1}{2}\langle d - h(\theta)\mid d - h(\theta)\rangle`</span>
+<span class="sd">about the fiducial parameters with :math:`d = h_0`, and writing</span>
+<span class="sd">:math:`\Delta h = h_{,a}\Delta^a + \tfrac{1}{2}h_{,ab}\Delta^a\Delta^b + \ldots`,</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">   \log L = -\tfrac{1}{2} F_{ab}\Delta^a\Delta^b</span>
+<span class="sd">            - \tfrac{1}{2} G_{abc}\Delta^a\Delta^b\Delta^c</span>
+<span class="sd">            - \tfrac{1}{8} H_{abcd}\Delta^a\Delta^b\Delta^c\Delta^d</span>
+<span class="sd">            + \ldots</span>
+
+<span class="sd">with</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">   F_{ab} = \langle h_{,a}\mid h_{,b}\rangle, \quad</span>
+<span class="sd">   G_{abc} = \langle h_{,ab}\mid h_{,c}\rangle, \quad</span>
+<span class="sd">   H_{abcd} = \langle h_{,ab}\mid h_{,cd}\rangle .</span>
+
+<span class="sd">The :math:`\tfrac{1}{2}` and :math:`\tfrac{1}{8}` come from the :math:`2\times</span>
+<span class="sd">\tfrac{1}{2}` and :math:`(\tfrac{1}{2})^2` cross terms, reproducing eq. (15) of</span>
+<span class="sd">Sellentin, Quartin &amp; Amendola. Truncating at :math:`F` is the Fisher matrix of</span>
+<span class="sd">Vallisneri; keeping all three is doublet-DALI.</span>
+
+<span class="sd">The quartic term is :math:`-\tfrac{1}{8}\lVert h_{,ab}\Delta^a\Delta^b\rVert^2`,</span>
+<span class="sd">which is negative-definite, so the doublet posterior is normalisable by</span>
+<span class="sd">construction.</span>
+
+<span class="sd">Third-order DALI ("triplet") is deliberately not implemented: there is no group</span>
+<span class="sd">of terms beyond the three above that can be written with first and second</span>
+<span class="sd">derivatives alone. See :func:`check_order`.</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.derivatives</span><span class="w"> </span><span class="kn">import</span> <span class="n">WaveformDerivatives</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_PARAMETERS</span><span class="p">,</span> <span class="n">strip_shadowed_parameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.stepsize</span><span class="w"> </span><span class="kn">import</span> <span class="n">TARGET_FRACTIONAL_CHANGE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.inner_product</span><span class="w"> </span><span class="kn">import</span> <span class="n">inner_product_matrix</span>
+
+<span class="c1"># Orders this module knows how to build.</span>
+<div class="viewcode-block" id="SUPPORTED_ORDERS">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.SUPPORTED_ORDERS">[docs]</a>
+<span class="n">SUPPORTED_ORDERS</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="c1"># Above this the Fisher matrix is too ill-conditioned for the inverse to mean</span>
+<span class="c1"># anything in double precision, and the covariance is reported with a warning.</span>
+<div class="viewcode-block" id="CONDITION_NUMBER_WARNING">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.CONDITION_NUMBER_WARNING">[docs]</a>
+<span class="n">CONDITION_NUMBER_WARNING</span> <span class="o">=</span> <span class="mf">1e15</span></div>
+
+
+
+<div class="viewcode-block" id="check_order">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.check_order">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_order</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Validate the requested expansion order.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    order : int</span>
+<span class="sd">        ``1`` for the Fisher matrix, ``2`` for doublet-DALI.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NotImplementedError</span>
+<span class="sd">        For ``order = 3``. Triplet-DALI needs genuine *third* derivatives of the</span>
+<span class="sd">        waveform -- the terms :math:`\\langle h_{,a}\\mid h_{,bcd}\\rangle`,</span>
+<span class="sd">        :math:`\\langle h_{,ab}\\mid h_{,cde}\\rangle` and</span>
+<span class="sd">        :math:`\\langle h_{,abc}\\mid h_{,def}\\rangle` of Sellentin+ eq. (16).</span>
+<span class="sd">        Grouping the expansion by highest derivative, the Fisher term plus</span>
+<span class="sd">        :math:`G` and :math:`H` already exhausts everything expressible with</span>
+<span class="sd">        first and second derivatives, so there is no consistent third order that</span>
+<span class="sd">        avoids them.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        For any other unsupported value.</span>
+<span class="sd">    """</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">"order = 3 (triplet-DALI) requires third derivatives of the waveform "</span>
+            <span class="s2">"-- the &lt;h_,a|h_,bcd&gt;, &lt;h_,ab|h_,cde&gt; and &lt;h_,abc|h_,def&gt; terms of "</span>
+            <span class="s2">"Sellentin, Quartin &amp; Amendola (arXiv:1401.6892) eq. (16). GWForge "</span>
+            <span class="s2">"implements order 1 (Fisher) and order 2 (doublet-DALI), which "</span>
+            <span class="s2">"together cover everything expressible with first and second "</span>
+            <span class="s2">"derivatives."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_ORDERS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"order must be one of </span><span class="si">{}</span><span class="s2">, got </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SUPPORTED_ORDERS</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">order</span></div>
+
+
+
+<div class="viewcode-block" id="FisherMatrix">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FisherMatrix</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Network Fisher matrix, and DALI tensors when ``order = 2``.</span>
+
+<span class="sd">    Every tensor is a sum over detectors of noise-weighted inner products, so</span>
+<span class="sd">    the network result is the sum of the per-detector results (Vallisneri</span>
+<span class="sd">    eq. 13). ET contributes as three separate interferometers, which is how</span>
+<span class="sd">    :class:`GWForge.ifo.detectors.Network` already presents it.</span>
+
+<span class="sd">    Usage</span>
+<span class="sd">    -----</span>
+<span class="sd">    &gt;&gt;&gt; fisher = FisherMatrix(ifos, waveform_generator, injection_parameters)</span>
+<span class="sd">    &gt;&gt;&gt; sigmas = numpy.sqrt(numpy.diag(fisher.covariance))</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    names : list of str</span>
+<span class="sd">        Parameter names in matrix order.</span>
+<span class="sd">    matrix : numpy.ndarray</span>
+<span class="sd">        ``(n, n)`` network Fisher matrix.</span>
+<span class="sd">    per_detector : dict</span>
+<span class="sd">        Detector name to its own ``(n, n)`` Fisher matrix.</span>
+<span class="sd">    doublet, quartic : numpy.ndarray or None</span>
+<span class="sd">        :math:`G_{abc}` and :math:`H_{abcd}`; ``None`` when ``order &lt; 2``.</span>
+<span class="sd">    optimal_snrs : dict</span>
+<span class="sd">        Detector name to optimal SNR, plus ``"network"``.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interferometers</span><span class="p">,</span>
+        <span class="n">waveform_generator</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">,</span>
+        <span class="n">fisher_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">earth_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">finite_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">step_sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">calibrate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">target_change</span><span class="o">=</span><span class="n">TARGET_FRACTIONAL_CHANGE</span><span class="p">,</span>
+        <span class="n">estimate_noise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        interferometers : bilby.gw.detector.InterferometerList</span>
+<span class="sd">            Network with strain data already set.</span>
+<span class="sd">        waveform_generator : bilby.gw.WaveformGenerator</span>
+<span class="sd">        parameters : dict</span>
+<span class="sd">            Fiducial source parameters.</span>
+<span class="sd">        fisher_parameters : sequence of str or None</span>
+<span class="sd">            Defaults to :data:`GWForge.fisher.derivatives.DEFAULT_PARAMETERS`.</span>
+<span class="sd">        earth_rotation, finite_size : bool</span>
+<span class="sd">            Response options.</span>
+<span class="sd">        step_sizes : dict or None</span>
+<span class="sd">            Finite-difference step overrides, or starting guesses when</span>
+<span class="sd">            ``calibrate`` is True.</span>
+<span class="sd">        order : int</span>
+<span class="sd">            ``1`` or ``2``; see :func:`check_order`.</span>
+<span class="sd">        calibrate, target_change, estimate_noise :</span>
+<span class="sd">            Automatic step selection and waveform-noise measurement; see</span>
+<span class="sd">            :class:`GWForge.fisher.derivatives.WaveformDerivatives`.</span>
+<span class="sd">        """</span>
+<div class="viewcode-block" id="FisherMatrix.order">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.order">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">check_order</span><span class="p">(</span><span class="n">order</span><span class="p">)</span></div>
+
+        <span class="c1"># An injection read from a population file carries every mass and spin</span>
+        <span class="c1"># parametrisation at once, and bilby's conversion prefers the component</span>
+        <span class="c1"># masses -- so displacing chirp_mass would displace a key the waveform</span>
+        <span class="c1"># ignores and hand back a zero derivative without raising.</span>
+        <span class="n">parameters</span><span class="p">,</span> <span class="n">shadowed</span> <span class="o">=</span> <span class="n">strip_shadowed_parameters</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="p">,</span> <span class="n">fisher_parameters</span> <span class="ow">or</span> <span class="n">DEFAULT_PARAMETERS</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">shadowed</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">"Dropped </span><span class="si">%s</span><span class="s2"> from the source parameters: they duplicate a Fisher "</span>
+                <span class="s2">"parameter and the waveform would have used them instead."</span><span class="p">,</span>
+                <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shadowed</span><span class="p">),</span>
+            <span class="p">)</span>
+<div class="viewcode-block" id="FisherMatrix.parameters">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.parameters">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FisherMatrix.derivatives">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.derivatives">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">derivatives</span> <span class="o">=</span> <span class="n">WaveformDerivatives</span><span class="p">(</span>
+            <span class="n">interferometers</span><span class="p">,</span>
+            <span class="n">waveform_generator</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">,</span>
+            <span class="n">fisher_parameters</span><span class="o">=</span><span class="n">fisher_parameters</span><span class="p">,</span>
+            <span class="n">earth_rotation</span><span class="o">=</span><span class="n">earth_rotation</span><span class="p">,</span>
+            <span class="n">finite_size</span><span class="o">=</span><span class="n">finite_size</span><span class="p">,</span>
+            <span class="n">step_sizes</span><span class="o">=</span><span class="n">step_sizes</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">calibrate</span><span class="o">=</span><span class="n">calibrate</span><span class="p">,</span>
+            <span class="n">target_change</span><span class="o">=</span><span class="n">target_change</span><span class="p">,</span>
+            <span class="n">estimate_noise</span><span class="o">=</span><span class="n">estimate_noise</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="FisherMatrix.names">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.names">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivatives</span><span class="o">.</span><span class="n">names</span></div>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accumulate</span><span class="p">(</span><span class="n">interferometers</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FisherMatrix._accumulate">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix._accumulate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_accumulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interferometers</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Sum the per-detector tensors over the network."""</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">per_detector</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimal_snrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doublet</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quartic</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">interferometer</span> <span class="ow">in</span> <span class="n">interferometers</span><span class="p">:</span>
+            <span class="n">response</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivatives</span><span class="o">.</span><span class="n">derivatives</span><span class="p">(</span><span class="n">interferometer</span><span class="p">)</span>
+
+            <span class="n">fisher</span> <span class="o">=</span> <span class="n">inner_product_matrix</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">interferometer</span><span class="p">)</span>
+            <span class="c1"># Symmetrise: &lt;h_,a|h_,b&gt; is real and symmetric analytically, but</span>
+            <span class="c1"># the two triangles are accumulated from different roundings.</span>
+            <span class="n">fisher</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">fisher</span> <span class="o">+</span> <span class="n">fisher</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">per_detector</span><span class="p">[</span><span class="n">interferometer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fisher</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">+=</span> <span class="n">fisher</span>
+
+            <span class="n">snr_squared</span> <span class="o">=</span> <span class="n">inner_product_matrix</span><span class="p">(</span>
+                <span class="n">response</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">response</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">interferometer</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimal_snrs</span><span class="p">[</span><span class="n">interferometer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">snr_squared</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">flat</span> <span class="o">=</span> <span class="n">second</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="n">count</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">doublet</span> <span class="o">+=</span> <span class="n">inner_product_matrix</span><span class="p">(</span>
+                    <span class="n">flat</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">interferometer</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">quartic</span> <span class="o">+=</span> <span class="n">inner_product_matrix</span><span class="p">(</span>
+                    <span class="n">flat</span><span class="p">,</span> <span class="n">flat</span><span class="p">,</span> <span class="n">interferometer</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+            <span class="c1"># Free the largest array before moving to the next detector.</span>
+            <span class="k">del</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimal_snrs</span><span class="p">[</span><span class="s2">"network"</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="nb">sum</span><span class="p">(</span><span class="n">value</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_snrs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FisherMatrix.covariance">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.covariance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">covariance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Inverse Fisher matrix, the linearised-signal covariance."""</span>
+        <span class="n">matrix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">covariance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matrix</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="FisherMatrix.sigmas">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.sigmas">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigmas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""One-sigma marginalised uncertainties, as a name to value dict."""</span>
+        <span class="n">diagonal</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diagonal</span><span class="p">))))</span></div>
+
+
+<div class="viewcode-block" id="FisherMatrix.with_gaussian_prior">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.FisherMatrix.with_gaussian_prior">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_gaussian_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prior_sigmas</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Add Gaussian prior information to the Fisher matrix.</span>
+
+<span class="sd">        A Gaussian prior of width :math:`\\sigma_a` contributes</span>
+<span class="sd">        :math:`1/\\sigma_a^2` to the diagonal -- the only way a prior can enter a</span>
+<span class="sd">        Fisher matrix, since a uniform prior carries no information in its</span>
+<span class="sd">        interior.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prior_sigmas : dict</span>
+<span class="sd">            Parameter name to prior standard deviation. Names not in</span>
+<span class="sd">            :attr:`names` are ignored.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            A new ``(n, n)`` matrix; :attr:`matrix` is left untouched.</span>
+<span class="sd">        """</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sigma</span> <span class="ow">in</span> <span class="n">prior_sigmas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">combined</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">combined</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="covariance">
+<a class="viewcode-back" href="../../../../autoapi/gwforge/GWForge/fisher/matrix/index.html#gwforge.GWForge.fisher.covariance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">covariance</span><span class="p">(</span><span class="n">fisher</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">condition_number_warning</span><span class="o">=</span><span class="n">CONDITION_NUMBER_WARNING</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Invert a Fisher matrix and report how much to trust the result.</span>
+
+<span class="sd">    Fisher matrices for a gravitational-wave network are badly scaled -- a</span>
+<span class="sd">    chirp-mass entry and a time entry differ by many orders of magnitude -- so</span>
+<span class="sd">    the matrix is normalised by its diagonal before inversion and un-normalised</span>
+<span class="sd">    afterwards.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fisher : numpy.ndarray</span>
+<span class="sd">        ``(n, n)`` symmetric positive-definite matrix.</span>
+<span class="sd">    names : sequence of str or None</span>
+<span class="sd">        Parameter names, used only to make the warnings readable.</span>
+<span class="sd">    condition_number_warning : float</span>
+<span class="sd">        Warn above this condition number.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        ``(covariance, diagnostics)``. ``diagnostics`` holds</span>
+<span class="sd">        ``condition_number`` and ``inversion_error``, the latter being</span>
+<span class="sd">        ``max|Sigma F - I|``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    numpy.linalg.LinAlgError</span>
+<span class="sd">        If the matrix is singular even after normalisation.</span>
+<span class="sd">    """</span>
+    <span class="n">fisher</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">fisher</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">diagonal</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">fisher</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">diagonal</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">bad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">numpy</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">diagonal</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">(</span>
+            <span class="s2">"Fisher matrix has a non-positive diagonal entry for </span><span class="si">{}</span><span class="s2">; the signal "</span>
+            <span class="s2">"does not depend on those parameters at this point."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span>
+    <span class="n">normalised</span> <span class="o">=</span> <span class="n">fisher</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="n">condition_number</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">normalised</span><span class="p">)</span>
+
+    <span class="n">inverse</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">normalised</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">inverse</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">result</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="n">inversion_error</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">result</span> <span class="o">@</span> <span class="n">fisher</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fisher</span><span class="p">)))</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">condition_number</span> <span class="o">&gt;</span> <span class="n">condition_number_warning</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"Fisher matrix is ill-conditioned (condition number </span><span class="si">%.3e</span><span class="s2">, inversion "</span>
+            <span class="s2">"error </span><span class="si">%.3e</span><span class="s2">). The covariance is unreliable; consider dropping a "</span>
+            <span class="s2">"parameter or adding a prior."</span><span class="p">,</span>
+            <span class="n">condition_number</span><span class="p">,</span>
+            <span class="n">inversion_error</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s2">"condition_number"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">condition_number</span><span class="p">),</span>
+        <span class="s2">"inversion_error"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">inversion_error</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

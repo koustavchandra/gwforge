@@ -1,0 +1,627 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.population._smoothed_mass - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../../../_sources/autoapi/gwforge/GWForge/population/_smoothed_mass/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-gwforge.GWForge.population._smoothed_mass">
+<span id="gwforge-gwforge-population-smoothed-mass"></span><h1>gwforge.GWForge.population._smoothed_mass<a class="headerlink" href="#module-gwforge.GWForge.population._smoothed_mass" title="Link to this heading">¶</a></h1>
+<p>Numpy/SciPy reimplementations of the <code class="docutils literal notranslate"><span class="pre">gwpopulation</span></code> smoothed mass models.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a></p></td>
+<td><p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SinglePeakSmoothedMassDistribution</span></code></a></p></td>
+<td><p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiPeakSmoothedMassDistribution</span></code></a></p></td>
+<td><p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BrokenPowerLawSmoothedMassDistribution</span></code></a></p></td>
+<td><p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakSmoothedMassDistribution</span></code></a></p></td>
+<td><p>BGP model: broken power law + two peaks, with low-mass Planck taper and a</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.powerlaw" title="gwforge.GWForge.population._smoothed_mass.powerlaw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">powerlaw</span></code></a>(xx, alpha, high, low)</p></td>
+<td><p>Normalised power-law pdf <code class="docutils literal notranslate"><span class="pre">p(x)</span> <span class="pre">∝</span> <span class="pre">x**alpha</span></code> on <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.truncnorm" title="gwforge.GWForge.population._smoothed_mass.truncnorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncnorm</span></code></a>(xx, mu, sigma, high, low)</p></td>
+<td><p>Truncated-normal pdf on <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.smoothing" title="gwforge.GWForge.population._smoothed_mass.smoothing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smoothing</span></code></a>(masses, mmin, mmax, delta_m)</p></td>
+<td><p>One-sided Planck-taper window applied to a mass pdf.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.two_component_single" title="gwforge.GWForge.population._smoothed_mass.two_component_single"><code class="xref py py-obj docutils literal notranslate"><span class="pre">two_component_single</span></code></a>(mass, alpha, mmin, mmax, lam, ...)</p></td>
+<td><p>Power law + single Gaussian peak primary-mass model (unsmoothed).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.three_component_single" title="gwforge.GWForge.population._smoothed_mass.three_component_single"><code class="xref py py-obj docutils literal notranslate"><span class="pre">three_component_single</span></code></a>(mass, alpha, mmin, mmax, lam, ...)</p></td>
+<td><p>Power law + two Gaussian peaks primary-mass model (unsmoothed).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass" title="gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">double_power_law_primary_mass</span></code></a>(mass, alpha_1, alpha_2, ...)</p></td>
+<td><p>Broken power-law primary-mass model (unsmoothed).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.left_truncated_normal" title="gwforge.GWForge.population._smoothed_mass.left_truncated_normal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">left_truncated_normal</span></code></a>(mass, mu, sigma, low)</p></td>
+<td><p>Normal pdf truncated below at <code class="docutils literal notranslate"><span class="pre">low</span></code> and unbounded above (N_lt).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law" title="gwforge.GWForge.population._smoothed_mass.broken_power_law"><code class="xref py py-obj docutils literal notranslate"><span class="pre">broken_power_law</span></code></a>(mass, alpha_1, alpha_2, m_break, ...)</p></td>
+<td><p>Broken power law of GWTC-5.0 Eq. B10, normalised via Eq. B11.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak" title="gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak"><code class="xref py py-obj docutils literal notranslate"><span class="pre">broken_power_law_two_peak</span></code></a>(mass, alpha_1, alpha_2, ...)</p></td>
+<td><p>Broken power law + two left-truncated Gaussian peaks (GWTC-5.0 Eq. B12).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.powerlaw">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">powerlaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#powerlaw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.powerlaw" title="Link to this definition">¶</a></dt>
+<dd><p>Normalised power-law pdf <code class="docutils literal notranslate"><span class="pre">p(x)</span> <span class="pre">∝</span> <span class="pre">x**alpha</span></code> on <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>.</p>
+<p>Matches <code class="docutils literal notranslate"><span class="pre">gwpopulation.utils.powerlaw</span></code>. <code class="docutils literal notranslate"><span class="pre">alpha</span></code> is the spectral index
+(<code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">==</span> <span class="pre">-1</span></code> uses the logarithmic normalisation).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.truncnorm">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">truncnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#truncnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.truncnorm" title="Link to this definition">¶</a></dt>
+<dd><p>Truncated-normal pdf on <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>.</p>
+<p>Matches <code class="docutils literal notranslate"><span class="pre">gwpopulation.utils.truncnorm</span></code> (which reproduces scipy’s truncated
+normal normalisation via the error function).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.smoothing">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">smoothing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#smoothing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.smoothing" title="Link to this definition">¶</a></dt>
+<dd><p>One-sided Planck-taper window applied to a mass pdf.</p>
+<p><code class="docutils literal notranslate"><span class="pre">S</span></code> rises smoothly from 0 to 1 over <code class="docutils literal notranslate"><span class="pre">(mmin,</span> <span class="pre">mmin</span> <span class="pre">+</span> <span class="pre">delta_m]</span></code> and is a hard
+step at <code class="docutils literal notranslate"><span class="pre">mmax</span></code>. Reproduces <code class="docutils literal notranslate"><span class="pre">gwpopulation</span></code>’s <code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span>
+<span class="pre">.smoothing</span></code> (Talbot &amp; Thrane 2018, Eqs. 7-8). <code class="docutils literal notranslate"><span class="pre">delta_m</span> <span class="pre">==</span> <span class="pre">0</span></code> -&gt; no taper.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.two_component_single">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">two_component_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigpp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_mass_maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#two_component_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.two_component_single" title="Link to this definition">¶</a></dt>
+<dd><p>Power law + single Gaussian peak primary-mass model (unsmoothed).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.three_component_single">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">three_component_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpp_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigpp_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpp_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigpp_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_mass_maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#three_component_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.three_component_single" title="Link to this definition">¶</a></dt>
+<dd><p>Power law + two Gaussian peaks primary-mass model (unsmoothed).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">double_power_law_primary_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_fraction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#double_power_law_primary_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass" title="Link to this definition">¶</a></dt>
+<dd><p>Broken power-law primary-mass model (unsmoothed).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.left_truncated_normal">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">left_truncated_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#left_truncated_normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.left_truncated_normal" title="Link to this definition">¶</a></dt>
+<dd><p>Normal pdf truncated below at <code class="docutils literal notranslate"><span class="pre">low</span></code> and unbounded above (N_lt).</p>
+<p>Used by the BGP mass model (GWTC-5.0 Eq. B12). Implemented as the truncated
+normal with an infinite upper bound.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.broken_power_law">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">broken_power_law</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_break</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#broken_power_law"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law" title="Link to this definition">¶</a></dt>
+<dd><p>Broken power law of GWTC-5.0 Eq. B10, normalised via Eq. B11.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}p_{BP}(m) = \frac{1}{N} \begin{cases}
+    (m/m_{break})^{-\alpha_1} &amp; m_{min} \le m &lt; m_{break} \\
+    (m/m_{break})^{-\alpha_2} &amp; m_{break} \le m &lt; m_{high}
+\end{cases}\end{split}\]</div>
+</div>
+<p>with normalisation <span class="math notranslate nohighlight">\(N = m_{break}\left[
+\frac{1 - (m_{min}/m_{break})^{1-\alpha_1}}{1-\alpha_1}
++ \frac{(m_{high}/m_{break})^{1-\alpha_2} - 1}{1-\alpha_2}\right]\)</span>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">broken_power_law_two_peak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_break</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpp_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigpp_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpp_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigpp_2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#broken_power_law_two_peak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak" title="Link to this definition">¶</a></dt>
+<dd><p>Broken power law + two left-truncated Gaussian peaks (GWTC-5.0 Eq. B12).</p>
+<p>The mixture (before the low-mass Planck taper, which the base class applies):</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\pi(m) \propto \lambda_0\, p_{BP}(m)
+             + \lambda_1\, N_{lt}(m | \mu_1, \sigma_1)
+             + (1 - \lambda_0 - \lambda_1)\, N_{lt}(m | \mu_2, \sigma_2).\]</div>
+</div>
+<p>This is the “BGP” (Broken power law + Gaussian Peaks) fiducial BBH mass model
+used in the GWTC-4.0/5.0 population analyses.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">BaseSmoothedMassDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1000,</span> <span class="pre">500)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="Link to this definition">¶</a></dt>
+<dd><p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough
+to be a drop-in replacement for GWForge’s usage: it exposes <code class="docutils literal notranslate"><span class="pre">m1s</span></code>/<code class="docutils literal notranslate"><span class="pre">qs</span></code> grids
+and <code class="docutils literal notranslate"><span class="pre">p_m1</span></code>/<code class="docutils literal notranslate"><span class="pre">p_q</span></code> with identical keyword names and normalisation conventions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.primary_model">
+<span class="sig-name descname"><span class="pre">primary_model</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.primary_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.primary_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmin">
+<span class="sig-name descname"><span class="pre">mmin</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.mmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmin" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmax">
+<span class="sig-name descname"><span class="pre">mmax</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.mmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmax" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.m1s">
+<span class="sig-name descname"><span class="pre">m1s</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.m1s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.m1s" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.qs">
+<span class="sig-name descname"><span class="pre">qs</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.qs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.qs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_m1">
+<span class="sig-name descname"><span class="pre">p_m1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.p_m1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_m1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.norm_p_m1">
+<span class="sig-name descname"><span class="pre">norm_p_m1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_m</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.norm_p_m1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.norm_p_m1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_q">
+<span class="sig-name descname"><span class="pre">p_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution.p_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_q" title="Link to this definition">¶</a></dt>
+<dd><p>Mass-ratio distribution <span class="math notranslate nohighlight">\(p(q \mid m_1) \propto q^\beta S(m_2)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>dict</em>) – <code class="docutils literal notranslate"><span class="pre">mass_1</span></code> and <code class="docutils literal notranslate"><span class="pre">mass_ratio</span></code>.</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Power-law index <span class="math notranslate nohighlight">\(\beta_q\)</span>.</p></li>
+<li><p><strong>mmin</strong> (<em>float</em>) – The <strong>primary</strong> taper, <span class="math notranslate nohighlight">\((m_{1,\rm low}, \delta_{m,1})\)</span>.</p></li>
+<li><p><strong>delta_m</strong> (<em>float</em>) – The <strong>primary</strong> taper, <span class="math notranslate nohighlight">\((m_{1,\rm low}, \delta_{m,1})\)</span>.</p></li>
+<li><p><strong>mmin_2</strong> (<em>float</em><em> or </em><em>None</em>) – The <strong>secondary</strong> taper, <span class="math notranslate nohighlight">\((m_{2,\rm low}, \delta_{m,2})\)</span>
+(the posterior’s <code class="docutils literal notranslate"><span class="pre">mlow_2</span></code>/<code class="docutils literal notranslate"><span class="pre">delta_m_2</span></code>). Each defaults to its
+primary counterpart, which is the single-taper behaviour the models
+without a separate secondary edge – <code class="docutils literal notranslate"><span class="pre">PowerLaw+Peak</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MultiPeak</span></code>, <code class="docutils literal notranslate"><span class="pre">BrokenPowerLaw</span></code> – keep.</p></li>
+<li><p><strong>delta_m_2</strong> (<em>float</em><em> or </em><em>None</em>) – The <strong>secondary</strong> taper, <span class="math notranslate nohighlight">\((m_{2,\rm low}, \delta_{m,2})\)</span>
+(the posterior’s <code class="docutils literal notranslate"><span class="pre">mlow_2</span></code>/<code class="docutils literal notranslate"><span class="pre">delta_m_2</span></code>). Each defaults to its
+primary counterpart, which is the single-taper behaviour the models
+without a separate secondary edge – <code class="docutils literal notranslate"><span class="pre">PowerLaw+Peak</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MultiPeak</span></code>, <code class="docutils literal notranslate"><span class="pre">BrokenPowerLaw</span></code> – keep.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution._norm_p_q">
+<span class="sig-name descname"><span class="pre">_norm_p_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BaseSmoothedMassDistribution._norm_p_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution._norm_p_q" title="Link to this definition">¶</a></dt>
+<dd><p>Per-<code class="docutils literal notranslate"><span class="pre">m1</span></code> mass-ratio norm, linearly interpolated onto <code class="docutils literal notranslate"><span class="pre">masses</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">SinglePeakSmoothedMassDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1000,</span> <span class="pre">500)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#SinglePeakSmoothedMassDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a></p>
+<p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough
+to be a drop-in replacement for GWForge’s usage: it exposes <code class="docutils literal notranslate"><span class="pre">m1s</span></code>/<code class="docutils literal notranslate"><span class="pre">qs</span></code> grids
+and <code class="docutils literal notranslate"><span class="pre">p_m1</span></code>/<code class="docutils literal notranslate"><span class="pre">p_q</span></code> with identical keyword names and normalisation conventions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution.primary_model">
+<span class="sig-name descname"><span class="pre">primary_model</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#SinglePeakSmoothedMassDistribution.primary_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution.primary_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">MultiPeakSmoothedMassDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1000,</span> <span class="pre">500)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#MultiPeakSmoothedMassDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a></p>
+<p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough
+to be a drop-in replacement for GWForge’s usage: it exposes <code class="docutils literal notranslate"><span class="pre">m1s</span></code>/<code class="docutils literal notranslate"><span class="pre">qs</span></code> grids
+and <code class="docutils literal notranslate"><span class="pre">p_m1</span></code>/<code class="docutils literal notranslate"><span class="pre">p_q</span></code> with identical keyword names and normalisation conventions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution.primary_model">
+<span class="sig-name descname"><span class="pre">primary_model</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#MultiPeakSmoothedMassDistribution.primary_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution.primary_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">BrokenPowerLawSmoothedMassDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1000,</span> <span class="pre">500)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BrokenPowerLawSmoothedMassDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a></p>
+<p>Mirrors <code class="docutils literal notranslate"><span class="pre">gwpopulation.models.mass.BaseSmoothedMassDistribution</span></code> closely enough
+to be a drop-in replacement for GWForge’s usage: it exposes <code class="docutils literal notranslate"><span class="pre">m1s</span></code>/<code class="docutils literal notranslate"><span class="pre">qs</span></code> grids
+and <code class="docutils literal notranslate"><span class="pre">p_m1</span></code>/<code class="docutils literal notranslate"><span class="pre">p_q</span></code> with identical keyword names and normalisation conventions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution.primary_model">
+<span class="sig-name descname"><span class="pre">primary_model</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BrokenPowerLawSmoothedMassDistribution.primary_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution.primary_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population._smoothed_mass.</span></span><span class="sig-name descname"><span class="pre">BrokenPowerLawTwoPeakSmoothedMassDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1000,</span> <span class="pre">500)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BrokenPowerLawTwoPeakSmoothedMassDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution" title="gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a></p>
+<p>BGP model: broken power law + two peaks, with low-mass Planck taper and a
+power-law mass ratio (GWTC-5.0 App. B.4, Eqs. B10-B14).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution.primary_model">
+<span class="sig-name descname"><span class="pre">primary_model</span></span><a class="reference internal" href="../../../../../_modules/gwforge/GWForge/population/_smoothed_mass.html#BrokenPowerLawTwoPeakSmoothedMassDistribution.primary_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution.primary_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">gwforge.GWForge.population._smoothed_mass</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.powerlaw"><code class="docutils literal notranslate"><span class="pre">powerlaw()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.truncnorm"><code class="docutils literal notranslate"><span class="pre">truncnorm()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.smoothing"><code class="docutils literal notranslate"><span class="pre">smoothing()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.two_component_single"><code class="docutils literal notranslate"><span class="pre">two_component_single()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.three_component_single"><code class="docutils literal notranslate"><span class="pre">three_component_single()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.double_power_law_primary_mass"><code class="docutils literal notranslate"><span class="pre">double_power_law_primary_mass()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.left_truncated_normal"><code class="docutils literal notranslate"><span class="pre">left_truncated_normal()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law"><code class="docutils literal notranslate"><span class="pre">broken_power_law()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.broken_power_law_two_peak"><code class="docutils literal notranslate"><span class="pre">broken_power_law_two_peak()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.primary_model"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.primary_model</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmin"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.mmin</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.mmax"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.mmax</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.m1s"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.m1s</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.qs"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.qs</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_m1"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.p_m1()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.norm_p_m1"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.norm_p_m1()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution.p_q"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution.p_q()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BaseSmoothedMassDistribution._norm_p_q"><code class="docutils literal notranslate"><span class="pre">BaseSmoothedMassDistribution._norm_p_q()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution"><code class="docutils literal notranslate"><span class="pre">SinglePeakSmoothedMassDistribution</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.SinglePeakSmoothedMassDistribution.primary_model"><code class="docutils literal notranslate"><span class="pre">SinglePeakSmoothedMassDistribution.primary_model</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution"><code class="docutils literal notranslate"><span class="pre">MultiPeakSmoothedMassDistribution</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.MultiPeakSmoothedMassDistribution.primary_model"><code class="docutils literal notranslate"><span class="pre">MultiPeakSmoothedMassDistribution.primary_model</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawSmoothedMassDistribution</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawSmoothedMassDistribution.primary_model"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawSmoothedMassDistribution.primary_model</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakSmoothedMassDistribution</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population._smoothed_mass.BrokenPowerLawTwoPeakSmoothedMassDistribution.primary_model"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakSmoothedMassDistribution.primary_model</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>

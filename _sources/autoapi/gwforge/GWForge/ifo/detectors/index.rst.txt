@@ -1,0 +1,126 @@
+gwforge.GWForge.ifo.detectors
+=============================
+
+.. py:module:: gwforge.GWForge.ifo.detectors
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.detectors.IFO
+   gwforge.GWForge.ifo.detectors.Network
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.detectors.load_xg_interferometer
+
+
+Module Contents
+---------------
+
+.. py:function:: load_xg_interferometer(filename, power_spectral_density)
+
+   Load a GWForge XG ``.ifo`` file, attaching ``power_spectral_density``.
+
+   This mirrors ``bilby.gw.detector.load_interferometer``'s tiny key = value
+   parser but injects a valid PSD before the interferometer is constructed.
+   Two things make this necessary rather than a plain ``load_interferometer``:
+
+   - bilby's ``TriangularInterferometer`` indexes ``power_spectral_density[ii]``
+     for each of the three arms, so a ``.ifo`` file carrying
+     ``power_spectral_density = None`` (as ET does) raises a ``TypeError`` at
+     load time.
+   - even for a single detector the PSD has to reach the interferometer(s), not
+     just the enclosing list, so we set it explicitly on every arm.
+
+   :param filename: Path to the ``.ifo`` file.
+   :type filename: str
+   :param power_spectral_density: The PSD to attach to the interferometer (all three arms for a triangle).
+   :type power_spectral_density: bilby.gw.detector.psd.PowerSpectralDensity
+
+   :rtype: bilby.gw.detector.Interferometer or bilby.gw.detector.networks.TriangularInterferometer
+
+
+.. py:class:: IFO(name, psd_file=None, asharp=None)
+
+   Usage:
+   -----
+   >>> ifo = IFO(name='H1', asharp=True)
+   >>> ifo.initialise_ifo(seed=42)
+
+   >>> ifo = IFO(name='ET')
+   >>> ifo.initialize_ifo()
+
+
+   .. py:attribute:: name
+
+
+   .. py:attribute:: psd_file
+      :value: None
+
+
+
+   .. py:attribute:: asharp
+      :value: None
+
+
+
+   .. py:method:: initialise_ifo(seed=None)
+
+      Initialise the interferometer with optional random seed.
+
+      Parameters:
+      -----------
+      seed : int (optional)
+         The random seed for initialisation. [Default: None]
+
+      Returns:
+      --------
+        ifo: bilby.gw.detector.Intereferometer
+
+      Raises:
+      -------
+        ValueError: If the interferometer is not implemented.
+
+
+
+   .. py:attribute:: initialize_ifo
+
+
+.. py:class:: Network(ifos, psd_files=None)
+
+   Bases: :py:obj:`IFO`
+
+
+   Usage:
+   ------
+   >>> ifos = Network(ifos = ['ET', 'CE20', 'CE40'])
+   >>> ifos.initialise_network()
+
+
+   .. py:attribute:: ifos
+
+
+   .. py:method:: initialise_network()
+
+      Returns:
+      --------
+      ifos: bilby.gw.detector.InterferometerList
+
+
+
+   .. py:attribute:: initialize_network
+
+
+   .. py:attribute:: initialise_ifos
+
+
+   .. py:attribute:: initialize_ifos
+
+

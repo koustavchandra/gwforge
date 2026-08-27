@@ -1,0 +1,120 @@
+gwforge.GWForge.fisher.parameters
+=================================
+
+.. py:module:: gwforge.GWForge.fisher.parameters
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.parameters.ANALYTIC_PARAMETERS
+   gwforge.GWForge.fisher.parameters.DEFAULT_PARAMETERS
+   gwforge.GWForge.fisher.parameters.PRECESSING_PARAMETERS
+   gwforge.GWForge.fisher.parameters.ECCENTRIC_PRECESSING_PARAMETERS
+   gwforge.GWForge.fisher.parameters._PARAMETER_BOUNDS
+   gwforge.GWForge.fisher.parameters.DEFAULT_STEP_SIZES
+   gwforge.GWForge.fisher.parameters._ABSOLUTE_STEP_PARAMETERS
+   gwforge.GWForge.fisher.parameters.REDUNDANT_PARAMETER_GROUPS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.parameters.step_size
+   gwforge.GWForge.fisher.parameters.bounded_step
+   gwforge.GWForge.fisher.parameters.strip_shadowed_parameters
+
+
+Module Contents
+---------------
+
+.. py:data:: ANALYTIC_PARAMETERS
+   :value: ('luminosity_distance', 'geocent_time', 'psi', 'ra', 'dec')
+
+
+.. py:data:: DEFAULT_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:data:: PRECESSING_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:data:: ECCENTRIC_PRECESSING_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:data:: _PARAMETER_BOUNDS
+
+.. py:data:: DEFAULT_STEP_SIZES
+
+.. py:data:: _ABSOLUTE_STEP_PARAMETERS
+
+.. py:function:: step_size(name, value, step_sizes=None)
+
+   Starting finite-difference step for one parameter.
+
+   :param name: Parameter name.
+   :type name: str
+   :param value: Fiducial value.
+   :type value: float
+   :param step_sizes: Overrides for :data:`DEFAULT_STEP_SIZES`.
+   :type step_sizes: dict or None
+
+   :rtype: float
+
+
+.. py:function:: bounded_step(name, value, step)
+
+   Shrink a step so that ``value +/- 2 * step`` stays physical.
+
+   The five-point stencil reaches twice the step either side, so a source close
+   to a boundary -- an almost equal-mass binary against ``eta = 0.25``, an
+   extremal spin against 1 -- would otherwise be evaluated at parameters the
+   waveform cannot represent.
+
+   A value sitting exactly *on* a bound is physical, not an error -- a
+   non-spinning binary has ``a_1 = 0`` and a circular one has
+   ``eccentricity = 0``. There is simply no two-sided derivative there, and the
+   Fisher matrix is singular in that parameter because the waveform cannot
+   respond to a displacement in the forbidden direction. That gets its own
+   message, because "``a_1 = 0.0`` is outside its physical range" is a
+   thoroughly confusing way to describe a perfectly ordinary injection.
+
+   :param name: Parameter name; unbounded names are returned unchanged.
+   :type name: str
+   :param value: Fiducial value.
+   :type value: float
+   :param step: Requested step.
+   :type step: float
+
+   :returns: The step, possibly reduced. Never returns zero for a positive input.
+   :rtype: float
+
+   :raises ValueError: If the value is on or outside a bound, with different wording for the
+       two cases.
+
+
+.. py:data:: REDUNDANT_PARAMETER_GROUPS
+   :value: (('mass_1', 'mass_2', 'chirp_mass', 'total_mass', 'symmetric_mass_ratio', 'mass_ratio',...
+
+
+.. py:function:: strip_shadowed_parameters(parameters, fisher_parameters)
+
+   Remove source parameters that would silently pin a Fisher parameter.
+
+   :param parameters: Source parameters as read from the configuration or an injection file.
+   :type parameters: dict
+   :param fisher_parameters: The names the Fisher matrix is taken over.
+   :type fisher_parameters: sequence of str
+
+   :returns: ``(parameters, removed)``. ``parameters`` is a new dict; ``removed`` is
+             the sorted list of keys dropped, which the caller should log so the
+             change is visible rather than silent.
+   :rtype: tuple
+
+

@@ -1,0 +1,1132 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.fisher - GWForge 0.0.1dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">GWForge 0.0.1dev documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.1dev documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../../_sources/autoapi/gwforge/GWForge/fisher/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-gwforge.GWForge.fisher">
+<span id="gwforge-gwforge-fisher"></span><h1>gwforge.GWForge.fisher<a class="headerlink" href="#module-gwforge.GWForge.fisher" title="Link to this heading">¶</a></h1>
+<p>Fisher-matrix and DALI forecasting for GWForge.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="antenna_derivatives/index.html">gwforge.GWForge.fisher.antenna_derivatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config/index.html">gwforge.GWForge.fisher.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dali/index.html">gwforge.GWForge.fisher.dali</a></li>
+<li class="toctree-l1"><a class="reference internal" href="derivatives/index.html">gwforge.GWForge.fisher.derivatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inner_product/index.html">gwforge.GWForge.fisher.inner_product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix/index.html">gwforge.GWForge.fisher.matrix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters/index.html">gwforge.GWForge.fisher.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot/index.html">gwforge.GWForge.fisher.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stepsize/index.html">gwforge.GWForge.fisher.stepsize</a></li>
+</ul>
+</div>
+</section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.ANALYTIC_PARAMETERS" title="gwforge.GWForge.fisher.ANALYTIC_PARAMETERS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ANALYTIC_PARAMETERS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.DEFAULT_PARAMETERS" title="gwforge.GWForge.fisher.DEFAULT_PARAMETERS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_PARAMETERS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS" title="gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ECCENTRIC_PRECESSING_PARAMETERS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.PRECESSING_PARAMETERS" title="gwforge.GWForge.fisher.PRECESSING_PARAMETERS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PRECESSING_PARAMETERS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives" title="gwforge.GWForge.fisher.AntennaDerivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AntennaDerivatives</span></code></a></p></td>
+<td><p>Exact derivatives of <span class="math notranslate nohighlight">\(F_+\)</span>, <span class="math notranslate nohighlight">\(F_\times\)</span> and <span class="math notranslate nohighlight">\(\tau\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives" title="gwforge.GWForge.fisher.WaveformDerivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WaveformDerivatives</span></code></a></p></td>
+<td><p>First and second derivatives of the detector response for one source.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix" title="gwforge.GWForge.fisher.FisherMatrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FisherMatrix</span></code></a></p></td>
+<td><p>Network Fisher matrix, and DALI tensors when <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.analytic_derivatives" title="gwforge.GWForge.fisher.analytic_derivatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analytic_derivatives</span></code></a>(interferometer, polarizations, ...)</p></td>
+<td><p>Exact response and derivatives for the five closed-form parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="inner_product/index.html#module-gwforge.GWForge.fisher.inner_product" title="gwforge.GWForge.fisher.inner_product"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inner_product</span></code></a>(aa, bb, interferometer)</p></td>
+<td><p>Noise-weighted inner product of two frequency-domain series.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.inner_product_matrix" title="gwforge.GWForge.fisher.inner_product_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inner_product_matrix</span></code></a>(left, right, interferometer)</p></td>
+<td><p>Gram matrix of inner products between two stacks of series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.optimal_snr_squared" title="gwforge.GWForge.fisher.optimal_snr_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">optimal_snr_squared</span></code></a>(signal, interferometer)</p></td>
+<td><p><span class="math notranslate nohighlight">\(\langle h \mid h \rangle\)</span> for a signal in one detector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.check_order" title="gwforge.GWForge.fisher.check_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_order</span></code></a>(order)</p></td>
+<td><p>Validate the requested expansion order.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.covariance" title="gwforge.GWForge.fisher.covariance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">covariance</span></code></a>(fisher[, names, condition_number_warning])</p></td>
+<td><p>Invert a Fisher matrix and report how much to trust the result.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.strip_shadowed_parameters" title="gwforge.GWForge.fisher.strip_shadowed_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strip_shadowed_parameters</span></code></a>(parameters, fisher_parameters)</p></td>
+<td><p>Remove source parameters that would silently pin a Fisher parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.fisher.estimate_noise" title="gwforge.GWForge.fisher.estimate_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_noise</span></code></a>(values)</p></td>
+<td><p>Estimate the numerical noise of a computed function from its values.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.AntennaDerivatives">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">AntennaDerivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geocent_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times_to_coalescence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earth_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finite_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/antenna_derivatives.html#AntennaDerivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.AntennaDerivatives" title="Link to this definition">¶</a></dt>
+<dd><p>Exact derivatives of <span class="math notranslate nohighlight">\(F_+\)</span>, <span class="math notranslate nohighlight">\(F_\times\)</span> and <span class="math notranslate nohighlight">\(\tau\)</span>.</p>
+<p>Differentiates the same expressions
+<code class="xref py py-func docutils literal notranslate"><span class="pre">GWForge.ifo.antenna.antenna_response()</span></code> evaluates, with respect to the
+internal angles <span class="math notranslate nohighlight">\((\phi, \theta, \psi)\)</span>, then chain-rules those onto the
+source parameters <code class="docutils literal notranslate"><span class="pre">ra</span></code>, <code class="docutils literal notranslate"><span class="pre">dec</span></code>, <code class="docutils literal notranslate"><span class="pre">psi</span></code> and <code class="docutils literal notranslate"><span class="pre">geocent_time</span></code>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial}{\partial\alpha} = \frac{\partial}{\partial\phi},
+\qquad
+\frac{\partial}{\partial\delta} = -\frac{\partial}{\partial\theta},
+\qquad
+\frac{\partial}{\partial t_c} \supset
+    -\dot{\mathrm{gmst}}\,\frac{\partial}{\partial\phi},\]</div>
+</div>
+<p>the last because <span class="math notranslate nohighlight">\(\phi = \alpha - \mathrm{gmst}(t_c)\)</span>. So the
+Earth-rotation part of the <code class="docutils literal notranslate"><span class="pre">geocent_time</span></code> derivative comes free from the
+sky partials. <code class="docutils literal notranslate"><span class="pre">geocent_time</span></code> additionally enters <span class="math notranslate nohighlight">\(\tau\)</span> explicitly
+with unit derivative, which is the dominant <span class="math notranslate nohighlight">\(-2\pi i f h\)</span> term.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">plus,</span> <span class="pre">cross</span></span></dt>
+<dd><p><span class="math notranslate nohighlight">\(F_+\)</span> and <span class="math notranslate nohighlight">\(F_\times\)</span> and their derivatives, keyed by source
+parameter name (<code class="docutils literal notranslate"><span class="pre">&quot;ra&quot;</span></code>) or sorted pair (<code class="docutils literal notranslate"><span class="pre">(&quot;dec&quot;,</span> <span class="pre">&quot;ra&quot;)</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.AntennaDerivatives.delay">
+<span class="sig-name descname"><span class="pre">delay</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.AntennaDerivatives.delay" title="Link to this definition">¶</a></dt>
+<dd><p>Same for <span class="math notranslate nohighlight">\(\tau\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.AntennaDerivatives.sidereal_rate">
+<span class="sig-name descname"><span class="pre">sidereal_rate</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.AntennaDerivatives.sidereal_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.AntennaDerivatives._responses">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finite_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/antenna_derivatives.html#AntennaDerivatives._responses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.AntennaDerivatives._responses" title="Link to this definition">¶</a></dt>
+<dd><p>Assemble the two pattern functions and the delay, with derivatives.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.AntennaDerivatives._store">
+<span class="sig-name descname"><span class="pre">_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cross</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/antenna_derivatives.html#AntennaDerivatives._store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.AntennaDerivatives._store" title="Link to this definition">¶</a></dt>
+<dd><p>Chain-rule the internal-angle derivatives onto source parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">WaveformDerivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fisher_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earth_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finite_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TARGET_FRACTIONAL_CHANGE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives" title="Link to this definition">¶</a></dt>
+<dd><p>First and second derivatives of the detector response for one source.</p>
+<p>Combines the exact closed-form derivatives of <a class="reference internal" href="#gwforge.GWForge.fisher.analytic_derivatives" title="gwforge.GWForge.fisher.analytic_derivatives"><code class="xref py py-func docutils literal notranslate"><span class="pre">analytic_derivatives()</span></code></a>
+with fourth-order finite differences for the parameters the waveform
+actually depends on.</p>
+<p>The waveform is evaluated once per stencil point and cached, because the
+polarizations do not depend on which detector is looking; detectors are then
+projected one at a time by <a class="reference internal" href="derivatives/index.html#module-gwforge.GWForge.fisher.derivatives" title="gwforge.GWForge.fisher.derivatives"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derivatives()</span></code></a>. That ordering matters for
+memory: a second-derivative array is <code class="docutils literal notranslate"><span class="pre">n_parameters**2</span></code> frequency series, so
+holding one for every detector at once reaches gigabytes at a high sampling
+frequency, while the cached polarizations are only <code class="docutils literal notranslate"><span class="pre">2</span></code> series per stencil
+point.</p>
+<p>For eleven parameters this is <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">*</span> <span class="pre">n_numerical</span> <span class="pre">+</span> <span class="pre">1</span></code> waveform evaluations at
+<code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">=</span> <span class="pre">1</span></code>, plus four per numerical pair at <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.names">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.names" title="Link to this definition">¶</a></dt>
+<dd><p>Parameter names, in the order used by the Fisher matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">analytic,</span> <span class="pre">numerical</span></span></dt>
+<dd><p>The split of <code class="docutils literal notranslate"><span class="pre">names</span></code> by differentiation method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.steps" title="Link to this definition">¶</a></dt>
+<dd><p>Finite-difference step actually used for each numerical parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.waveform_evaluations">
+<span class="sig-name descname"><span class="pre">waveform_evaluations</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.waveform_evaluations" title="Link to this definition">¶</a></dt>
+<dd><p>How many times the waveform generator was called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.interferometers">
+<span class="sig-name descname"><span class="pre">interferometers</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.interferometers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.waveform_generator">
+<span class="sig-name descname"><span class="pre">waveform_generator</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.waveform_generator" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.parameters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['chirp_mass',</span> <span class="pre">'symmetric_mass_ratio',</span> <span class="pre">'luminosity_distance',</span> <span class="pre">'ra',</span> <span class="pre">'dec',</span> <span class="pre">'theta_jn',</span> <span class="pre">'psi',...</span></span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.earth_rotation">
+<span class="sig-name descname"><span class="pre">earth_rotation</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.earth_rotation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.finite_size">
+<span class="sig-name descname"><span class="pre">finite_size</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.finite_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.order">
+<span class="sig-name descname"><span class="pre">order</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.order" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.estimate_noise">
+<span class="sig-name descname"><span class="pre">estimate_noise</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.estimate_noise" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.index">
+<span class="sig-name descname"><span class="pre">index</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.analytic">
+<span class="sig-name descname"><span class="pre">analytic</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.analytic" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.numerical">
+<span class="sig-name descname"><span class="pre">numerical</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.numerical" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.noise_ratios">
+<span class="sig-name descname"><span class="pre">noise_ratios</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.noise_ratios" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">waveform_evaluations</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._cache">
+<span class="sig-name descname"><span class="pre">_cache</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._cache" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._calibrate">
+<span class="sig-name descname"><span class="pre">_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._calibrate" title="Link to this definition">¶</a></dt>
+<dd><p>Choose every numerical step, then check the model can support it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._overlap">
+<span class="sig-name descname"><span class="pre">_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._overlap" title="Link to this definition">¶</a></dt>
+<dd><p>Noise-weighted overlap <span class="math notranslate nohighlight">\(\langle h(x + \delta) \mid h_0\rangle\)</span>.</p>
+<p>The scalar functional the noise estimator runs on. It has to be <em>smooth</em>
+in the parameter, which rules out the <code class="docutils literal notranslate"><span class="pre">||dh||</span> <span class="pre">/</span> <span class="pre">||h||</span></code> used for the
+fractional-change target – that has a kink at zero. An inner product
+with the fiducial waveform is smooth, and is weighted by the PSD exactly
+the way the Fisher matrix is, so the noise it reports is the noise that
+actually reaches the answer.</p>
+<p>Kept complex on purpose. The real part is stationary at the fiducial
+point for a phase-like parameter – for <code class="docutils literal notranslate"><span class="pre">phase</span></code> the overlap goes as
+<code class="docutils literal notranslate"><span class="pre">cos(2</span> <span class="pre">dphi)</span></code> – so a real functional alone would report a vanishing
+slope there and a meaningless noise ratio. The imaginary part is not
+stationary, and using both sidesteps the issue for any parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._apply_noise_estimate">
+<span class="sig-name descname"><span class="pre">_apply_noise_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._apply_noise_estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._apply_noise_estimate" title="Link to this definition">¶</a></dt>
+<dd><p>Raise the step if the model’s own noise says it is too small.</p>
+<p>Only ever <em>raises</em> it. For a smooth waveform the noise is at the level
+of machine precision, the required step comes out far below the one the
+fractional-change target already picked, and nothing changes – which is
+what keeps the validated IMRPhenomXHM results intact. It binds only for
+a model whose output genuinely scatters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._point">
+<span class="sig-name descname"><span class="pre">_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._point" title="Link to this definition">¶</a></dt>
+<dd><p>Cache key, shifted parameters and polarizations at a stencil point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._fill_cache">
+<span class="sig-name descname"><span class="pre">_fill_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._fill_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._fill_cache" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluate the waveform at every stencil point this order needs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._analytic_at">
+<span class="sig-name descname"><span class="pre">_analytic_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._analytic_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._analytic_at" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form response and derivatives at one cached stencil point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives.derivatives">
+<span class="sig-name descname"><span class="pre">derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives.derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives.derivatives" title="Link to this definition">¶</a></dt>
+<dd><p>Response and derivative arrays for one detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>interferometer</strong> (<em>bilby.gw.detector.Interferometer</em>) – Must belong to the network this object was built with.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(response,</span> <span class="pre">first,</span> <span class="pre">second)</span></code> where <code class="docutils literal notranslate"><span class="pre">first</span></code> has shape
+<code class="docutils literal notranslate"><span class="pre">(n_parameters,</span> <span class="pre">n_frequencies)</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code> has shape
+<code class="docutils literal notranslate"><span class="pre">(n_parameters,</span> <span class="pre">n_parameters,</span> <span class="pre">n_frequencies)</span></code> – or is <code class="docutils literal notranslate"><span class="pre">None</span></code>
+when <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">&lt;</span> <span class="pre">2</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._stencil_first">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_stencil_first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._stencil_first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._stencil_first" title="Link to this definition">¶</a></dt>
+<dd><p>Fourth-order first derivative from the five-point stencil.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.WaveformDerivatives._stencil_second">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_stencil_second</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#WaveformDerivatives._stencil_second"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.WaveformDerivatives._stencil_second" title="Link to this definition">¶</a></dt>
+<dd><p>Fourth-order second derivative from the same five points.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.analytic_derivatives">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">analytic_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polarizations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earth_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finite_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/derivatives.html#analytic_derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.analytic_derivatives" title="Link to this definition">¶</a></dt>
+<dd><p>Exact response and derivatives for the five closed-form parameters.</p>
+<p>Writing <span class="math notranslate nohighlight">\(h = P\,S\)</span> with <span class="math notranslate nohighlight">\(P = F_+\tilde h_+ + F_\times\tilde h_\times\)</span>
+and <span class="math notranslate nohighlight">\(S = e^{-2\pi i f\tau}\)</span>,</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\partial_a h = \big(\partial_a P - 2\pi i f\,\partial_a\tau\,P\big) S,\]</div>
+</div>
+<p>and the second derivative follows from one more product rule. <code class="docutils literal notranslate"><span class="pre">ra</span></code>,
+<code class="docutils literal notranslate"><span class="pre">dec</span></code>, <code class="docutils literal notranslate"><span class="pre">psi</span></code> and <code class="docutils literal notranslate"><span class="pre">geocent_time</span></code> enter through
+<a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives" title="gwforge.GWForge.fisher.AntennaDerivatives"><code class="xref py py-class docutils literal notranslate"><span class="pre">AntennaDerivatives</span></code></a>; <code class="docutils literal notranslate"><span class="pre">luminosity_distance</span></code> is handled separately
+because <span class="math notranslate nohighlight">\(h \propto 1/d_L\)</span> makes every one of its derivatives a rescaling
+of a derivative we already have.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interferometer</strong> (<em>bilby.gw.detector.Interferometer</em>)</p></li>
+<li><p><strong>polarizations</strong> (<em>dict</em>) – <code class="docutils literal notranslate"><span class="pre">{'plus':</span> <span class="pre">...,</span> <span class="pre">'cross':</span> <span class="pre">...}</span></code> on the interferometer’s frequency grid.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em>) – Source parameters.</p></li>
+<li><p><strong>earth_rotation</strong> (<em>bool</em>) – Response options; must match those used elsewhere.</p></li>
+<li><p><strong>finite_size</strong> (<em>bool</em>) – Response options; must match those used elsewhere.</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – <code class="docutils literal notranslate"><span class="pre">2</span></code> also returns second derivatives.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(response,</span> <span class="pre">first,</span> <span class="pre">second)</span></code>. <code class="docutils literal notranslate"><span class="pre">first</span></code> maps a parameter name to a
+full-length complex array; <code class="docutils literal notranslate"><span class="pre">second</span></code> maps a sorted name pair to one.
+Both are zero outside the interferometer’s frequency mask.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.inner_product">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">inner_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/inner_product.html#inner_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.inner_product" title="Link to this definition">¶</a></dt>
+<dd><p>Noise-weighted inner product of two frequency-domain series.</p>
+<p>Wraps <code class="xref py py-func docutils literal notranslate"><span class="pre">bilby.gw.utils.noise_weighted_inner_product()</span></code> – the same
+routine bilby uses for its own SNRs, so a Fisher SNR and an injection SNR
+are guaranteed to agree – and takes the real part, which is what the
+Fisher matrix is built from.</p>
+<p>Only bins inside the interferometer’s <code class="docutils literal notranslate"><span class="pre">frequency_mask</span></code> contribute. Outside
+it bilby leaves the PSD at an arbitrary sentinel value, so including those
+bins would silently corrupt the integral.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aa</strong> (<em>array_like</em>) – Frequency-domain series on the interferometer’s frequency grid. <code class="docutils literal notranslate"><span class="pre">aa</span></code>
+is the one that gets conjugated. Either may be complex.</p></li>
+<li><p><strong>bb</strong> (<em>array_like</em>) – Frequency-domain series on the interferometer’s frequency grid. <code class="docutils literal notranslate"><span class="pre">aa</span></code>
+is the one that gets conjugated. Either may be complex.</p></li>
+<li><p><strong>interferometer</strong> (<em>bilby.gw.detector.Interferometer</em>) – Supplies the PSD, the frequency mask and the segment duration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The real inner product.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.inner_product_matrix">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">inner_product_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/inner_product.html#inner_product_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.inner_product_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Gram matrix of inner products between two stacks of series.</p>
+<p>Building the Fisher matrix means taking <code class="docutils literal notranslate"><span class="pre">len(left)</span> <span class="pre">*</span> <span class="pre">len(right)</span></code> inner
+products that all share the same PSD weighting, so the weighting is applied
+once and the rest is a single matrix product. For an 11-parameter Fisher
+over a 65537-bin grid this is roughly two orders of magnitude faster than
+looping over <a class="reference internal" href="inner_product/index.html#module-gwforge.GWForge.fisher.inner_product" title="gwforge.GWForge.fisher.inner_product"><code class="xref py py-func docutils literal notranslate"><span class="pre">inner_product()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<em>array_like</em>) – Arrays of shape <code class="docutils literal notranslate"><span class="pre">(n_left,</span> <span class="pre">n_frequencies)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(n_right,</span> <span class="pre">n_frequencies)</span></code>. <code class="docutils literal notranslate"><span class="pre">left</span></code> is conjugated.</p></li>
+<li><p><strong>right</strong> (<em>array_like</em>) – Arrays of shape <code class="docutils literal notranslate"><span class="pre">(n_left,</span> <span class="pre">n_frequencies)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(n_right,</span> <span class="pre">n_frequencies)</span></code>. <code class="docutils literal notranslate"><span class="pre">left</span></code> is conjugated.</p></li>
+<li><p><strong>interferometer</strong> (<em>bilby.gw.detector.Interferometer</em>) – Supplies the PSD, the frequency mask and the segment duration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Real array of shape <code class="docutils literal notranslate"><span class="pre">(n_left,</span> <span class="pre">n_right)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.optimal_snr_squared">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">optimal_snr_squared</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interferometer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/inner_product.html#optimal_snr_squared"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.optimal_snr_squared" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\langle h \mid h \rangle\)</span> for a signal in one detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>array_like</em>) – Frequency-domain detector response.</p></li>
+<li><p><strong>interferometer</strong> (<em>bilby.gw.detector.Interferometer</em>) – Detector whose PSD is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">FisherMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fisher_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">earth_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finite_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_sizes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TARGET_FRACTIONAL_CHANGE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/matrix.html#FisherMatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix" title="Link to this definition">¶</a></dt>
+<dd><p>Network Fisher matrix, and DALI tensors when <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p>
+<p>Every tensor is a sum over detectors of noise-weighted inner products, so
+the network result is the sum of the per-detector results (Vallisneri
+eq. 13). ET contributes as three separate interferometers, which is how
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GWForge.ifo.detectors.Network</span></code> already presents it.</p>
+<section id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fisher</span> <span class="o">=</span> <span class="n">FisherMatrix</span><span class="p">(</span><span class="n">ifos</span><span class="p">,</span> <span class="n">waveform_generator</span><span class="p">,</span> <span class="n">injection_parameters</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigmas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">fisher</span><span class="o">.</span><span class="n">covariance</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.names">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.names" title="Link to this definition">¶</a></dt>
+<dd><p>Parameter names in matrix order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.matrix">
+<span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.matrix" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">n)</span></code> network Fisher matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.per_detector">
+<span class="sig-name descname"><span class="pre">per_detector</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.per_detector" title="Link to this definition">¶</a></dt>
+<dd><p>Detector name to its own <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">n)</span></code> Fisher matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">doublet,</span> <span class="pre">quartic</span></span></dt>
+<dd><p><span class="math notranslate nohighlight">\(G_{abc}\)</span> and <span class="math notranslate nohighlight">\(H_{abcd}\)</span>; <code class="docutils literal notranslate"><span class="pre">None</span></code> when <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">&lt;</span> <span class="pre">2</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.optimal_snrs">
+<span class="sig-name descname"><span class="pre">optimal_snrs</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.optimal_snrs" title="Link to this definition">¶</a></dt>
+<dd><p>Detector name to optimal SNR, plus <code class="docutils literal notranslate"><span class="pre">&quot;network&quot;</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.order">
+<span class="sig-name descname"><span class="pre">order</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.order" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.parameters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.derivatives">
+<span class="sig-name descname"><span class="pre">derivatives</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.derivatives" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix._accumulate">
+<span class="sig-name descname"><span class="pre">_accumulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interferometers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/matrix.html#FisherMatrix._accumulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix._accumulate" title="Link to this definition">¶</a></dt>
+<dd><p>Sum the per-detector tensors over the network.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.covariance">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">covariance</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.covariance" title="Link to this definition">¶</a></dt>
+<dd><p>Inverse Fisher matrix, the linearised-signal covariance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.sigmas">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sigmas</span></span><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.sigmas" title="Link to this definition">¶</a></dt>
+<dd><p>One-sigma marginalised uncertainties, as a name to value dict.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.FisherMatrix.with_gaussian_prior">
+<span class="sig-name descname"><span class="pre">with_gaussian_prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior_sigmas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/matrix.html#FisherMatrix.with_gaussian_prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.FisherMatrix.with_gaussian_prior" title="Link to this definition">¶</a></dt>
+<dd><p>Add Gaussian prior information to the Fisher matrix.</p>
+<p>A Gaussian prior of width <span class="math notranslate nohighlight">\(\sigma_a\)</span> contributes
+<span class="math notranslate nohighlight">\(1/\sigma_a^2\)</span> to the diagonal – the only way a prior can enter a
+Fisher matrix, since a uniform prior carries no information in its
+interior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prior_sigmas</strong> (<em>dict</em>) – Parameter name to prior standard deviation. Names not in
+<a class="reference internal" href="#id3" title="gwforge.GWForge.fisher.FisherMatrix.names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">names</span></code></a> are ignored.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">n)</span></code> matrix; <a class="reference internal" href="matrix/index.html#module-gwforge.GWForge.fisher.matrix" title="gwforge.GWForge.fisher.matrix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">matrix</span></code></a> is left untouched.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.check_order">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">check_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/matrix.html#check_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.check_order" title="Link to this definition">¶</a></dt>
+<dd><p>Validate the requested expansion order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – <code class="docutils literal notranslate"><span class="pre">1</span></code> for the Fisher matrix, <code class="docutils literal notranslate"><span class="pre">2</span></code> for doublet-DALI.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NotImplementedError</strong> – For <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">=</span> <span class="pre">3</span></code>. Triplet-DALI needs genuine <em>third</em> derivatives of the
+waveform – the terms <span class="math notranslate nohighlight">\(\langle h_{,a}\mid h_{,bcd}\rangle\)</span>,
+<span class="math notranslate nohighlight">\(\langle h_{,ab}\mid h_{,cde}\rangle\)</span> and
+<span class="math notranslate nohighlight">\(\langle h_{,abc}\mid h_{,def}\rangle\)</span> of Sellentin+ eq. (16).
+Grouping the expansion by highest derivative, the Fisher term plus
+<span class="math notranslate nohighlight">\(G\)</span> and <span class="math notranslate nohighlight">\(H\)</span> already exhausts everything expressible with
+first and second derivatives, so there is no consistent third order that
+avoids them.</p></li>
+<li><p><strong>ValueError</strong> – For any other unsupported value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.covariance">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">covariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fisher</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CONDITION_NUMBER_WARNING</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/matrix.html#covariance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.covariance" title="Link to this definition">¶</a></dt>
+<dd><p>Invert a Fisher matrix and report how much to trust the result.</p>
+<p>Fisher matrices for a gravitational-wave network are badly scaled – a
+chirp-mass entry and a time entry differ by many orders of magnitude – so
+the matrix is normalised by its diagonal before inversion and un-normalised
+afterwards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fisher</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">n)</span></code> symmetric positive-definite matrix.</p></li>
+<li><p><strong>names</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Parameter names, used only to make the warnings readable.</p></li>
+<li><p><strong>condition_number_warning</strong> (<em>float</em>) – Warn above this condition number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(covariance,</span> <span class="pre">diagnostics)</span></code>. <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> holds
+<code class="docutils literal notranslate"><span class="pre">condition_number</span></code> and <code class="docutils literal notranslate"><span class="pre">inversion_error</span></code>, the latter being
+<code class="docutils literal notranslate"><span class="pre">max|Sigma</span> <span class="pre">F</span> <span class="pre">-</span> <span class="pre">I|</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>numpy.linalg.LinAlgError</strong> – If the matrix is singular even after normalisation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.ANALYTIC_PARAMETERS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">ANALYTIC_PARAMETERS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('luminosity_distance',</span> <span class="pre">'geocent_time',</span> <span class="pre">'psi',</span> <span class="pre">'ra',</span> <span class="pre">'dec')</span></span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/parameters.html#ANALYTIC_PARAMETERS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.ANALYTIC_PARAMETERS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.DEFAULT_PARAMETERS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_PARAMETERS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('chirp_mass',</span> <span class="pre">'symmetric_mass_ratio',</span> <span class="pre">'luminosity_distance',</span> <span class="pre">'ra',</span> <span class="pre">'dec',</span> <span class="pre">'theta_jn',</span> <span class="pre">'psi',...</span></span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/parameters.html#DEFAULT_PARAMETERS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.DEFAULT_PARAMETERS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">ECCENTRIC_PRECESSING_PARAMETERS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('chirp_mass',</span> <span class="pre">'symmetric_mass_ratio',</span> <span class="pre">'luminosity_distance',</span> <span class="pre">'ra',</span> <span class="pre">'dec',</span> <span class="pre">'theta_jn',</span> <span class="pre">'psi',...</span></span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/parameters.html#ECCENTRIC_PRECESSING_PARAMETERS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.PRECESSING_PARAMETERS">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">PRECESSING_PARAMETERS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('chirp_mass',</span> <span class="pre">'symmetric_mass_ratio',</span> <span class="pre">'luminosity_distance',</span> <span class="pre">'ra',</span> <span class="pre">'dec',</span> <span class="pre">'theta_jn',</span> <span class="pre">'psi',...</span></span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/parameters.html#PRECESSING_PARAMETERS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.PRECESSING_PARAMETERS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.strip_shadowed_parameters">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">strip_shadowed_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fisher_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/parameters.html#strip_shadowed_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.strip_shadowed_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Remove source parameters that would silently pin a Fisher parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<em>dict</em>) – Source parameters as read from the configuration or an injection file.</p></li>
+<li><p><strong>fisher_parameters</strong> (<em>sequence</em><em> of </em><em>str</em>) – The names the Fisher matrix is taken over.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(parameters,</span> <span class="pre">removed)</span></code>. <code class="docutils literal notranslate"><span class="pre">parameters</span></code> is a new dict; <code class="docutils literal notranslate"><span class="pre">removed</span></code> is
+the sorted list of keys dropped, which the caller should log so the
+change is visible rather than silent.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.fisher.estimate_noise">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.fisher.</span></span><span class="sig-name descname"><span class="pre">estimate_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/fisher/stepsize.html#estimate_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.fisher.estimate_noise" title="Link to this definition">¶</a></dt>
+<dd><p>Estimate the numerical noise of a computed function from its values.</p>
+<p>Implements the ECNoise procedure of Moré and Wild, <em>Estimating Computational
+Noise</em>, SIAM J. Sci. Comput. 33(3):1292–1314 (2011), which is the standard
+way to measure how much of a simulated function’s output is numerical
+scatter rather than signal.</p>
+<p>The idea is that for a smooth <span class="math notranslate nohighlight">\(f\)</span> the <span class="math notranslate nohighlight">\(k\)</span>-th finite difference
+over a spacing <span class="math notranslate nohighlight">\(h\)</span> shrinks like <span class="math notranslate nohighlight">\(h^k\)</span>, while iid noise does not
+shrink at all – it merely gets amplified by a known binomial factor. So
+build the difference table and look for the level at which the estimates
+stop changing:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\sigma_k^2 = \frac{\gamma_k}{m + 1 - k} \sum_i \big(\Delta^k f_i\big)^2,
+\qquad \gamma_k = \frac{(k!)^2}{(2k)!}.\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> (<em>array_like</em>) – Function values at equally spaced points. At least four, preferably
+<code class="xref py py-data docutils literal notranslate"><span class="pre">NOISE_SAMPLE_POINTS</span></code>. The spacing itself never enters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(noise,</span> <span class="pre">status)</span></code>. <code class="docutils literal notranslate"><span class="pre">status</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code> when the noise was detected,
+<code class="docutils literal notranslate"><span class="pre">2</span></code> when the spacing was too <em>small</em> (half the first differences came
+out exactly zero – widen it by ~100), and <code class="docutils literal notranslate"><span class="pre">3</span></code> when it was too <em>large</em>
+(no level settled, or the values already differ in their first digit –
+narrow it by ~100). <code class="docutils literal notranslate"><span class="pre">noise</span></code> is <code class="docutils literal notranslate"><span class="pre">0.0</span></code> unless <code class="docutils literal notranslate"><span class="pre">status</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">gwforge.GWForge.fisher</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives"><code class="docutils literal notranslate"><span class="pre">AntennaDerivatives</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives.delay"><code class="docutils literal notranslate"><span class="pre">AntennaDerivatives.delay</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives.sidereal_rate"><code class="docutils literal notranslate"><span class="pre">AntennaDerivatives.sidereal_rate</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives._responses"><code class="docutils literal notranslate"><span class="pre">AntennaDerivatives._responses()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.AntennaDerivatives._store"><code class="docutils literal notranslate"><span class="pre">AntennaDerivatives._store()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.names"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.steps"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.steps</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.waveform_evaluations"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.waveform_evaluations</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.interferometers"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.interferometers</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.waveform_generator"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.waveform_generator</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.parameters"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.parameters</span></code></a></li>
+<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.earth_rotation"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.earth_rotation</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.finite_size"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.finite_size</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.order"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.order</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.estimate_noise"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.estimate_noise</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.index"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.index</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.analytic"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.analytic</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.numerical"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.numerical</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.steps</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.noise_ratios"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.noise_ratios</span></code></a></li>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.waveform_evaluations</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._cache"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._cache</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._calibrate"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._calibrate()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._overlap"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._overlap()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._apply_noise_estimate"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._apply_noise_estimate()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._point"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._point()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._fill_cache"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._fill_cache()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._analytic_at"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._analytic_at()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives.derivatives"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives.derivatives()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._stencil_first"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._stencil_first()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.WaveformDerivatives._stencil_second"><code class="docutils literal notranslate"><span class="pre">WaveformDerivatives._stencil_second()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.analytic_derivatives"><code class="docutils literal notranslate"><span class="pre">analytic_derivatives()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.inner_product"><code class="docutils literal notranslate"><span class="pre">inner_product()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.inner_product_matrix"><code class="docutils literal notranslate"><span class="pre">inner_product_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.optimal_snr_squared"><code class="docutils literal notranslate"><span class="pre">optimal_snr_squared()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix"><code class="docutils literal notranslate"><span class="pre">FisherMatrix</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.names"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.matrix"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.matrix</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.per_detector"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.per_detector</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.optimal_snrs"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.optimal_snrs</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.order"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.order</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.parameters"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.parameters</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.derivatives"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.derivatives</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix._accumulate"><code class="docutils literal notranslate"><span class="pre">FisherMatrix._accumulate()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.covariance"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.covariance</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.sigmas"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.sigmas</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.FisherMatrix.with_gaussian_prior"><code class="docutils literal notranslate"><span class="pre">FisherMatrix.with_gaussian_prior()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.check_order"><code class="docutils literal notranslate"><span class="pre">check_order()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.covariance"><code class="docutils literal notranslate"><span class="pre">covariance()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.ANALYTIC_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">ANALYTIC_PARAMETERS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.DEFAULT_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_PARAMETERS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">ECCENTRIC_PRECESSING_PARAMETERS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.PRECESSING_PARAMETERS"><code class="docutils literal notranslate"><span class="pre">PRECESSING_PARAMETERS</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.strip_shadowed_parameters"><code class="docutils literal notranslate"><span class="pre">strip_shadowed_parameters()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.fisher.estimate_noise"><code class="docutils literal notranslate"><span class="pre">estimate_noise()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=1b65bdd7"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>

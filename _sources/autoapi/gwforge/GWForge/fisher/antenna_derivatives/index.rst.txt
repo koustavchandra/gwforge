@@ -1,0 +1,264 @@
+gwforge.GWForge.fisher.antenna_derivatives
+==========================================
+
+.. py:module:: gwforge.GWForge.fisher.antenna_derivatives
+
+.. autoapi-nested-parse::
+
+   Closed-form derivatives of the detector response geometry.
+
+   ``ra``, ``dec`` and ``psi`` reach the strain only through the detector
+   projection, never through the waveform, so their derivatives can be written down
+   exactly. This module differentiates the same expressions
+   :func:`GWForge.ifo.antenna.antenna_response` evaluates -- the ``u``, ``v``, ``m``
+   and ``n`` triad, the propagation direction, the finite-size arm transfer
+   function and the vertex delay -- with respect to the internal angles
+   :math:`(\phi, \theta, \psi)`, and chain-rules them onto the source parameters.
+
+   That holds under the frequency-dependent, Earth-rotating response too, which
+   changes only *how* :math:`F_{+,\times}` and :math:`\tau` are built. Freezing the
+   polarizations and differencing the response alone reproduces the full derivative
+   bit-identically; ``tests/test_fisher.py`` asserts exactly that.
+
+   The work is done on scalars rather than on :math:`3\times3\times n`
+   polarization tensors: contracting an arm with the polarization basis reduces to
+   :math:`(\hat a\cdot m)` and :math:`(\hat a\cdot n)`, so only those and their
+   derivatives are ever needed.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.antenna_derivatives._SMALL
+   gwforge.GWForge.fisher.antenna_derivatives._LABELS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.antenna_derivatives.AntennaDerivatives
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.antenna_derivatives._sinc_derivatives
+   gwforge.GWForge.fisher.antenna_derivatives._transfer_derivatives
+   gwforge.GWForge.fisher.antenna_derivatives._basis_derivatives
+   gwforge.GWForge.fisher.antenna_derivatives._polarization_projections
+   gwforge.GWForge.fisher.antenna_derivatives._product_rule
+   gwforge.GWForge.fisher.antenna_derivatives._scale
+   gwforge.GWForge.fisher.antenna_derivatives._combine
+   gwforge.GWForge.fisher.antenna_derivatives._arm_transfer
+   gwforge.GWForge.fisher.antenna_derivatives._unit_derivatives
+
+
+Module Contents
+---------------
+
+.. py:data:: _SMALL
+   :value: 0.0001
+
+
+.. py:function:: _sinc_derivatives(z)
+
+   Return ``(sinc, sinc', sinc'')`` for :math:`\mathrm{sinc}(z)`.
+
+   Uses numpy's convention :math:`\mathrm{sinc}(z) = \sin(\pi z)/(\pi z)`, to
+   match :func:`GWForge.ifo.antenna.finite_size_factor`.
+
+   Both derivatives are singular-looking at ``z = 0`` (they contain ``1/z`` and
+   ``1/z**2``) while being perfectly finite there, so small arguments are
+   evaluated from the Taylor series instead.
+
+   :param z:
+   :type z: array_like
+
+   :rtype: tuple of numpy.ndarray
+
+
+.. py:function:: _transfer_derivatives(x, y)
+
+   Arm transfer function :math:`D(x, y)` and its first two ``y`` derivatives.
+
+   :math:`D` is :func:`GWForge.ifo.antenna.finite_size_factor`; ``y`` is the
+   cosine between the arm and the propagation direction, which is where the sky
+   position enters. ``x = fL/c`` does not depend on any source parameter, so no
+   ``x`` derivatives are needed.
+
+   :param x: Arm length in wavelengths.
+   :type x: array_like
+   :param y: :math:`-\hat\Omega\cdot\hat a`.
+   :type y: array_like
+
+   :returns: ``(D, dD/dy, d2D/dy2)``, complex.
+   :rtype: tuple of numpy.ndarray
+
+
+.. py:function:: _basis_derivatives(theta, phi)
+
+   Sky basis triad and propagation direction, with first and second derivatives.
+
+   Mirrors the ``u``, ``v`` and ``omega`` built in
+   :func:`GWForge.ifo.antenna.antenna_response`, so that differentiating here is
+   differentiating exactly what the response evaluates.
+
+   :param theta: :math:`\theta = \pi/2 - \delta` and :math:`\phi = \alpha - \mathrm{gmst}`,
+                 broadcast to a common shape.
+   :type theta: array_like
+   :param phi: :math:`\theta = \pi/2 - \delta` and :math:`\phi = \alpha - \mathrm{gmst}`,
+               broadcast to a common shape.
+   :type phi: array_like
+
+   :returns: Maps ``"u"``, ``"v"``, ``"omega"`` and the derivative keys ``"_phi"``,
+             ``"_theta"``, ``"_phiphi"``, ``"_phitheta"``, ``"_thetatheta"`` to
+             ``(3, n)`` arrays.
+   :rtype: dict
+
+
+.. py:data:: _LABELS
+   :value: ('', '_phi', '_theta', '_psi', '_phiphi', '_phitheta', '_thetatheta', '_phipsi', '_thetapsi', '_psipsi')
+
+
+.. py:function:: _polarization_projections(basis, psi, arm)
+
+   Project the polarization triad onto one arm, with all derivatives.
+
+   Rather than forming :math:`3\times3\times n` polarization tensors and
+   contracting them, note that
+
+   .. math::
+
+      \tfrac{1}{2}\hat a\otimes\hat a : e^+ = \tfrac{1}{2}\big[(\hat a\cdot m)^2
+      - (\hat a\cdot n)^2\big],
+      \qquad
+      \tfrac{1}{2}\hat a\otimes\hat a : e^\times = (\hat a\cdot m)(\hat a\cdot n),
+
+   so everything reduces to the two scalars :math:`\hat a\cdot m` and
+   :math:`\hat a\cdot n` and their derivatives.
+
+   :param basis: Output of :func:`_basis_derivatives`.
+   :type basis: dict
+   :param psi: Polarisation angle.
+   :type psi: float
+   :param arm: Unit vector along the arm.
+   :type arm: numpy.ndarray
+
+   :returns: ``(plus, cross)``, each keyed by the labels in ``_LABELS``.
+   :rtype: tuple of dict
+
+
+.. py:function:: _product_rule(left, right, factor)
+
+   Symmetrised product of two derivative dictionaries.
+
+   Returns ``factor * left * right`` differentiated up to second order in the
+   internal angles, which is the only place the product rule appears in this
+   module.
+
+   :param left: Keyed by the labels in ``_LABELS``.
+   :type left: dict
+   :param right: Keyed by the labels in ``_LABELS``.
+   :type right: dict
+   :param factor: Overall multiplier.
+   :type factor: float
+
+   :rtype: dict
+
+
+.. py:function:: _scale(mapping, factor)
+
+   Multiply every entry of a derivative dictionary by a scalar or array.
+
+
+.. py:function:: _combine(left, right, sign=1.0)
+
+   Add or subtract two derivative dictionaries entry by entry.
+
+
+.. py:class:: AntennaDerivatives(interferometer, ra, dec, geocent_time, psi, frequencies, start_time, times_to_coalescence=None, earth_rotation=True, finite_size=True)
+
+   Exact derivatives of :math:`F_+`, :math:`F_\times` and :math:`\tau`.
+
+   Differentiates the same expressions
+   :func:`GWForge.ifo.antenna.antenna_response` evaluates, with respect to the
+   internal angles :math:`(\phi, \theta, \psi)`, then chain-rules those onto the
+   source parameters ``ra``, ``dec``, ``psi`` and ``geocent_time``:
+
+   .. math::
+
+      \frac{\partial}{\partial\alpha} = \frac{\partial}{\partial\phi},
+      \qquad
+      \frac{\partial}{\partial\delta} = -\frac{\partial}{\partial\theta},
+      \qquad
+      \frac{\partial}{\partial t_c} \supset
+          -\dot{\mathrm{gmst}}\,\frac{\partial}{\partial\phi},
+
+   the last because :math:`\phi = \alpha - \mathrm{gmst}(t_c)`. So the
+   Earth-rotation part of the ``geocent_time`` derivative comes free from the
+   sky partials. ``geocent_time`` additionally enters :math:`\tau` explicitly
+   with unit derivative, which is the dominant :math:`-2\pi i f h` term.
+
+   .. attribute:: plus, cross
+
+      :math:`F_+` and :math:`F_\times` and their derivatives, keyed by source
+      parameter name (``"ra"``) or sorted pair (``("dec", "ra")``).
+
+      :type: dict
+
+   .. attribute:: delay
+
+      Same for :math:`\tau`.
+
+      :type: dict
+
+
+   .. py:attribute:: sidereal_rate
+
+
+   .. py:method:: _responses(basis, psi, geometry, frequencies, finite_size)
+      :staticmethod:
+
+
+      Assemble the two pattern functions and the delay, with derivatives.
+
+
+
+   .. py:method:: _store(plus, cross, delay)
+
+      Chain-rule the internal-angle derivatives onto source parameters.
+
+
+
+.. py:function:: _arm_transfer(basis, arm, arm_length_in_wavelengths)
+
+   Finite-size transfer function for one arm, with angular derivatives.
+
+   The arm enters only through :math:`y = -\hat\Omega\cdot\hat a`, so the chain
+   rule is one-dimensional: :math:`\partial_a D = D_y\,\partial_a y` and
+   :math:`\partial_{ab} D = D_{yy}\,\partial_a y\,\partial_b y +
+   D_y\,\partial_{ab} y`.
+
+   :param basis: Output of :func:`_basis_derivatives`.
+   :type basis: dict
+   :param arm: Unit vector along the arm.
+   :type arm: numpy.ndarray
+   :param arm_length_in_wavelengths: :math:`fL/c`.
+   :type arm_length_in_wavelengths: numpy.ndarray
+
+   :returns: Keyed by the labels in ``_LABELS``.
+   :rtype: dict
+
+
+.. py:function:: _unit_derivatives(shape)
+
+   A derivative dictionary for the constant function 1.
+
+

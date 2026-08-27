@@ -1,0 +1,80 @@
+gwforge.GWForge.fisher.inner_product
+====================================
+
+.. py:module:: gwforge.GWForge.fisher.inner_product
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.inner_product.inner_product
+   gwforge.GWForge.fisher.inner_product.optimal_snr_squared
+   gwforge.GWForge.fisher.inner_product.inner_product_matrix
+
+
+Module Contents
+---------------
+
+.. py:function:: inner_product(aa, bb, interferometer)
+
+   Noise-weighted inner product of two frequency-domain series.
+
+   Wraps :func:`bilby.gw.utils.noise_weighted_inner_product` -- the same
+   routine bilby uses for its own SNRs, so a Fisher SNR and an injection SNR
+   are guaranteed to agree -- and takes the real part, which is what the
+   Fisher matrix is built from.
+
+   Only bins inside the interferometer's ``frequency_mask`` contribute. Outside
+   it bilby leaves the PSD at an arbitrary sentinel value, so including those
+   bins would silently corrupt the integral.
+
+   :param aa: Frequency-domain series on the interferometer's frequency grid. ``aa``
+              is the one that gets conjugated. Either may be complex.
+   :type aa: array_like
+   :param bb: Frequency-domain series on the interferometer's frequency grid. ``aa``
+              is the one that gets conjugated. Either may be complex.
+   :type bb: array_like
+   :param interferometer: Supplies the PSD, the frequency mask and the segment duration.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :returns: The real inner product.
+   :rtype: float
+
+
+.. py:function:: optimal_snr_squared(signal, interferometer)
+
+   :math:`\langle h \mid h \rangle` for a signal in one detector.
+
+   :param signal: Frequency-domain detector response.
+   :type signal: array_like
+   :param interferometer: Detector whose PSD is used.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :rtype: float
+
+
+.. py:function:: inner_product_matrix(left, right, interferometer)
+
+   Gram matrix of inner products between two stacks of series.
+
+   Building the Fisher matrix means taking ``len(left) * len(right)`` inner
+   products that all share the same PSD weighting, so the weighting is applied
+   once and the rest is a single matrix product. For an 11-parameter Fisher
+   over a 65537-bin grid this is roughly two orders of magnitude faster than
+   looping over :func:`inner_product`.
+
+   :param left: Arrays of shape ``(n_left, n_frequencies)`` and
+                ``(n_right, n_frequencies)``. ``left`` is conjugated.
+   :type left: array_like
+   :param right: Arrays of shape ``(n_left, n_frequencies)`` and
+                 ``(n_right, n_frequencies)``. ``left`` is conjugated.
+   :type right: array_like
+   :param interferometer: Supplies the PSD, the frequency mask and the segment duration.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :returns: Real array of shape ``(n_left, n_right)``.
+   :rtype: numpy.ndarray
+
+

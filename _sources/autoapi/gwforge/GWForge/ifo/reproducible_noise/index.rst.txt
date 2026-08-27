@@ -1,0 +1,204 @@
+gwforge.GWForge.ifo.reproducible_noise
+======================================
+
+.. py:module:: gwforge.GWForge.ifo.reproducible_noise
+
+.. autoapi-nested-parse::
+
+   Reproducible coloured Gaussian noise and zero noise, in pure numpy.
+   Probably equivalent to ``pycbc.noise.reproduceable`` (agrees to FFT round-off), but without the PyCBC dependency.
+   The noise is reproducible in the sense that a given
+   ``(seed, GPS time)`` always yields the same samples, so adjacent requests stitch together seamlessly.
+   This makes it suitable for generating long observations in chunks.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.reproducible_noise.BLOCK_SAMPLES
+   gwforge.GWForge.ifo.reproducible_noise.DEFAULT_FILTER_DURATION
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.ifo.reproducible_noise.block
+   gwforge.GWForge.ifo.reproducible_noise.normal
+   gwforge.GWForge.ifo.reproducible_noise.time_slice
+   gwforge.GWForge.ifo.reproducible_noise.zero_noise
+   gwforge.GWForge.ifo.reproducible_noise.interpolate_psd
+   gwforge.GWForge.ifo.reproducible_noise._resample
+   gwforge.GWForge.ifo.reproducible_noise._inverse_spectrum_truncation
+   gwforge.GWForge.ifo.reproducible_noise.colored_noise
+   gwforge.GWForge.ifo.reproducible_noise.noise_from_interferometer
+
+
+Module Contents
+---------------
+
+.. py:data:: BLOCK_SAMPLES
+   :value: 1638400
+
+
+.. py:data:: DEFAULT_FILTER_DURATION
+   :value: 128
+
+
+.. py:function:: block(seed, sample_rate)
+
+   Return one fixed-length block of white Gaussian samples.
+
+   :param seed: Block seed. Reduced modulo ``2**32`` for ``RandomState``.
+   :type seed: int
+   :param sample_rate: Sampling rate in Hz. Sets the variance to ``sample_rate / 2`` so that the
+                       one-sided PSD of the result is unity.
+   :type sample_rate: float
+
+   :returns: ``BLOCK_SAMPLES`` normally distributed samples.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: normal(start, end, sample_rate=16384, seed=0)
+
+   Return white Gaussian noise covering ``[start, end)`` in GPS seconds.
+
+   The samples depend only on ``(seed, absolute GPS time)``: adjacent requests
+   stitch together seamlessly, which is what lets the workflow generate a long
+   observation as independent per-chunk Condor jobs.
+
+   :returns: The samples and the GPS epoch of the first one (which is ``start``).
+   :rtype: tuple of (numpy.ndarray, float)
+
+
+.. py:function:: time_slice(samples, epoch, sample_rate, start, end)
+
+   Crop ``samples`` (starting at GPS ``epoch``) to ``[start, end)``.
+
+   :returns: The cropped samples and their GPS epoch, which is ``start``.
+   :rtype: tuple of (numpy.ndarray, float)
+
+
+.. py:function:: zero_noise(start_time, end_time, sample_rate=16384)
+
+   Return an all-zero strain series covering ``[start_time, end_time)``.
+
+   Same return contract as :func:`colored_noise`, so callers can switch between
+   the two without special-casing anything.
+
+
+.. py:function:: interpolate_psd(frequencies, psd, length, delta_f, low_frequency_cutoff)
+
+   Interpolate a tabulated PSD onto a uniform grid, log-log.
+
+   Port of ``pycbc.psd.read.from_numpy_arrays``. Interpolation is linear in
+   ``(log f, log S)``, which is the right space for noise curves spanning many
+   decades. Bins below ``low_frequency_cutoff`` are set to zero.
+
+   :param frequencies: Tabulated one-sided PSD. ``frequencies`` must be ascending and positive.
+   :type frequencies: array_like
+   :param psd: Tabulated one-sided PSD. ``frequencies`` must be ascending and positive.
+   :type psd: array_like
+   :param length: Number of samples in the output (DC to Nyquist inclusive).
+   :type length: int
+   :param delta_f: Frequency resolution of the output in Hz.
+   :type delta_f: float
+   :param low_frequency_cutoff: Bins below this are zeroed.
+   :type low_frequency_cutoff: float
+
+   :returns: The PSD on ``numpy.arange(length) * delta_f``.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: _resample(series, delta_f, new_delta_f, length=None)
+
+   Linearly resample a uniformly sampled series to a new ``delta_f``.
+
+   Port of ``pycbc.psd.interpolate``.
+
+
+.. py:function:: _inverse_spectrum_truncation(psd, delta_f, max_filter_length, low_frequency_cutoff)
+
+   Coarse-grain a PSD by truncating its inverse ASD's impulse response.
+
+   Port of ``pycbc.psd.estimate.inverse_spectrum_truncation`` restricted to the
+   two options GWForge uses: ``which_spectrum='invasd'`` and
+   ``trunc_method='hann'``. See arXiv:gr-qc/0509116 for the method.
+
+   The goal is to remove the sharp spectral features that
+   would otherwise give the colouring filter an impulse response longer than the
+   data segment.
+
+
+.. py:function:: colored_noise(psd, delta_f, start_time, end_time, seed=0, sample_rate=16384, low_frequency_cutoff=1.0, filter_duration=DEFAULT_FILTER_DURATION, scale=1.0)
+
+   Return Gaussian noise coloured by ``psd``, covering ``[start, end)``.
+
+   Numerically equivalent to ``pycbc.noise.reproduceable.colored_noise`` (agrees
+   to FFT round-off), including the seed/GPS reproducibility contract described
+   in the module docstring.
+
+   :param psd: One-sided PSD sampled uniformly from DC at spacing ``delta_f``.
+   :type psd: array_like
+   :param delta_f: Frequency resolution of ``psd`` in Hz.
+   :type delta_f: float
+   :param start_time: GPS bounds of the requested data. The returned series covers
+                      ``[start_time, end_time)``.
+   :type start_time: float
+   :param end_time: GPS bounds of the requested data. The returned series covers
+                    ``[start_time, end_time)``.
+   :type end_time: float
+   :param seed: Noise seed. A given ``(seed, GPS time)`` always yields the same samples.
+   :type seed: int
+   :param sample_rate: Output sampling rate in Hz. Must be held constant to keep continuity
+                       between disjoint spans.
+   :type sample_rate: float
+   :param low_frequency_cutoff: The PSD is zeroed below this, so the output carries no power there.
+   :type low_frequency_cutoff: float
+   :param filter_duration: Length in seconds of the colouring filter.
+   :type filter_duration: float
+   :param scale: Extra multiplicative factor on the amplitude spectrum.
+   :type scale: float
+
+   :returns: The coloured samples and their GPS epoch (which is ``start_time``).
+   :rtype: tuple of (numpy.ndarray, float)
+
+
+.. py:function:: noise_from_interferometer(interferometer, start_time, end_time, seed=0, sample_rate=16384, noise_type='gaussian', low_frequency_cutoff=None, filter_duration=DEFAULT_FILTER_DURATION, psd_delta_f=1.0 / 16)
+
+   Generate noise for a bilby ``Interferometer``.
+
+   The PSD is taken from ``interferometer.power_spectral_density`` as *arrays*
+   (``frequency_array`` / ``psd_array``) rather than by re-reading the file. Those
+   arrays are populated no matter how the PSD was supplied -- PSD file, ASD file,
+   or raw arrays -- so this works for ET (which ships a PSD file) and for every
+   user-supplied ``psd-dict`` entry, both of which the old file-sniffing path
+   could not handle.
+
+   :param interferometer: Detector whose PSD and ``minimum_frequency`` are used.
+   :type interferometer: bilby.gw.detector.Interferometer
+   :param start_time: GPS bounds of the requested data.
+   :type start_time: float
+   :param end_time: GPS bounds of the requested data.
+   :type end_time: float
+   :param seed: Noise seed; ignored for zero noise.
+   :type seed: int
+   :param sample_rate: Output sampling rate in Hz.
+   :type sample_rate: float
+   :param noise_type: ``'gaussian'`` or ``'zero'``.
+   :type noise_type: str
+   :param low_frequency_cutoff: Defaults to the interferometer's ``minimum_frequency``.
+   :type low_frequency_cutoff: float or None
+   :param filter_duration: Length in seconds of the colouring filter.
+   :type filter_duration: float
+   :param psd_delta_f: Resolution the tabulated PSD is interpolated onto before colouring.
+   :type psd_delta_f: float
+
+   :returns: The strain samples and their GPS epoch.
+   :rtype: tuple of (numpy.ndarray, float)
+
+

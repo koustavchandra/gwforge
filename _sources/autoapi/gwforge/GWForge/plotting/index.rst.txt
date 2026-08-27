@@ -1,0 +1,279 @@
+gwforge.GWForge.plotting
+========================
+
+.. py:module:: gwforge.GWForge.plotting
+
+.. autoapi-nested-parse::
+
+   Corner plots and figure style for GWForge.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.plotting.PHI
+   gwforge.GWForge.plotting.TEALROSE
+   gwforge.GWForge.plotting.OKABE_ITO
+   gwforge.GWForge.plotting._OKABE_ITO_RAMP
+   gwforge.GWForge.plotting.DEFAULT_PALETTE
+   gwforge.GWForge.plotting.XG_COLOUR
+   gwforge.GWForge.plotting.LVK_COLOUR
+   gwforge.GWForge.plotting.TRUTH_COLOUR
+   gwforge.GWForge.plotting.DEFAULT_LEVELS
+   gwforge.GWForge.plotting.DEFAULT_QUANTILES
+   gwforge.GWForge.plotting.DEFAULT_SPAN_SIGMA
+   gwforge.GWForge.plotting.HISTOGRAM_BINS
+   gwforge.GWForge.plotting.SMOOTHING_BINS
+   gwforge.GWForge.plotting.POPULATION_LATEX_LABELS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.plotting.new_rcParams
+   gwforge.GWForge.plotting.palette
+   gwforge.GWForge.plotting.labels_for
+   gwforge.GWForge.plotting._quantile
+   gwforge.GWForge.plotting.enclosed_levels
+   gwforge.GWForge.plotting._panel_density
+   gwforge.GWForge.plotting._default_span
+   gwforge.GWForge.plotting.corner_plot
+   gwforge.GWForge.plotting._draw_marginal
+   gwforge.GWForge.plotting._draw_panel
+   gwforge.GWForge.plotting._update_legend
+
+
+Module Contents
+---------------
+
+.. py:data:: PHI
+   :value: 1.618033988749895
+
+
+.. py:data:: TEALROSE
+   :value: ('#009392', '#72aaa1', '#b1c7b3', '#f1eac8', '#e5b9ad', '#d98994', '#d0587e')
+
+
+.. py:data:: OKABE_ITO
+   :value: ('#e69f00', '#56b4e9', '#009e73', '#f0e442', '#0072b2', '#d55e00', '#cc79a7', '#000000')
+
+
+.. py:data:: _OKABE_ITO_RAMP
+   :value: ('#0072b2', '#56b4e9', '#009e73', '#f0e442', '#e69f00', '#d55e00')
+
+
+.. py:data:: DEFAULT_PALETTE
+   :value: 'tealrose'
+
+
+.. py:data:: XG_COLOUR
+   :value: '#009392'
+
+
+.. py:data:: LVK_COLOUR
+   :value: '#d0587e'
+
+
+.. py:data:: TRUTH_COLOUR
+   :value: '0.2'
+
+
+.. py:data:: DEFAULT_LEVELS
+   :value: (0.5, 0.9)
+
+
+.. py:data:: DEFAULT_QUANTILES
+   :value: (0.16, 0.5, 0.84)
+
+
+.. py:data:: DEFAULT_SPAN_SIGMA
+   :value: 4.0
+
+
+.. py:data:: HISTOGRAM_BINS
+   :value: 60
+
+
+.. py:data:: SMOOTHING_BINS
+   :value: 1.0
+
+
+.. py:data:: POPULATION_LATEX_LABELS
+
+.. py:function:: new_rcParams(width='column', aspect_ratio=PHI)
+
+   Publication ready plot
+   :param width: ``"column"`` (246 pt) or ``"page"`` (510 pt), each doubled so the saved
+                 figure has room for readable fonts when scaled down.
+   :type width: str
+   :param aspect_ratio: Width divided by height. Defaults to the golden ratio.
+   :type aspect_ratio: float
+
+   :returns: Suitable for ``matplotlib.rc_context`` -- which is how it should be
+             used; see the note in the module docstring about
+             :mod:`GWForge.utils` restyling matplotlib on import.
+   :rtype: dict
+
+
+.. py:function:: palette(name=DEFAULT_PALETTE)
+
+   Discrete colour cycle and continuous colormap for a named palette.
+
+   :param name: ``"tealrose"`` or ``"okabe-ito"``.
+   :type name: str
+
+   :returns: ``(colours, colormap)``. ``colours`` is a tuple of hex strings to cycle
+             through for overlaid datasets; ``colormap`` is a
+             ``matplotlib.colors.LinearSegmentedColormap`` for
+             :func:`corner_plot`'s ``colour_by`` scatter.
+   :rtype: tuple
+
+   :raises ValueError: For an unknown palette name.
+
+
+.. py:function:: labels_for(parameters)
+
+   LaTeX labels for parameter names, falling back to the escaped raw name.
+
+   The fallback escapes underscores so mathtext does not read them as
+   subscripts and silently mangle the label.
+
+   :param parameters:
+   :type parameters: sequence of str
+
+   :rtype: list of str
+
+
+.. py:function:: _quantile(values, quantiles, weights=None)
+
+   Weighted quantiles, matching zeus's ``_quantile``.
+
+   ``numpy.quantile`` has no weights argument, so the weighted case sorts,
+   builds the cumulative weight as a CDF and interpolates.
+
+   :param values:
+   :type values: array_like
+   :param quantiles: In ``[0, 1]``.
+   :type quantiles: array_like
+   :param weights:
+   :type weights: array_like or None
+
+   :rtype: numpy.ndarray
+
+
+.. py:function:: enclosed_levels(density, levels)
+
+   Density values enclosing the requested fractions of the total probability.
+
+   Sort the histogram, walk down the cumulative sum, and read off where each
+   fraction is reached. This is what makes a "90% contour" contain 90% of the
+   samples rather than trace an arbitrary isopleth of the density.
+
+   :param density: Histogram or smoothed density, any shape.
+   :type density: numpy.ndarray
+   :param levels: Enclosed probabilities in ``(0, 1)``.
+   :type levels: sequence of float
+
+   :returns: Contour values, sorted ascending as ``matplotlib.contour`` requires.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: _panel_density(x_values, y_values, weights, span_x, span_y, bins, smooth)
+
+   Smoothed 2-D density on a fixed span, plus its bin centres.
+
+
+.. py:function:: _default_span(samples, sigma=DEFAULT_SPAN_SIGMA)
+
+   Mean +/- ``sigma`` sample standard deviations, per column.
+
+
+.. py:function:: corner_plot(samples, labels=None, weights=None, levels=DEFAULT_LEVELS, span=None, quantiles=DEFAULT_QUANTILES, truths=None, colour=None, alpha=0.5, linewidth=1.5, fill=None, colour_by=None, colour_label=None, palette_name=DEFAULT_PALETTE, scatter_size=2.0, show_titles=True, title_fmt='.3f', label=None, fig=None, size=None, bins=HISTOGRAM_BINS, smooth=SMOOTHING_BINS)
+
+   Corner plot: 1-D marginals on the diagonal, 2-D contours below it.
+
+   Call once per dataset, passing the returned figure back as ``fig`` to
+   overlay a second. Pass the same ``span`` to both so the panels line up --
+   ranges are computed per call otherwise.
+
+   :param samples: ``(n_samples, n_dimensions)``.
+   :type samples: array_like
+   :param labels: Axis labels, already LaTeX. See :func:`labels_for`.
+   :type labels: sequence of str or None
+   :param weights: Per-sample weights.
+   :type weights: array_like or None
+   :param levels: **Enclosed probabilities**, not density values. See
+                  :func:`enclosed_levels`.
+   :type levels: sequence of float
+   :param span: ``(low, high)`` per dimension. Defaults to mean +/- 4 sample standard
+                deviations.
+   :type span: sequence of tuple or None
+   :param quantiles: Three quantiles for the diagonal titles: lower, central, upper.
+   :type quantiles: sequence of float
+   :param truths: Reference values, drawn as lines.
+   :type truths: array_like or None
+   :param colour: Contour colour. Defaults to the first entry of ``palette_name``.
+   :type colour: str or None
+   :param alpha: Fill opacity. The outline is always drawn at full opacity so overlaid
+                 contours stay legible.
+   :type alpha: float
+   :param linewidth:
+   :type linewidth: float
+   :param fill: Fill the contours as well as outlining them. ``None`` means *yes,
+                unless* ``colour_by`` is given -- a filled contour drawn over a scatter
+                hides exactly the points the scatter exists to show.
+   :type fill: bool or None
+   :param colour_by: Length ``n_samples``. When given, each lower-triangle panel scatters the
+                     samples coloured by this on the palette's continuous map, with one
+                     shared colourbar. This is the pycbc posterior idiom -- events coloured
+                     by redshift or by network SNR.
+   :type colour_by: array_like or None
+   :param colour_label: Colourbar label.
+   :type colour_label: str or None
+   :param palette_name: ``"tealrose"`` or ``"okabe-ito"``.
+   :type palette_name: str
+   :param scatter_size: Marker size for the ``colour_by`` scatter.
+   :type scatter_size: float
+   :param show_titles: Quantile titles over the diagonal panels. Pass ``False`` on overlays so
+                       the first dataset's titles are not overwritten.
+   :type show_titles: bool
+   :param title_fmt:
+   :type title_fmt: str
+   :param label: Legend entry for this dataset.
+   :type label: str or None
+   :param fig: Existing corner to draw onto.
+   :type fig: matplotlib.figure.Figure or None
+   :param size: Figure size in inches. Defaults to ``(3 n, 3 n)``.
+   :type size: tuple or None
+   :param bins: Histogram bins per axis.
+   :type bins: int
+   :param smooth: Gaussian smoothing in units of bins. ``0`` disables it.
+   :type smooth: float
+
+   :rtype: matplotlib.figure.Figure
+
+   :raises ValueError: If ``samples`` is not two-dimensional, or if ``labels``, ``truths``,
+       ``span`` or ``colour_by`` do not match its shape, or if ``fig`` has a
+       different number of panels.
+
+
+.. py:function:: _draw_marginal(axis, values, weights, span, colour, alpha, linewidth, fill, bins, smooth, quantiles, title_fmt, label)
+
+   One diagonal panel: the smoothed 1-D marginal, optionally titled.
+
+
+.. py:function:: _draw_panel(axis, x_values, y_values, weights, span_x, span_y, levels, colour, alpha, linewidth, fill, bins, smooth, colour_by, colormap, scatter_size)
+
+   One lower-triangle panel: optional scatter, then contours over it.
+
+
+.. py:function:: _update_legend(figure, colour, label)
+
+   Append one proxy handle to the figure legend, keeping earlier entries.
+
+

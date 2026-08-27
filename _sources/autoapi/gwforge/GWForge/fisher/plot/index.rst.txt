@@ -1,0 +1,97 @@
+gwforge.GWForge.fisher.plot
+===========================
+
+.. py:module:: gwforge.GWForge.fisher.plot
+
+.. autoapi-nested-parse::
+
+   Corner plots for Fisher and DALI results.
+
+   A Fisher forecast is a covariance matrix, not a set of samples, so the way to
+   draw it is to realise the multivariate normal it describes and hand that to the
+   same corner machinery everything else uses. That also makes a Fisher result and
+   a sampled DALI posterior directly overlayable, which is the point.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.plot.CONTOUR_LEVELS
+   gwforge.GWForge.fisher.plot.OVERLAY_COLOURS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.plot.samples_from_covariance
+   gwforge.GWForge.fisher.plot.labels_for
+   gwforge.GWForge.fisher.plot.overlay_corner
+
+
+Module Contents
+---------------
+
+.. py:data:: CONTOUR_LEVELS
+
+.. py:data:: OVERLAY_COLOURS
+   :value: ('#ca0020', '#0571b0', '#4daf4a', '#984ea3')
+
+
+.. py:function:: samples_from_covariance(mean, covariance, size=200000, seed=None)
+
+   Draw from the multivariate normal a Fisher matrix describes.
+
+   :param mean: Fiducial parameter values.
+   :type mean: array_like
+   :param covariance: ``(n, n)`` covariance matrix.
+   :type covariance: array_like
+   :param size: Number of samples.
+   :type size: int
+   :param seed: Seed for reproducibility.
+   :type seed: int or None
+
+   :returns: ``(size, n)`` samples.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Notes
+
+   A Fisher covariance can pick up tiny negative eigenvalues from rounding when
+   the matrix is poorly conditioned, which makes the normal undrawable. Those
+   are clipped to zero with a warning; a genuinely indefinite covariance means
+   the forecast itself is not trustworthy.
+
+
+.. py:function:: labels_for(parameters)
+
+   LaTeX axis labels, falling back to the raw name when none is known.
+
+   The fallback escapes underscores so matplotlib's mathtext does not read them
+   as subscripts and silently mangle the label.
+
+
+.. py:function:: overlay_corner(datasets, parameters, truths=None, save=None, title=None)
+
+   Overlay several sample sets on one corner plot.
+
+   :param datasets: ``(label, samples)`` pairs, each ``samples`` of shape
+                    ``(n_samples, n_parameters)`` with columns ordered as ``parameters``.
+   :type datasets: sequence of tuple
+   :param parameters: Parameter names, used for the axis labels.
+   :type parameters: sequence of str
+   :param truths: Reference values to mark.
+   :type truths: array_like or None
+   :param save: Path to write the figure to. When None the figure is returned unsaved.
+   :type save: str or None
+   :param title: Figure title.
+   :type title: str or None
+
+   :rtype: matplotlib.figure.Figure
+
+   :raises ValueError: If ``datasets`` is empty or a sample array has the wrong width.
+
+

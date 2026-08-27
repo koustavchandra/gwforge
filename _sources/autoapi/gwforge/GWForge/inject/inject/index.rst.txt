@@ -1,0 +1,53 @@
+gwforge.GWForge.inject.inject
+=============================
+
+.. py:module:: gwforge.GWForge.inject.inject
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.inject.inject.Inject
+
+
+Module Contents
+---------------
+
+.. py:class:: Inject(ifos, data, injection_parameters, injection_type='bbh', earth_rotation=True, finite_size=True, **waveform_arguments)
+
+   .. py:attribute:: ifos
+
+
+   .. py:attribute:: injection_parameters
+
+
+   .. py:attribute:: injection_type
+      :value: ''
+
+
+
+   .. py:attribute:: earth_rotation
+      :value: True
+
+
+
+   .. py:attribute:: finite_size
+      :value: True
+
+
+
+   .. py:attribute:: waveform_arguments
+
+
+   .. py:method:: inject()
+
+      Inject a gravitational wave signal into the interferometer network.
+      Returns:
+      --------------
+      Network: bilby.gw.detectors.InterferometerList
+          Injected interferometer network
+
+
+

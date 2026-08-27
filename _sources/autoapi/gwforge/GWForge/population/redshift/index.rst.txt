@@ -1,0 +1,251 @@
+gwforge.GWForge.population.redshift
+===================================
+
+.. py:module:: gwforge.GWForge.population.redshift
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.redshift.TIME_DELAY_MODELS
+   gwforge.GWForge.population.redshift.DEFAULT_TIME_DELAY_MINIMUM
+   gwforge.GWForge.population.redshift.GWTC5_LOCAL_MERGER_RATE_DENSITY
+   gwforge.GWForge.population.redshift.FORMATION_GRID_POINTS
+   gwforge.GWForge.population.redshift.FORMATION_REDSHIFT_MAXIMUM
+   gwforge.GWForge.population.redshift.TIME_DELAY_GRID_POINTS
+   gwforge.GWForge.population.redshift.COALESCENCE_GRID_POINTS
+   gwforge.GWForge.population.redshift.REDSHIFT_MODEL_PARAMETERS
+   gwforge.GWForge.population.redshift.REDSHIFT_GRID_POINTS
+   gwforge.GWForge.population.redshift.REDSHIFT_GRID_MINIMUM
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.redshift.Redshift
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.redshift.madau_dickinson_psi_of_z
+   gwforge.GWForge.population.redshift.power_law_psi_of_z
+
+
+Module Contents
+---------------
+
+.. py:data:: TIME_DELAY_MODELS
+   :value: ('inverse', 'powerlaw')
+
+
+.. py:data:: DEFAULT_TIME_DELAY_MINIMUM
+   :value: 0.02
+
+
+.. py:data:: GWTC5_LOCAL_MERGER_RATE_DENSITY
+   :value: 23.3895396
+
+
+.. py:data:: FORMATION_GRID_POINTS
+   :value: 20000
+
+
+.. py:data:: FORMATION_REDSHIFT_MAXIMUM
+   :value: 1000.0
+
+
+.. py:data:: TIME_DELAY_GRID_POINTS
+   :value: 3000
+
+
+.. py:data:: COALESCENCE_GRID_POINTS
+   :value: 10000
+
+
+.. py:data:: REDSHIFT_MODEL_PARAMETERS
+
+.. py:function:: madau_dickinson_psi_of_z(redshift, gamma, kappa, z_peak)
+
+   Madau-Dickinson redshift evolution :math:`\psi(z)`, normalised so that
+   :math:`\psi(0) = 1`.
+
+   .. math::
+       \psi(z) = \frac{(1 + z)^\gamma}{1 + ((1 + z) / (1 + z_p))^\kappa}
+                 \left[1 + (1 + z_p)^{-\kappa}\right]
+
+   Matches ``gwpopulation.models.redshift.MadauDickinsonRedshift.psi_of_z``
+   (Fishbach+ arXiv:1805.10270 Eq. 33; normalisation from Callister+
+   arXiv:2003.12152 Eq. 2). Written with plain arithmetic so it also accepts a
+   ``sympy`` symbol, as required by :meth:`Redshift.transform`.
+
+
+.. py:function:: power_law_psi_of_z(redshift, lamb)
+
+   Power-law redshift evolution :math:`\psi(z) = (1 + z)^\lambda`.
+
+   Matches ``gwpopulation.models.redshift.PowerLawRedshift.psi_of_z``
+   (Fishbach+ arXiv:1805.10270).
+
+
+.. py:data:: REDSHIFT_GRID_POINTS
+   :value: 2500
+
+
+.. py:data:: REDSHIFT_GRID_MINIMUM
+   :value: 1e-06
+
+
+.. py:class:: Redshift(redshift_model, local_merger_rate_density, maximum_redshift, gps_start_time, analysis_time=YRJUL_SI, cosmology='Planck18', parameters={'gamma': 2.7, 'kappa': 5.6, 'z_peak': 1.9}, time_delay_model='inverse', time_delay_slope=1.0, time_delay_minimum=DEFAULT_TIME_DELAY_MINIMUM, H0=70, Om0=0.3, Ode0=0.7, Tcmb0=2.725, Ob0=None)
+
+   .. py:attribute:: redshift_model
+      :value: ''
+
+
+
+   .. py:attribute:: local_merger_rate_density
+
+
+   .. py:attribute:: maximum_redshift
+
+
+   .. py:attribute:: analysis_time
+
+
+   .. py:attribute:: gps_start_time
+
+
+   .. py:attribute:: cosmology
+      :value: 'Planck18'
+
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:attribute:: time_delay_model
+      :value: ''
+
+
+
+   .. py:attribute:: time_delay_slope
+      :value: 1.0
+
+
+
+   .. py:attribute:: time_delay_minimum
+      :value: 0.02
+
+
+
+   .. py:method:: import_cosmology()
+
+      Resolve this object's cosmology specification.
+
+      Delegates to :func:`GWForge.cosmology.astropy_cosmology`, which is the
+      single place a GWForge cosmology specification is resolved, so that the
+      redshifts a population is sampled from and the luminosity distances it
+      is labelled with cannot come from two different universes.
+
+      :rtype: astropy.cosmology.FLRW
+
+
+
+   .. py:method:: differential_lookback_time(redshift)
+
+      Derivative of lookback time t(z) with respect to z, in Gyr.
+      See Eq.(A3) of <arXiv:2011.02717v3>. Vectorised over ``redshift``.
+
+
+
+   .. py:method:: _psi_of_z(redshift)
+
+      Star-formation-rate redshift evolution psi(z) for the chosen model.
+
+      The overall amplitude is irrelevant here: :meth:`rate_density` rescales to
+      ``local_merger_rate_density`` at z = 0, so any constant prefactor cancels.
+
+
+
+   .. py:method:: _maximum_time_delay()
+
+      Maximum formation->merger delay (Gyr): the age of the universe at z=0.
+
+
+
+   .. py:method:: time_delay_probability(tau)
+
+      Formation->merger time-delay distribution, :math:`p(\tau)`.
+
+      Power-law model :math:`p(\tau) \propto \tau^{-\mathrm{slope}}` supported on
+      ``[time_delay_minimum, age_of_universe]`` and zero elsewhere. ``slope = 1``
+      recovers the ``1/\tau`` ("inverse") model. The normalisation is a global
+      constant and cancels in :meth:`rate_density`, so it is omitted here.
+
+
+
+   .. py:method:: _model_parameters()
+
+      Select only the hyperparameters the chosen redshift model's psi_of_z accepts,
+      raising a clear error if a required one is missing.
+
+
+
+   .. py:method:: rate_density(elements=1000)
+
+      Merger-rate density :math:`R(z_m)` as a function of merger redshift.
+
+      Convolves the star-formation rate with the time-delay distribution,
+
+      .. math::
+          R(z_m) \propto \int_{z_m}^{\infty} \psi(z_f)\, p\!\left(t(z_f) - t(z_m)\right)
+                        \frac{dt}{dz_f}\, dz_f,
+
+      where :math:`\psi` is the SFR, :math:`p(\tau)` the time-delay distribution
+      (:meth:`time_delay_probability`), and :math:`t(z)` the lookback time. The
+      result is normalised and rescaled to ``local_merger_rate_density`` at
+      :math:`z_m = 0`. Replaces the previous pycbc + sympy implementation with
+      direct vectorised numerical integration.
+
+      Return:
+      -------
+      merger rate density : scipy.interpolate.interp1d
+          Callable over ``[0, maximum_redshift]``, in Mpc^-3 yr^-1.
+
+
+
+   .. py:method:: coalescence_rate()
+
+      Detector-frame merger rate per unit redshift, :math:`dR/dz` (yr^-1).
+
+      .. math::
+          \frac{dR}{dz} = R(z)\, \frac{1}{1 + z}\, \frac{dV_c}{dz},
+
+      with :math:`dV_c/dz = 4\pi\, (dV_c/d\Omega/dz)` the comoving volume element
+      and the :math:`1/(1+z)` factor converting source-frame to detector-frame
+      time. Reproduces ``pycbc.population.population_models.coalescence_rate``.
+
+
+
+   .. py:method:: average_time_between_signals()
+
+      Calculates the average time interval (in seconds) between two signals of
+      the same type, out to ``maximum_redshift``.
+
+
+
+   .. py:method:: sample()
+
+      Return:
+      -------
+      parameters : dict
+          dictionary of redshift, time_interval, tc
+
+
+

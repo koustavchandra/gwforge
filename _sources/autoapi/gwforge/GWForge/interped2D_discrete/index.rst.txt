@@ -1,0 +1,61 @@
+gwforge.GWForge.interped2D_discrete
+===================================
+
+.. py:module:: gwforge.GWForge.interped2D_discrete
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.interped2D_discrete.Interped2D_Discrete
+
+
+Module Contents
+---------------
+
+.. py:class:: Interped2D_Discrete(name, x_axis, y_axis, pdf_grid, x_name='x', y_name='y', jitter=True)
+
+   Bases: :py:obj:`bilby.core.prior.Prior`
+
+
+   Index-based 2D Prior: sample grid indices exactly, optionally jitter within cells.
+
+
+   .. py:attribute:: x_axis
+
+
+   .. py:attribute:: y_axis
+
+
+   .. py:attribute:: x_name
+      :value: 'x'
+
+
+
+   .. py:attribute:: y_name
+      :value: 'y'
+
+
+
+   .. py:attribute:: jitter
+      :value: True
+
+
+
+   .. py:attribute:: pmf
+
+
+   .. py:attribute:: dx
+
+
+   .. py:attribute:: dy
+
+
+   .. py:method:: sample(size=1)
+
+      Sample grid indices exactly, optionally jitter within cells.
+
+
+

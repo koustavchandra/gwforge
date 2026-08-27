@@ -1,0 +1,605 @@
+gwforge.GWForge.fisher
+======================
+
+.. py:module:: gwforge.GWForge.fisher
+
+.. autoapi-nested-parse::
+
+   Fisher-matrix and DALI forecasting for GWForge.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/gwforge/GWForge/fisher/antenna_derivatives/index
+   /autoapi/gwforge/GWForge/fisher/config/index
+   /autoapi/gwforge/GWForge/fisher/dali/index
+   /autoapi/gwforge/GWForge/fisher/derivatives/index
+   /autoapi/gwforge/GWForge/fisher/inner_product/index
+   /autoapi/gwforge/GWForge/fisher/matrix/index
+   /autoapi/gwforge/GWForge/fisher/parameters/index
+   /autoapi/gwforge/GWForge/fisher/plot/index
+   /autoapi/gwforge/GWForge/fisher/stepsize/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.ANALYTIC_PARAMETERS
+   gwforge.GWForge.fisher.DEFAULT_PARAMETERS
+   gwforge.GWForge.fisher.ECCENTRIC_PRECESSING_PARAMETERS
+   gwforge.GWForge.fisher.PRECESSING_PARAMETERS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.AntennaDerivatives
+   gwforge.GWForge.fisher.WaveformDerivatives
+   gwforge.GWForge.fisher.FisherMatrix
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.analytic_derivatives
+   gwforge.GWForge.fisher.inner_product
+   gwforge.GWForge.fisher.inner_product_matrix
+   gwforge.GWForge.fisher.optimal_snr_squared
+   gwforge.GWForge.fisher.check_order
+   gwforge.GWForge.fisher.covariance
+   gwforge.GWForge.fisher.strip_shadowed_parameters
+   gwforge.GWForge.fisher.estimate_noise
+
+
+Package Contents
+----------------
+
+.. py:class:: AntennaDerivatives(interferometer, ra, dec, geocent_time, psi, frequencies, start_time, times_to_coalescence=None, earth_rotation=True, finite_size=True)
+
+   Exact derivatives of :math:`F_+`, :math:`F_\times` and :math:`\tau`.
+
+   Differentiates the same expressions
+   :func:`GWForge.ifo.antenna.antenna_response` evaluates, with respect to the
+   internal angles :math:`(\phi, \theta, \psi)`, then chain-rules those onto the
+   source parameters ``ra``, ``dec``, ``psi`` and ``geocent_time``:
+
+   .. math::
+
+      \frac{\partial}{\partial\alpha} = \frac{\partial}{\partial\phi},
+      \qquad
+      \frac{\partial}{\partial\delta} = -\frac{\partial}{\partial\theta},
+      \qquad
+      \frac{\partial}{\partial t_c} \supset
+          -\dot{\mathrm{gmst}}\,\frac{\partial}{\partial\phi},
+
+   the last because :math:`\phi = \alpha - \mathrm{gmst}(t_c)`. So the
+   Earth-rotation part of the ``geocent_time`` derivative comes free from the
+   sky partials. ``geocent_time`` additionally enters :math:`\tau` explicitly
+   with unit derivative, which is the dominant :math:`-2\pi i f h` term.
+
+   .. attribute:: plus, cross
+
+      :math:`F_+` and :math:`F_\times` and their derivatives, keyed by source
+      parameter name (``"ra"``) or sorted pair (``("dec", "ra")``).
+
+      :type: dict
+
+   .. attribute:: delay
+
+      Same for :math:`\tau`.
+
+      :type: dict
+
+
+   .. py:attribute:: sidereal_rate
+
+
+   .. py:method:: _responses(basis, psi, geometry, frequencies, finite_size)
+      :staticmethod:
+
+
+      Assemble the two pattern functions and the delay, with derivatives.
+
+
+
+   .. py:method:: _store(plus, cross, delay)
+
+      Chain-rule the internal-angle derivatives onto source parameters.
+
+
+
+.. py:class:: WaveformDerivatives(interferometers, waveform_generator, parameters, fisher_parameters=None, earth_rotation=True, finite_size=True, step_sizes=None, order=1, calibrate=True, target_change=TARGET_FRACTIONAL_CHANGE, estimate_noise=True)
+
+   First and second derivatives of the detector response for one source.
+
+   Combines the exact closed-form derivatives of :func:`analytic_derivatives`
+   with fourth-order finite differences for the parameters the waveform
+   actually depends on.
+
+   The waveform is evaluated once per stencil point and cached, because the
+   polarizations do not depend on which detector is looking; detectors are then
+   projected one at a time by :meth:`derivatives`. That ordering matters for
+   memory: a second-derivative array is ``n_parameters**2`` frequency series, so
+   holding one for every detector at once reaches gigabytes at a high sampling
+   frequency, while the cached polarizations are only ``2`` series per stencil
+   point.
+
+   For eleven parameters this is ``4 * n_numerical + 1`` waveform evaluations at
+   ``order = 1``, plus four per numerical pair at ``order = 2``.
+
+   .. attribute:: names
+
+      Parameter names, in the order used by the Fisher matrix.
+
+      :type: list of str
+
+   .. attribute:: analytic, numerical
+
+      The split of ``names`` by differentiation method.
+
+      :type: list of str
+
+   .. attribute:: steps
+
+      Finite-difference step actually used for each numerical parameter.
+
+      :type: dict
+
+   .. attribute:: waveform_evaluations
+
+      How many times the waveform generator was called.
+
+      :type: int
+
+
+   .. py:attribute:: interferometers
+
+
+   .. py:attribute:: waveform_generator
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:attribute:: names
+      :value: ['chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+
+   .. py:attribute:: earth_rotation
+      :value: True
+
+
+
+   .. py:attribute:: finite_size
+      :value: True
+
+
+
+   .. py:attribute:: order
+      :value: 1
+
+
+
+   .. py:attribute:: estimate_noise
+      :value: True
+
+
+
+   .. py:attribute:: index
+
+
+   .. py:attribute:: analytic
+
+
+   .. py:attribute:: numerical
+
+
+   .. py:attribute:: steps
+
+
+   .. py:attribute:: noise_ratios
+
+
+   .. py:attribute:: waveform_evaluations
+      :value: 0
+
+
+
+   .. py:attribute:: _cache
+
+
+   .. py:method:: _calibrate(target)
+
+      Choose every numerical step, then check the model can support it.
+
+
+
+   .. py:method:: _overlap(name, offset, reference, interferometer)
+
+      Noise-weighted overlap :math:`\langle h(x + \delta) \mid h_0\rangle`.
+
+      The scalar functional the noise estimator runs on. It has to be *smooth*
+      in the parameter, which rules out the ``||dh|| / ||h||`` used for the
+      fractional-change target -- that has a kink at zero. An inner product
+      with the fiducial waveform is smooth, and is weighted by the PSD exactly
+      the way the Fisher matrix is, so the noise it reports is the noise that
+      actually reaches the answer.
+
+      Kept complex on purpose. The real part is stationary at the fiducial
+      point for a phase-like parameter -- for ``phase`` the overlap goes as
+      ``cos(2 dphi)`` -- so a real functional alone would report a vanishing
+      slope there and a meaningless noise ratio. The imaginary part is not
+      stationary, and using both sidesteps the issue for any parameter.
+
+
+
+   .. py:method:: _apply_noise_estimate(name, base)
+
+      Raise the step if the model's own noise says it is too small.
+
+      Only ever *raises* it. For a smooth waveform the noise is at the level
+      of machine precision, the required step comes out far below the one the
+      fractional-change target already picked, and nothing changes -- which is
+      what keeps the validated IMRPhenomXHM results intact. It binds only for
+      a model whose output genuinely scatters.
+
+
+
+   .. py:method:: _point(offsets)
+
+      Cache key, shifted parameters and polarizations at a stencil point.
+
+
+
+   .. py:method:: _fill_cache()
+
+      Evaluate the waveform at every stencil point this order needs.
+
+
+
+   .. py:method:: _analytic_at(interferometer, offsets, order)
+
+      Closed-form response and derivatives at one cached stencil point.
+
+
+
+   .. py:method:: derivatives(interferometer)
+
+      Response and derivative arrays for one detector.
+
+      :param interferometer: Must belong to the network this object was built with.
+      :type interferometer: bilby.gw.detector.Interferometer
+
+      :returns: ``(response, first, second)`` where ``first`` has shape
+                ``(n_parameters, n_frequencies)`` and ``second`` has shape
+                ``(n_parameters, n_parameters, n_frequencies)`` -- or is ``None``
+                when ``order < 2``.
+      :rtype: tuple
+
+
+
+   .. py:method:: _stencil_first(points, step)
+      :staticmethod:
+
+
+      Fourth-order first derivative from the five-point stencil.
+
+
+
+   .. py:method:: _stencil_second(points, step)
+      :staticmethod:
+
+
+      Fourth-order second derivative from the same five points.
+
+
+
+.. py:function:: analytic_derivatives(interferometer, polarizations, parameters, earth_rotation=True, finite_size=True, order=1)
+
+   Exact response and derivatives for the five closed-form parameters.
+
+   Writing :math:`h = P\,S` with :math:`P = F_+\tilde h_+ + F_\times\tilde h_\times`
+   and :math:`S = e^{-2\pi i f\tau}`,
+
+   .. math::
+
+      \partial_a h = \big(\partial_a P - 2\pi i f\,\partial_a\tau\,P\big) S,
+
+   and the second derivative follows from one more product rule. ``ra``,
+   ``dec``, ``psi`` and ``geocent_time`` enter through
+   :class:`AntennaDerivatives`; ``luminosity_distance`` is handled separately
+   because :math:`h \propto 1/d_L` makes every one of its derivatives a rescaling
+   of a derivative we already have.
+
+   :param interferometer:
+   :type interferometer: bilby.gw.detector.Interferometer
+   :param polarizations: ``{'plus': ..., 'cross': ...}`` on the interferometer's frequency grid.
+   :type polarizations: dict
+   :param parameters: Source parameters.
+   :type parameters: dict
+   :param earth_rotation: Response options; must match those used elsewhere.
+   :type earth_rotation: bool
+   :param finite_size: Response options; must match those used elsewhere.
+   :type finite_size: bool
+   :param order: ``2`` also returns second derivatives.
+   :type order: int
+
+   :returns: ``(response, first, second)``. ``first`` maps a parameter name to a
+             full-length complex array; ``second`` maps a sorted name pair to one.
+             Both are zero outside the interferometer's frequency mask.
+   :rtype: tuple
+
+
+.. py:function:: inner_product(aa, bb, interferometer)
+
+   Noise-weighted inner product of two frequency-domain series.
+
+   Wraps :func:`bilby.gw.utils.noise_weighted_inner_product` -- the same
+   routine bilby uses for its own SNRs, so a Fisher SNR and an injection SNR
+   are guaranteed to agree -- and takes the real part, which is what the
+   Fisher matrix is built from.
+
+   Only bins inside the interferometer's ``frequency_mask`` contribute. Outside
+   it bilby leaves the PSD at an arbitrary sentinel value, so including those
+   bins would silently corrupt the integral.
+
+   :param aa: Frequency-domain series on the interferometer's frequency grid. ``aa``
+              is the one that gets conjugated. Either may be complex.
+   :type aa: array_like
+   :param bb: Frequency-domain series on the interferometer's frequency grid. ``aa``
+              is the one that gets conjugated. Either may be complex.
+   :type bb: array_like
+   :param interferometer: Supplies the PSD, the frequency mask and the segment duration.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :returns: The real inner product.
+   :rtype: float
+
+
+.. py:function:: inner_product_matrix(left, right, interferometer)
+
+   Gram matrix of inner products between two stacks of series.
+
+   Building the Fisher matrix means taking ``len(left) * len(right)`` inner
+   products that all share the same PSD weighting, so the weighting is applied
+   once and the rest is a single matrix product. For an 11-parameter Fisher
+   over a 65537-bin grid this is roughly two orders of magnitude faster than
+   looping over :func:`inner_product`.
+
+   :param left: Arrays of shape ``(n_left, n_frequencies)`` and
+                ``(n_right, n_frequencies)``. ``left`` is conjugated.
+   :type left: array_like
+   :param right: Arrays of shape ``(n_left, n_frequencies)`` and
+                 ``(n_right, n_frequencies)``. ``left`` is conjugated.
+   :type right: array_like
+   :param interferometer: Supplies the PSD, the frequency mask and the segment duration.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :returns: Real array of shape ``(n_left, n_right)``.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: optimal_snr_squared(signal, interferometer)
+
+   :math:`\langle h \mid h \rangle` for a signal in one detector.
+
+   :param signal: Frequency-domain detector response.
+   :type signal: array_like
+   :param interferometer: Detector whose PSD is used.
+   :type interferometer: bilby.gw.detector.Interferometer
+
+   :rtype: float
+
+
+.. py:class:: FisherMatrix(interferometers, waveform_generator, parameters, fisher_parameters=None, earth_rotation=True, finite_size=True, step_sizes=None, order=1, calibrate=True, target_change=TARGET_FRACTIONAL_CHANGE, estimate_noise=True)
+
+   Network Fisher matrix, and DALI tensors when ``order = 2``.
+
+   Every tensor is a sum over detectors of noise-weighted inner products, so
+   the network result is the sum of the per-detector results (Vallisneri
+   eq. 13). ET contributes as three separate interferometers, which is how
+   :class:`GWForge.ifo.detectors.Network` already presents it.
+
+   Usage
+   -----
+   >>> fisher = FisherMatrix(ifos, waveform_generator, injection_parameters)
+   >>> sigmas = numpy.sqrt(numpy.diag(fisher.covariance))
+
+   .. attribute:: names
+
+      Parameter names in matrix order.
+
+      :type: list of str
+
+   .. attribute:: matrix
+
+      ``(n, n)`` network Fisher matrix.
+
+      :type: numpy.ndarray
+
+   .. attribute:: per_detector
+
+      Detector name to its own ``(n, n)`` Fisher matrix.
+
+      :type: dict
+
+   .. attribute:: doublet, quartic
+
+      :math:`G_{abc}` and :math:`H_{abcd}`; ``None`` when ``order < 2``.
+
+      :type: numpy.ndarray or None
+
+   .. attribute:: optimal_snrs
+
+      Detector name to optimal SNR, plus ``"network"``.
+
+      :type: dict
+
+
+   .. py:attribute:: order
+      :value: 1
+
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:attribute:: derivatives
+
+
+   .. py:attribute:: names
+
+
+   .. py:method:: _accumulate(interferometers)
+
+      Sum the per-detector tensors over the network.
+
+
+
+   .. py:property:: covariance
+
+      Inverse Fisher matrix, the linearised-signal covariance.
+
+
+   .. py:property:: sigmas
+
+      One-sigma marginalised uncertainties, as a name to value dict.
+
+
+   .. py:method:: with_gaussian_prior(prior_sigmas)
+
+      Add Gaussian prior information to the Fisher matrix.
+
+      A Gaussian prior of width :math:`\sigma_a` contributes
+      :math:`1/\sigma_a^2` to the diagonal -- the only way a prior can enter a
+      Fisher matrix, since a uniform prior carries no information in its
+      interior.
+
+      :param prior_sigmas: Parameter name to prior standard deviation. Names not in
+                           :attr:`names` are ignored.
+      :type prior_sigmas: dict
+
+      :returns: A new ``(n, n)`` matrix; :attr:`matrix` is left untouched.
+      :rtype: numpy.ndarray
+
+
+
+.. py:function:: check_order(order)
+
+   Validate the requested expansion order.
+
+   :param order: ``1`` for the Fisher matrix, ``2`` for doublet-DALI.
+   :type order: int
+
+   :rtype: int
+
+   :raises NotImplementedError: For ``order = 3``. Triplet-DALI needs genuine *third* derivatives of the
+       waveform -- the terms :math:`\langle h_{,a}\mid h_{,bcd}\rangle`,
+       :math:`\langle h_{,ab}\mid h_{,cde}\rangle` and
+       :math:`\langle h_{,abc}\mid h_{,def}\rangle` of Sellentin+ eq. (16).
+       Grouping the expansion by highest derivative, the Fisher term plus
+       :math:`G` and :math:`H` already exhausts everything expressible with
+       first and second derivatives, so there is no consistent third order that
+       avoids them.
+   :raises ValueError: For any other unsupported value.
+
+
+.. py:function:: covariance(fisher, names=None, condition_number_warning=CONDITION_NUMBER_WARNING)
+
+   Invert a Fisher matrix and report how much to trust the result.
+
+   Fisher matrices for a gravitational-wave network are badly scaled -- a
+   chirp-mass entry and a time entry differ by many orders of magnitude -- so
+   the matrix is normalised by its diagonal before inversion and un-normalised
+   afterwards.
+
+   :param fisher: ``(n, n)`` symmetric positive-definite matrix.
+   :type fisher: numpy.ndarray
+   :param names: Parameter names, used only to make the warnings readable.
+   :type names: sequence of str or None
+   :param condition_number_warning: Warn above this condition number.
+   :type condition_number_warning: float
+
+   :returns: ``(covariance, diagnostics)``. ``diagnostics`` holds
+             ``condition_number`` and ``inversion_error``, the latter being
+             ``max|Sigma F - I|``.
+   :rtype: tuple
+
+   :raises numpy.linalg.LinAlgError: If the matrix is singular even after normalisation.
+
+
+.. py:data:: ANALYTIC_PARAMETERS
+   :value: ('luminosity_distance', 'geocent_time', 'psi', 'ra', 'dec')
+
+
+.. py:data:: DEFAULT_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:data:: ECCENTRIC_PRECESSING_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:data:: PRECESSING_PARAMETERS
+   :value: ('chirp_mass', 'symmetric_mass_ratio', 'luminosity_distance', 'ra', 'dec', 'theta_jn', 'psi',...
+
+
+.. py:function:: strip_shadowed_parameters(parameters, fisher_parameters)
+
+   Remove source parameters that would silently pin a Fisher parameter.
+
+   :param parameters: Source parameters as read from the configuration or an injection file.
+   :type parameters: dict
+   :param fisher_parameters: The names the Fisher matrix is taken over.
+   :type fisher_parameters: sequence of str
+
+   :returns: ``(parameters, removed)``. ``parameters`` is a new dict; ``removed`` is
+             the sorted list of keys dropped, which the caller should log so the
+             change is visible rather than silent.
+   :rtype: tuple
+
+
+.. py:function:: estimate_noise(values)
+
+   Estimate the numerical noise of a computed function from its values.
+
+   Implements the ECNoise procedure of Moré and Wild, *Estimating Computational
+   Noise*, SIAM J. Sci. Comput. 33(3):1292--1314 (2011), which is the standard
+   way to measure how much of a simulated function's output is numerical
+   scatter rather than signal.
+
+   The idea is that for a smooth :math:`f` the :math:`k`-th finite difference
+   over a spacing :math:`h` shrinks like :math:`h^k`, while iid noise does not
+   shrink at all -- it merely gets amplified by a known binomial factor. So
+   build the difference table and look for the level at which the estimates
+   stop changing:
+
+   .. math::
+
+      \sigma_k^2 = \frac{\gamma_k}{m + 1 - k} \sum_i \big(\Delta^k f_i\big)^2,
+      \qquad \gamma_k = \frac{(k!)^2}{(2k)!}.
+
+   :param values: Function values at equally spaced points. At least four, preferably
+                  :data:`NOISE_SAMPLE_POINTS`. The spacing itself never enters.
+   :type values: array_like
+
+   :returns: ``(noise, status)``. ``status`` is ``1`` when the noise was detected,
+             ``2`` when the spacing was too *small* (half the first differences came
+             out exactly zero -- widen it by ~100), and ``3`` when it was too *large*
+             (no level settled, or the values already differ in their first digit --
+             narrow it by ~100). ``noise`` is ``0.0`` unless ``status`` is ``1``.
+   :rtype: tuple
+
+

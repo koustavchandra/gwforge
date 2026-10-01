@@ -1,0 +1,178 @@
+gwforge.GWForge.population.spin
+===============================
+
+.. py:module:: gwforge.GWForge.population.spin
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.spin.choices
+   gwforge.GWForge.population.spin.DEFAULT_BBH_SPIN_PARAMETERS
+   gwforge.GWForge.population.spin._INVERSE_ROOT_TWO_PI
+   gwforge.GWForge.population.spin.DEFAULT_PARAMETERS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.spin.Spin
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population.spin._standard_normal
+   gwforge.GWForge.population.spin.truncated_normal
+   gwforge.GWForge.population.spin.default_spin_magnitude_density
+   gwforge.GWForge.population.spin.default_spin_tilt_density
+
+
+Module Contents
+---------------
+
+.. py:data:: choices
+   :value: ['Non-spinning', 'Aligned', 'Aligned-Bilby', 'Aligned-Uniform', 'Beta-Aligned',...
+
+
+.. py:data:: DEFAULT_BBH_SPIN_PARAMETERS
+
+.. py:data:: _INVERSE_ROOT_TWO_PI
+
+.. py:function:: _standard_normal(value)
+
+   Standard normal density.
+
+
+.. py:function:: truncated_normal(value, mu, sigma, low, high)
+
+   Truncated-normal density and its log-derivatives in ``mu`` and ``sigma``.
+
+   The kernel both halves of the ``Default`` BBH spin model are built from: the
+   magnitudes are one of these on :math:`[0, a_{\max}]`, and the cos-tilt
+   mixture's Gaussian component is one on :math:`[t_{\min}, 1]`.
+
+   With :math:`z = (x-\mu)/\sigma`, :math:`a = (\text{low}-\mu)/\sigma`,
+   :math:`b = (\text{high}-\mu)/\sigma` and :math:`D = \Phi(b) - \Phi(a)`,
+
+   .. math::
+
+      \frac{\partial \ln N}{\partial \mu}
+        = \frac{z}{\sigma} - \frac{\phi(a) - \phi(b)}{\sigma D},
+      \qquad
+      \frac{\partial \ln N}{\partial \sigma}
+        = \frac{z^2 - 1}{\sigma} - \frac{a\phi(a) - b\phi(b)}{\sigma D}.
+
+   :param value:
+   :type value: array_like
+   :param mu:
+   :type mu: float
+   :param sigma:
+   :type sigma: float
+   :param low:
+   :type low: float
+   :param high:
+   :type high: float
+
+   :returns: ``{"density": ..., "mu": ..., "sigma": ...}``, the latter two being
+             ``d ln N / d mu`` and ``d ln N / d sigma``. ``density`` is zero outside
+             ``[low, high]``.
+   :rtype: dict
+
+
+.. py:function:: default_spin_magnitude_density(magnitude, mu_chi, sigma_chi, amax=1.0)
+
+   ``p(chi)`` for the ``Default`` BBH model: Eq. B15 of arXiv:2605.27226.
+
+   A truncated Gaussian :math:`N_{[0, a_{\max}]}(\mu_\chi, \sigma_\chi)`, the
+   same for both components. ``sigma_chi`` is a **standard deviation**; the Beta
+   models take a variance and are a different model.
+
+
+.. py:function:: default_spin_tilt_density(cosine, mu_t, sigma_t, xi_spin, t_min=-1.0)
+
+   The **marginal** ``p(cos t)`` of one component: Eq. B16, one tilt at a time.
+
+   .. math::
+       p(\cos t) = \xi\, N_{[t_{\min}, 1]}(\mu_t, \sigma_t)
+                   + \frac{1 - \xi}{1 - t_{\min}}.
+
+   Careful: the model is joint over the *binary* -- one draw decides whether
+   both tilts come from the Gaussian or both from the isotropic component -- so
+   the density of the pair is **not** the product of two of these. It is
+
+   .. math::
+       p(\cos t_1, \cos t_2) = \xi\, N(\cos t_1) N(\cos t_2)
+                             + \frac{1 - \xi}{(1 - t_{\min})^2},
+
+   which is what :class:`GWForge.population_fisher.DefaultSpin` evaluates and
+   what makes ``corr(cos t_1, cos t_2)`` non-zero. This marginal is the right
+   thing to compare a one-dimensional histogram against, and nothing else.
+
+
+.. py:data:: DEFAULT_PARAMETERS
+
+.. py:class:: Spin(spin_model, number_of_samples, parameters=None)
+
+   .. py:attribute:: spin_model
+      :value: ''
+
+
+
+   .. py:attribute:: number_of_samples
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:method:: _sample_default_bbh()
+
+      The GWTC-4.0/5.0 **Default BBH** spin model, Eqs. B15-B16 of
+      `arXiv:2605.27226 <https://arxiv.org/abs/2605.27226>`_.
+
+      Magnitudes are independent and identically distributed truncated
+      Gaussians (Eq. B15),
+
+      .. math::
+
+         \pi(\chi_i \mid \mu_\chi, \sigma_\chi)
+           = N_{[0, a_{\max}]}(\chi_1 \mid \mu_\chi, \sigma_\chi)\,
+             N_{[0, a_{\max}]}(\chi_2 \mid \mu_\chi, \sigma_\chi),
+
+      and the cosine tilts are identically but **not independently**
+      distributed (Eq. B16),
+
+      .. math::
+
+         \pi(\cos\theta_i \mid \mu_t, \sigma_t, \xi)
+           = \xi\, N_{[t_{\min}, 1]}(\cos\theta_1 \mid \mu_t, \sigma_t)\,
+                   N_{[t_{\min}, 1]}(\cos\theta_2 \mid \mu_t, \sigma_t)
+           + \frac{1 - \xi}{(1 - t_{\min})^2}.
+
+      Parameters, from ``spin-parameters``: ``mu_chi``, ``sigma_chi``,
+      ``mu_t``, ``sigma_t``, ``xi_spin``, and optionally ``amax`` (default 1)
+      and ``t_min`` (default -1). The posterior files call ``mu_t`` and
+      ``sigma_t`` ``mu_spin`` and ``sigma_spin``.
+
+      Returns:
+      --------
+          dict: ``a_1``, ``a_2``, ``tilt_1``, ``tilt_2``, ``phi_12``, ``phi_jl``.
+
+
+
+   .. py:method:: sample()
+
+      Generate spin distribution samples based on the chosen parameterised model and its parameters.
+
+      Returns:
+      --------
+          dict: A dictionary containing spin distribution samples.
+
+
+

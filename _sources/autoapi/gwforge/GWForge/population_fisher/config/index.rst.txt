@@ -1,0 +1,140 @@
+gwforge.GWForge.population_fisher.config
+========================================
+
+.. py:module:: gwforge.GWForge.population_fisher.config
+
+.. autoapi-nested-parse::
+
+   Configuration handling for ``gwforge_population_fisher``.
+
+   Kept out of the executable so the parsing is importable and testable, and so the
+   CLI stays a thin driver -- the same split :mod:`GWForge.fisher.config` uses.
+
+   The five analyses differ only in ``[Model] blocks`` and ``[Fisher]
+   free-parameters``, so one config reader covers redshift-only through spectral
+   sirens without branching in the driver.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.config.BLOCKS
+   gwforge.GWForge.population_fisher.config.BLOCK_CLASSES
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.config.catalogue_settings
+   gwforge.GWForge.population_fisher.config.cosmology_settings
+   gwforge.GWForge.population_fisher.config.build_model
+   gwforge.GWForge.population_fisher.config._fiducial
+   gwforge.GWForge.population_fisher.config.fit_settings
+   gwforge.GWForge.population_fisher.config.fisher_settings
+   gwforge.GWForge.population_fisher.config.output_settings
+
+
+Module Contents
+---------------
+
+.. py:data:: BLOCKS
+   :value: ('mass', 'redshift', 'spin', 'cosmology')
+
+
+.. py:data:: BLOCK_CLASSES
+
+.. py:function:: catalogue_settings(config, section='Catalogue')
+
+   Read the ``[Catalogue]`` section.
+
+   :returns: ``population_file``, ``snr_file``, ``detectors``, ``snr_thresholds``.
+   :rtype: dict
+
+
+.. py:function:: cosmology_settings(config, section='Model')
+
+   Build the fiducial :class:`GWForge.cosmology.FlatwCDM`.
+
+   ``cosmology = <name>`` seeds it from an ``astropy`` realization, folding
+   massive neutrinos into the matter density -- this background has only matter
+   and dark energy, and at the redshifts a gravitational-wave catalogue reaches
+   that is a far smaller error than pretending the neutrinos are not there.
+   Explicit ``H0``/``Om0``/``w0`` override whatever the name supplied.
+
+   :rtype: GWForge.cosmology.FlatwCDM
+
+
+.. py:function:: build_model(config, section='Model')
+
+   Assemble the population model the config describes.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+
+   :returns: ``(model, blocks, sub_models, cosmology)``. ``sub_models`` maps block
+             name to the source-frame model, which the fit stage needs even when the
+             Fisher runs on the detector-frame wrapper.
+   :rtype: tuple
+
+   :raises ValueError: For an unknown block, or ``cosmology`` without ``mass`` and ``redshift``.
+
+
+.. py:function:: _fiducial(config, section, block, model_class)
+
+   Fiducial hyper-parameters for one block, defaults filled in.
+
+   A config may set only the values it cares about; anything omitted falls back
+   to the class default, so a config need not restate all eleven BGP numbers to
+   change one.
+
+
+.. py:function:: fit_settings(config, section='Fit')
+
+   Which blocks to refit to the injections, and which to only check.
+
+   ``redshift`` defaults to ``True`` and should stay that way:
+   :class:`GWForge.population.redshift.Redshift` convolves the star-formation
+   rate with a time-delay distribution, so the generated redshifts are not
+   distributed as the direct Madau-Dickinson form and the config's
+   ``(gamma, kappa, z_peak)`` are not the fiducials of the model being
+   forecast.
+
+   ``mass`` and ``spin`` default to ``False``, because ``gwforge_population``
+   draws those straight from the same densities this package evaluates. Turning
+   them on is a consistency check, not a correction -- the fit must return the
+   generation values.
+
+   :returns: Block name to bool.
+   :rtype: dict
+
+
+.. py:function:: fisher_settings(config, section='Fisher')
+
+   Read the ``[Fisher]`` section.
+
+   ``configurations`` maps a name to *extra* parameters pinned on top of
+   ``fixed-parameters``, so one config file can produce a degeneracy ladder --
+   the joint fit, then LCDM with ``w0`` pinned, then ``H_0`` alone. That ladder
+   is usually what separates two published forecasts, far more than the physics
+   does, so it is worth reporting rather than choosing one rung silently.
+
+   :returns: ``free_parameters``, ``fixed_parameters``, ``configurations``,
+             ``score_method``.
+   :rtype: dict
+
+
+.. py:function:: output_settings(config, section='Output', label='population_fisher')
+
+   Read the ``[Output]`` section.
+
+   :returns: ``output_directory``, ``label``, ``plot_corner``.
+   :rtype: dict
+
+

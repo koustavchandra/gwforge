@@ -1,0 +1,75 @@
+gwforge.GWForge.population_fisher.compare
+=========================================
+
+.. py:module:: gwforge.GWForge.population_fisher.compare
+
+.. autoapi-nested-parse::
+
+   Fit a population block to the injections and report what came back.
+
+   Two different jobs wear the same clothes here, and the difference matters when
+   reading the output.
+
+   For the **redshift** block the fit is load-bearing.
+   :class:`GWForge.population.redshift.Redshift` convolves the star-formation rate
+   with a formation-to-merger time-delay distribution, so a generated catalogue is
+   not distributed as the direct Madau-Dickinson form. The fitted
+   :math:`(\gamma, \kappa, z_p)` are the *effective* parameters of the model being
+   forecast, and they will not equal the generation values -- that is expected, and
+   the ratio column says how far the time delay moved them.
+
+   For the **mass** and **spin** blocks the fit is a check.
+   ``gwforge_population`` draws those straight from the same densities this package
+   evaluates, so the fit must return the generation values to within Monte-Carlo
+   error. A ratio that is not close to one there is a bug, not a result.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.compare.BLOCK_ROLE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.compare.compare_block
+
+
+Module Contents
+---------------
+
+.. py:data:: BLOCK_ROLE
+
+.. py:function:: compare_block(model, block, injections, free_parameters=None)
+
+   Fit one block to the injections and format the comparison.
+
+   :param model: Fitted **in place**: on return ``model.fiducial`` holds the fitted
+                 values, so the Fisher that follows is evaluated at them.
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param block: ``"mass"``, ``"redshift"`` or ``"spin"``.
+   :type block: str
+   :param injections: Every injection, detected or not.
+   :type injections: dict
+   :param free_parameters: Vary only these, holding the rest at their config values. Defaults to
+                           every parameter the model has.
+
+                           The driver passes the *Fisher's* free list, so the fit varies exactly
+                           what the forecast will vary. That matters when a parameter is pinned
+                           because the data cannot constrain it: ``delta_m`` for a taper narrower
+                           than the sampling grid has no maximum to find, so an optimiser given it
+                           rails against whichever bound it was handed and drags the correlated
+                           parameters with it. Since the catalogue was *generated* here, such
+                           parameters are known exactly and there is nothing to fit.
+   :type free_parameters: sequence of str or None
+
+   :returns: Lines for the summary file.
+   :rtype: list of str
+
+

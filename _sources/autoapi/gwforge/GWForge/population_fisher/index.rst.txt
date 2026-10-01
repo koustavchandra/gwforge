@@ -1,0 +1,1170 @@
+gwforge.GWForge.population_fisher
+=================================
+
+.. py:module:: gwforge.GWForge.population_fisher
+
+.. autoapi-nested-parse::
+
+   Population (hyper-parameter) Fisher forecasting for GWForge.
+
+   Where :mod:`GWForge.fisher` asks how well a network measures *one source*, this
+   asks how well it measures the *population*: the shape of the mass function, the
+   history of the merger rate, the spin distribution, and -- through spectral
+   sirens -- the cosmology.
+
+   The estimator is the first term of the hyper-parameter Fisher expansion of Gair,
+   Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_ Eq. 21),
+
+   .. math::
+
+      \Gamma^{ij} = \sum_{k\ \rm detected}
+        \big(s_k^i - \langle s\rangle^i\big)\big(s_k^j - \langle s\rangle^j\big),
+      \qquad
+      s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}{\partial \Lambda^i},
+
+   which is the small-measurement-error limit. The mean subtraction is the
+   selection term, so there is no separate detection integral to evaluate and no
+   rate normalisation to get right -- see :mod:`GWForge.population_fisher.population_fisher_term_I`.
+
+   Pipeline
+   --------
+
+   .. code-block:: bash
+
+      gwforge_population        --config-file bgp-gwtc5.ini --output-file population.h5
+      gwforge_optimal_snr       --injection-file population.h5 --output-file snr.h5 --ifos CE40 CE20 ET
+      gwforge_population_fisher --config-file mass_redshift.ini
+
+   Models
+   ------
+
+   All four live in :mod:`GWForge.population_fisher.model`. The densities are
+   GWForge's own, called directly rather than reimplemented:
+   :mod:`GWForge.population._smoothed_mass` for the BGP mass model,
+   :func:`GWForge.population.redshift.madau_dickinson_psi_of_z` for the merger
+   rate, and :func:`GWForge.population.spin.truncated_normal` for both halves of
+   the ``Default`` spin model -- so a forecast and the catalogue it runs on
+   describe the same population by construction.
+
+   Derivatives
+   -----------
+
+   Analytic, everywhere, cosmology included -- see
+   :mod:`GWForge.population_fisher.base` for the two-tier policy and
+   :mod:`GWForge.cosmology` for why differentiating under the integral beats
+   finite-differencing the integral. Finite differences are the test oracle and the
+   fallback for a model added later, not a production path; there is no autodiff
+   tier and no JAX dependency.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/gwforge/GWForge/population_fisher/base/index
+   /autoapi/gwforge/GWForge/population_fisher/catalogue/index
+   /autoapi/gwforge/GWForge/population_fisher/compare/index
+   /autoapi/gwforge/GWForge/population_fisher/config/index
+   /autoapi/gwforge/GWForge/population_fisher/fit/index
+   /autoapi/gwforge/GWForge/population_fisher/model/index
+   /autoapi/gwforge/GWForge/population_fisher/plot/index
+   /autoapi/gwforge/GWForge/population_fisher/population_fisher_term_I/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.JointPopulationModel
+   gwforge.GWForge.population_fisher.PopulationModel
+   gwforge.GWForge.population_fisher.Catalogue
+   gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass
+   gwforge.GWForge.population_fisher.DefaultSpin
+   gwforge.GWForge.population_fisher.MadauDickinsonRedshift
+   gwforge.GWForge.population_fisher.SpectralSirenModel
+   gwforge.GWForge.population_fisher.PopulationFisherResult
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.load_catalogue
+   gwforge.GWForge.population_fisher.load_injections
+   gwforge.GWForge.population_fisher.network_snr_from
+   gwforge.GWForge.population_fisher.compare_to
+   gwforge.GWForge.population_fisher.fit_model
+   gwforge.GWForge.population_fisher.covariance_from_fisher
+   gwforge.GWForge.population_fisher.population_fisher
+
+
+Package Contents
+----------------
+
+.. py:class:: JointPopulationModel(models)
+
+   Bases: :py:obj:`PopulationModel`
+
+
+   Product of independent sub-models over disjoint event parameters.
+
+   The log density adds and the score columns concatenate, in the order the
+   sub-models were given. Duplicate hyper-parameter names across sub-models are
+   an error rather than a silent tie: two blocks sharing a name almost always
+   means one of them was built with the wrong keyword.
+
+   Usage
+   -----
+   >>> model = JointPopulationModel([mass_model, redshift_model, spin_model])
+   >>> model.score(events)
+
+
+   .. py:attribute:: models
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: event_keys
+      :value: []
+
+
+
+   .. py:property:: fiducial
+
+      Sub-model fiducials, merged live.
+
+      A property rather than a dict copied at construction: the fiducials of
+      a block can be *refitted* after the joint model is built (see
+      :mod:`GWForge.population_fisher.compare`, which the redshift block
+      always needs), and a snapshot taken in ``__init__`` would silently send
+      the Fisher back to the pre-fit point.
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      Sum of the sub-model log densities.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Horizontally stacked sub-model scores, ``None`` if any sub-model lacks one.
+
+
+
+   .. py:method:: score(events, parameters=None, method='auto')
+
+      Per-sub-model dispatch, so one analytic block is not lost to another's fallback.
+
+
+
+.. py:class:: PopulationModel
+
+   Base class: a normalised density over event parameters, given hyper-parameters.
+
+   Subclasses must set :attr:`parameter_names`, :attr:`fiducial` and
+   :attr:`event_keys`, and implement :meth:`log_prob`. Implementing
+   :meth:`analytic_score` is strongly preferred but optional.
+
+   .. attribute:: parameter_names
+
+      Hyper-parameter names, in the order the score columns come out.
+
+      :type: list of str
+
+   .. attribute:: fiducial
+
+      Default hyper-parameter values.
+
+      :type: dict
+
+   .. attribute:: event_keys
+
+      Keys the model requires in the ``events`` dict.
+
+      :type: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: event_keys
+      :value: []
+
+
+
+   .. py:method:: log_prob(events, parameters)
+      :abstractmethod:
+
+
+      Log density of each event.
+
+      :param events: Arrays of event parameters, all the same length.
+      :type events: dict
+      :param parameters: Hyper-parameter values; must cover :attr:`parameter_names`.
+      :type parameters: dict
+
+      :returns: Shape ``(n_events,)``. ``-inf`` outside the support.
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, or ``None`` if this model has none.
+
+      :returns: Shape ``(n_events, len(parameter_names))``, columns in
+                :attr:`parameter_names` order.
+      :rtype: numpy.ndarray or None
+
+
+
+   .. py:method:: score(events, parameters=None, method='auto')
+
+      Score of each event with respect to every hyper-parameter.
+
+      :param events:
+      :type events: dict
+      :param parameters: Defaults to :attr:`fiducial`.
+      :type parameters: dict or None
+      :param method: One of :data:`SCORE_METHODS`. ``"auto"`` tries analytic, then falls
+                     back to finite differences.
+      :type method: str
+
+      :returns: Shape ``(n_events, len(parameter_names))``.
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: _finite_difference_score(events, parameters)
+
+      Score by centred finite differences. The test oracle; see the module docstring.
+
+
+
+   .. py:method:: to_vector(parameters)
+
+      Hyper-parameter dict to array, in :attr:`parameter_names` order.
+
+
+
+   .. py:method:: from_vector(vector, parameters=None)
+
+      Array back to a hyper-parameter dict, merged onto ``parameters``.
+
+
+
+   .. py:method:: check_events(events)
+
+      Raise if ``events`` is missing a key this model needs.
+
+
+
+   .. py:method:: _n_events(events)
+
+
+   .. py:method:: _column_index(name)
+
+
+.. py:class:: Catalogue(events, network_snr, detectors, snr_threshold, n_total, n_with_snr)
+
+   A detected catalogue, and the counts that describe how it was cut.
+
+   .. attribute:: events
+
+      Source parameters of the detected events, plus derived ``mass_ratio``
+      and ``cos_tilt_1``/``cos_tilt_2`` where the inputs allow.
+
+      :type: dict
+
+   .. attribute:: network_snr
+
+      Network optimal SNR of the detected events.
+
+      :type: numpy.ndarray
+
+   .. attribute:: detectors
+
+      Detector columns that went into the network SNR.
+
+      :type: list of str
+
+   .. attribute:: snr_threshold
+
+
+
+      :type: float
+
+   .. attribute:: n_total
+
+      Injections in the population file.
+
+      :type: int
+
+   .. attribute:: n_with_snr
+
+      Injections the SNR stage actually covered.
+
+      :type: int
+
+   .. attribute:: n_detected
+
+      Injections above threshold. GWForge applies no duty cycle, so this is
+      also the analysis sample.
+
+      :type: int
+
+
+   .. py:attribute:: events
+
+
+   .. py:attribute:: network_snr
+
+
+   .. py:attribute:: detectors
+
+
+   .. py:attribute:: snr_threshold
+
+
+   .. py:attribute:: n_total
+
+
+   .. py:attribute:: n_with_snr
+
+
+   .. py:attribute:: n_detected
+
+
+   .. py:property:: detected_fraction
+
+      Fraction of the SNR-covered injections that passed the threshold.
+
+
+   .. py:method:: summary()
+
+      A plain-text description of the cuts.
+
+      :rtype: str
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:function:: load_catalogue(population_file, snr_file, snr_threshold=10.0, detectors=None, keys=CATALOGUE_KEYS)
+
+   Join a population file to its SNR file and cut on network SNR.
+
+   :param population_file: HDF5 from ``gwforge_population``.
+   :type population_file: str
+   :param snr_file: HDF5 from ``gwforge_optimal_snr``.
+   :type snr_file: str
+   :param snr_threshold: Network optimal-SNR threshold for detection.
+   :type snr_threshold: float
+   :param detectors: Detectors to sum. ``"ET"`` is expanded to its three arms. Defaults to
+                     every detector in the SNR file.
+   :type detectors: sequence of str or None
+   :param keys: Source parameters to carry over.
+   :type keys: sequence of str
+
+   :rtype: Catalogue
+
+   :raises ValueError: If the two files cannot be aligned, or nothing passes the threshold.
+
+
+.. py:function:: load_injections(population_file, keys=CATALOGUE_KEYS)
+
+   Every injection, detected or not, as an events dict.
+
+   This is what the maximum-likelihood fits in
+   :mod:`GWForge.population_fisher.fit` run on: the fiducial hyper-parameters
+   describe the *astrophysical* population, so they are fitted to what was
+   drawn, not to what was detected.
+
+   :param population_file:
+   :type population_file: str
+   :param keys:
+   :type keys: sequence of str
+
+   :rtype: dict
+
+
+.. py:function:: network_snr_from(snr_data, detectors=None)
+
+   Quadrature sum of the per-detector optimal SNRs.
+
+   :param snr_data: As written by ``gwforge_optimal_snr``.
+   :type snr_data: dict
+   :param detectors: Detector names (triangles already expanded). Defaults to every
+                     ``*_optimal_snr`` column in the file.
+   :type detectors: sequence of str or None
+
+   :returns: ``(network_snr, detectors_used)``.
+   :rtype: tuple
+
+   :raises KeyError: If a requested detector has no column.
+
+
+.. py:function:: compare_to(fitted, reference, names)
+
+   A plain-text table of fitted values against the values used to generate.
+
+   :param fitted:
+   :type fitted: dict
+   :param reference:
+   :type reference: dict
+   :param names:
+   :type names: sequence of str
+
+   :rtype: str
+
+
+.. py:function:: fit_model(model, samples, free_parameters=None, start=None, bounds=None, fixed_parameters=None)
+
+   Fit a population model to samples by maximum likelihood.
+
+   :param model:
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param samples: Event parameters to fit to. For a fiducial, these should be *all*
+                   injections, not just the detected ones: the population model describes
+                   the astrophysical population, and fitting to the detected subset would
+                   absorb the selection function into the hyper-parameters.
+   :type samples: dict
+   :param free_parameters: Defaults to every hyper-parameter not in ``fixed_parameters``.
+   :type free_parameters: sequence of str or None
+   :param start: Starting point. Defaults to ``model.fiducial``.
+   :type start: dict or None
+   :param bounds: Name to ``(low, high)``. Merged onto :data:`DEFAULT_BOUNDS`.
+   :type bounds: dict or None
+   :param fixed_parameters:
+   :type fixed_parameters: dict or None
+
+   :returns: The fitted values, merged onto the starting point, with the keys
+             ``"_success"``, ``"_message"`` and ``"_mean_log_prob"`` describing the
+             optimisation.
+   :rtype: dict
+
+
+.. py:class:: BrokenPowerLawTwoPeakMass(mmin=BGP_PARAMETERS['mmin'], m_high=BGP_PARAMETERS['m_high'], maximum_mass=BGP_PARAMETERS['maximum_mass'], mmin_2=BGP_PARAMETERS['mmin_2'], delta_m_2=BGP_PARAMETERS['delta_m_2'], fiducial=None, nodes=MASS_GRID_NODES)
+
+   Bases: :py:obj:`gwforge.GWForge.population_fisher.base.PopulationModel`
+
+
+   BGP primary mass and power-law mass ratio, with analytic scores.
+
+   Usage
+   -----
+   >>> model = BrokenPowerLawTwoPeakMass(mmin=5.0, m_high=100.0)
+   >>> model.log_prob({"mass_1_source": m1, "mass_ratio": q}, model.fiducial)
+   >>> model.score({"mass_1_source": m1, "mass_ratio": q})
+
+   .. attribute:: parameter_names
+
+      The eleven free hyper-parameters, using
+      :class:`GWForge.population.mass.Mass`'s spelling so that a generation
+      config and a Fisher config read the same.
+
+      :type: list of str
+
+   .. attribute:: mmin, m_high, maximum_mass
+
+      Support parameters, fixed by construction. See the module docstring.
+
+      :type: float
+
+
+   .. py:attribute:: parameter_names
+      :value: ['alpha_1', 'alpha_2', 'm_break', 'lam_0', 'lam_1', 'mpp_1', 'sigpp_1', 'mpp_2', 'sigpp_2',...
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['mass_1_source']
+
+
+
+   .. py:attribute:: mmin
+
+
+   .. py:attribute:: mmin_2
+
+
+   .. py:attribute:: m_high
+
+
+   .. py:attribute:: maximum_mass
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: delta_m_2
+
+
+   .. py:attribute:: grid
+
+
+   .. py:method:: _components(mass, parameters)
+
+      The three normalised mixture components and the taper, at ``mass``.
+
+
+
+   .. py:method:: _primary_numerator(mass, parameters)
+
+      Un-normalised :math:`\pi(m_1)`: the mixture times the taper.
+
+
+
+   .. py:method:: _primary_numerator_derivatives(mass, parameters)
+
+      ``d(numerator)/dLambda`` at ``mass``, as a dict of arrays.
+
+
+
+   .. py:method:: _cumulative_secondary(parameters)
+
+      The cumulative secondary-mass integral and its derivatives.
+
+      .. math::
+
+         G(M) = \int_{m_{\min}}^{M} m_2^{\beta}\, S(m_2)\, dm_2,
+
+      so that :math:`C(m_1) = m_1^{-(\beta+1)} G(m_1)` is the mass-ratio
+      normalisation. Substituting :math:`m_2 = m_1 q` turns one integral per
+      event into one cumulative integral on the shared grid, interpolated --
+      which is also how ``_smoothed_mass._norm_p_q`` does it, so the two agree.
+
+      :returns: ``{"value": ..., "beta": ..., "delta_m": ...}``, each a callable
+                cubic-Hermite interpolant of the corresponding cumulative integral.
+      :rtype: dict
+
+
+
+   .. py:method:: dlog_prob_dmasses(events, parameters)
+
+      ``(d ln p / d m_1, d ln p / d m_2)`` at fixed hyper-parameters.
+
+      Not needed by the Fisher itself -- these are derivatives with respect to
+      the *event* parameters, not the hyper-parameters. They are needed by
+      :mod:`GWForge.population_fisher.model`, where a trial cosmology
+      moves the redshift assigned to a measured distance and so moves the
+      source-frame masses:
+      :math:`\partial_\Lambda m^{\rm src} = -m^{\rm src}/(1+z)\cdot\partial_\Lambda z`.
+
+      .. math::
+
+         \frac{\partial \ln p}{\partial m_1}
+           = \frac{\partial \ln(\text{mixture})}{\partial m_1}
+           + \frac{\partial \ln S(m_1)}{\partial m_1}
+           - \frac{m_1^{\beta} S(m_1)}{G(m_1)},
+
+      the last term because :math:`m_1` is the upper limit of the mass-ratio
+      normalisation :math:`G`, and
+
+      .. math::
+
+         \frac{\partial \ln p}{\partial m_2}
+           = \frac{\beta}{m_2} + \frac{\partial \ln S(m_2)}{\partial m_2}.
+
+      :returns: ``(d ln p / d m_1, d ln p / d m_2)``, ``nan`` outside the support.
+      :rtype: tuple of numpy.ndarray
+
+
+
+   .. py:method:: _secondary_mass(events)
+      :staticmethod:
+
+
+      ``m_2`` from either ``mass_2_source`` or ``mass_ratio``.
+
+
+
+   .. py:method:: _support(primary, secondary)
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 11)``.
+
+      Each column is the log-derivative of the numerator minus that of the
+      normalisation,
+      :math:`\partial_\Lambda \ln(\text{numerator}) - \partial_\Lambda \ln Z`,
+      for the primary mass, plus the mass-ratio
+      contribution for the two parameters (``beta`` and ``delta_m``) that
+      appear in both. :math:`\partial_\Lambda Z` is the trapezoid of
+      :math:`\partial_\Lambda(\text{numerator})` on the *same* nodes that
+      normalise ``log_prob``, which is exact because the nodes do not move.
+
+
+
+.. py:class:: DefaultSpin(fiducial=None, maximum_spin=DEFAULT_MAXIMUM_SPIN, minimum_cosine_tilt=DEFAULT_MINIMUM_COSINE_TILT)
+
+   Bases: :py:obj:`gwforge.GWForge.population_fisher.base.PopulationModel`
+
+
+   GWTC-5.0 Default BBH spins: truncated-Gaussian magnitudes, mixture tilts.
+
+   Usage
+   -----
+   >>> model = DefaultSpin()
+   >>> model.log_prob({"a_1": a1, "a_2": a2, "tilt_1": t1, "tilt_2": t2}, model.fiducial)
+
+   .. attribute:: parameter_names
+
+      ``["mu_chi", "sigma_chi", "mu_t", "sigma_t", "xi_spin"]`` -- the names
+      ``GWForge.population.spin.Spin`` takes in ``spin-parameters``. The
+      posterior files call ``mu_t``/``sigma_t`` ``mu_spin``/``sigma_spin``.
+
+      :type: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: ['mu_chi', 'sigma_chi', 'mu_t', 'sigma_t', 'xi_spin']
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['a_1', 'a_2']
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: maximum_spin
+
+
+   .. py:attribute:: minimum_cosine_tilt
+
+
+   .. py:attribute:: isotropic_density
+
+
+   .. py:method:: _cosine_tilts(events)
+      :staticmethod:
+
+
+      ``(cos tilt_1, cos tilt_2)``, from either name.
+
+
+
+   .. py:method:: _magnitudes(events)
+
+
+   .. py:method:: check_events(events)
+
+      Raise if the magnitudes or either spelling of the tilts is missing.
+
+
+
+   .. py:method:: _magnitude_terms(events, parameters)
+
+      Truncated-normal terms for both spin magnitudes.
+
+
+
+   .. py:method:: _tilt_terms(events, parameters)
+
+      Truncated-normal terms for both cosine tilts.
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 5)``.
+
+      The magnitude columns are the sum of the two components'
+      :math:`\partial \ln N/\partial(\mu_\chi, \sigma_\chi)`. The tilt columns
+      differentiate the *joint* mixture, so each picks up both terms of the
+      product rule:
+
+      .. math::
+
+         \frac{\partial \ln \pi}{\partial \mu_t}
+           = \frac{\xi\,N_1 N_2\left(\partial_{\mu_t}\ln N_1
+                                   + \partial_{\mu_t}\ln N_2\right)}{\pi},
+         \qquad
+         \frac{\partial \ln \pi}{\partial \xi}
+           = \frac{N_1 N_2 - (1-t_{\min})^{-2}}{\pi}.
+
+
+
+.. py:class:: MadauDickinsonRedshift(maximum_redshift=10.0, cosmology=None, fiducial=None, nodes=NORMALISATION_NODES)
+
+   Bases: :py:obj:`gwforge.GWForge.population_fisher.base.PopulationModel`
+
+
+   Merger-rate density following the Madau-Dickinson shape.
+
+   Usage
+   -----
+   >>> model = MadauDickinsonRedshift(maximum_redshift=10.0)
+   >>> model.log_prob({"redshift": z}, model.fiducial)
+   >>> model.score({"redshift": z})
+
+   .. attribute:: parameter_names
+
+      ``["gamma", "kappa", "z_peak"]`` -- the names
+      :class:`GWForge.population.redshift.Redshift` uses, so a generation
+      config and a Fisher config read the same.
+
+      :type: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: ['gamma', 'kappa', 'z_peak']
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['redshift']
+
+
+
+   .. py:attribute:: maximum_redshift
+
+
+   .. py:attribute:: cosmology
+      :value: None
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:attribute:: _log_measure_nodes
+
+
+   .. py:method:: log_shape(redshift, parameters)
+
+      ``ln psi(z)``: the Madau-Dickinson shape alone, without the measure.
+
+      Public because :mod:`GWForge.population_fisher.model` rebuilds
+      the measure at a trial cosmology and needs the shape on its own.
+
+      Includes the :math:`[1 + (1+z_p)^{-\kappa}]` factor that sets
+      :math:`\psi(0) = 1`. That factor is independent of :math:`z`, so it
+      multiplies the numerator and the normalisation alike and cancels from
+      ``log_prob`` identically -- which is why :meth:`shape_gradient` omits it.
+
+
+
+   .. py:method:: _log_normalisation(parameters)
+
+      ``ln Z``, the trapezoidal integral of the numerator over the support.
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: shape_gradient(redshift, parameters)
+
+      ``d ln psi / dLambda``, shape ``(n, 3)``.
+
+      Public for the same reason as :meth:`log_shape`.
+
+      With :math:`u = (1+z)/(1+z_p)` and :math:`r = u^\kappa`,
+      :math:`f = r/(1+r)`:
+
+      .. math::
+
+         \partial_\gamma = \ln(1+z), \quad
+         \partial_\kappa = -f \ln u, \quad
+         \partial_{z_p} = \frac{\kappa f}{1 + z_p}.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 3)``.
+
+      ``g(z) - E_p[g]``: the first term from the numerator, the second from
+      :math:`\partial_\Lambda \ln Z`, evaluated on the normalisation grid.
+
+
+
+.. py:class:: SpectralSirenModel(mass_model, redshift_model, spin_model=None, cosmology=None, cosmology_parameters=COSMOLOGY_PARAMETERS, nodes=None)
+
+   Bases: :py:obj:`gwforge.GWForge.population_fisher.base.PopulationModel`
+
+
+   Source-frame population observed in the detector frame, cosmology free.
+
+   Usage
+   -----
+   >>> model = SpectralSirenModel(mass_model, redshift_model, spin_model)
+   >>> model.score({"mass_1": m1_det, "mass_2": m2_det,
+   ...              "luminosity_distance": distance})
+
+   .. attribute:: parameter_names
+
+      Mass, then redshift, then spin, then the cosmology parameters.
+
+      :type: list of str
+
+   .. attribute:: maximum_redshift
+
+      Upper edge of the redshift support, taken from the redshift model.
+
+      :type: float
+
+
+   .. py:attribute:: mass_model
+
+
+   .. py:attribute:: redshift_model
+
+
+   .. py:attribute:: spin_model
+      :value: None
+
+
+
+   .. py:attribute:: cosmology_parameters
+      :value: ['H0', 'Om0', 'w0']
+
+
+
+   .. py:attribute:: maximum_redshift
+
+
+   .. py:attribute:: blocks
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: _cosmology_fiducial
+
+
+   .. py:attribute:: event_keys
+      :value: ['mass_1', 'mass_2', 'luminosity_distance']
+
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:property:: fiducial
+
+      Block fiducials plus the cosmology, merged live.
+
+      A property for the same reason as
+      :attr:`GWForge.population_fisher.base.JointPopulationModel.fiducial`:
+      the redshift block is always refitted after the model is built, and a
+      snapshot would send the Fisher back to the pre-fit point.
+
+
+   .. py:method:: _cosmology(parameters)
+
+      The trial cosmology, cosmology parameters taken from ``parameters``.
+
+
+
+   .. py:method:: _source_frame(events, cosmology)
+
+      ``(z, m_1^src, m_2^src)`` at a trial cosmology.
+
+
+
+   .. py:method:: _log_redshift_numerator(redshift, parameters, cosmology)
+
+      ``ln psi(z) + ln(dV_c/dz) - ln(1+z)``, the measure at the trial cosmology.
+
+
+
+   .. py:method:: _redshift_weights(parameters, cosmology)
+
+      Normalised ``p(z)`` on :attr:`nodes`, and its normalisation.
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, len(parameter_names))``.
+
+      The population columns are the source-frame scores evaluated at the
+      source-frame parameters the trial cosmology implies; the cosmology
+      columns are the chain rule in the module docstring.
+
+
+
+   .. py:method:: _cosmology_score(redshift, primary, secondary, parameters, cosmology)
+
+      The ``(H0, Om0, w0)`` columns; see the chain rule in the module docstring.
+
+
+
+   .. py:method:: _dlog_shape_dz(redshift, parameters)
+      :staticmethod:
+
+
+      :math:`\partial \ln\psi/\partial z = (\gamma - \kappa f)/(1+z)`.
+
+      With :math:`r = ((1+z)/(1+z_p))^{\kappa}` and :math:`f = r/(1+r)`.
+
+
+
+.. py:class:: PopulationFisherResult(parameter_names, fixed_parameters, fiducial, fisher, covariance, condition_number, n_events, n_total, scores, mean_score, degenerate)
+
+   Everything :func:`population_fisher` computed, and how to read it.
+
+   .. attribute:: parameter_names
+
+      Free hyper-parameters, in matrix order.
+
+      :type: list of str
+
+   .. attribute:: fixed_parameters
+
+      Hyper-parameters held fixed, excluded from the matrix.
+
+      :type: dict
+
+   .. attribute:: fiducial
+
+      Values the Fisher was evaluated at, free and fixed together.
+
+      :type: dict
+
+   .. attribute:: fisher
+
+      ``(n, n)`` Term-I Fisher matrix.
+
+      :type: numpy.ndarray
+
+   .. attribute:: covariance
+
+      Its inverse (or pseudo-inverse).
+
+      :type: numpy.ndarray
+
+   .. attribute:: sigma
+
+      Name to one-sigma marginalised uncertainty.
+
+      :type: dict
+
+   .. attribute:: condition_number
+
+
+
+      :type: float
+
+   .. attribute:: n_events
+
+      Events with finite scores, i.e. those that entered the sum.
+
+      :type: int
+
+   .. attribute:: n_total
+
+      Events offered, before the support and finiteness cuts.
+
+      :type: int
+
+   .. attribute:: scores
+
+      ``(n_events, n)`` raw, uncentred scores.
+
+      :type: numpy.ndarray
+
+   .. attribute:: mean_score
+
+      ``(n,)``; the Monte-Carlo estimate of ``d ln alpha / d Lambda``.
+
+      :type: numpy.ndarray
+
+   .. attribute:: degenerate
+
+      Free parameters whose centred score vanished.
+
+      :type: list of str
+
+
+   .. py:attribute:: parameter_names
+
+
+   .. py:attribute:: fixed_parameters
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: fisher
+
+
+   .. py:attribute:: covariance
+
+
+   .. py:attribute:: condition_number
+
+
+   .. py:attribute:: n_events
+
+
+   .. py:attribute:: n_total
+
+
+   .. py:attribute:: scores
+
+
+   .. py:attribute:: mean_score
+
+
+   .. py:attribute:: degenerate
+
+
+   .. py:attribute:: sigma
+
+
+   .. py:method:: from_npz(path)
+      :classmethod:
+
+
+      Reload a forecast that :file:`bin/gwforge_population_fisher` saved.
+
+      Comparing two networks, or redrawing a figure in a new style, should not
+      mean recomputing either forecast. The saved archive carries everything a
+      plot needs: the matrix, its covariance, the parameter names, the
+      fiducial values and the event counts.
+
+      The score matrix is *not* saved -- it is one row per detected event and
+      would dominate the file -- so the reloaded result has an empty
+      ``scores`` and ``mean_score``. Everything the plotting path touches is
+      present.
+
+      :param path: A ``.npz`` written by the CLI.
+      :type path: str
+
+      :rtype: PopulationFisherResult
+
+
+
+   .. py:method:: correlation_matrix()
+
+      Correlation matrix implied by :attr:`covariance`.
+
+
+
+   .. py:method:: scaled_to(n_events)
+
+      This forecast rescaled to a different number of detected events.
+
+      The Term-I Fisher is a sum over events, so it is proportional to
+      :math:`N_{\rm det}` in expectation and :math:`\sigma \propto
+      N_{\rm det}^{-1/2}`. Use this to turn a one-month catalogue into a
+      ten-year forecast without regenerating anything -- or, more usefully, to
+      state plainly that a headline number is a pure :math:`\sqrt{T}`
+      extrapolation rather than a computed one.
+
+      :param n_events:
+      :type n_events: int
+
+      :rtype: PopulationFisherResult
+
+
+
+   .. py:method:: summary()
+
+      A plain-text table of the forecast.
+
+      :rtype: str
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:function:: covariance_from_fisher(fisher, names=None, rcond=DEFAULT_RCOND)
+
+   Invert a Fisher matrix, falling back to a pseudo-inverse when it is singular.
+
+   The matrix is normalised by its diagonal before inversion -- the same trick
+   :func:`GWForge.fisher.matrix.covariance` uses -- because hyper-parameters
+   differ by many orders of magnitude in scale (``H0`` near 68, ``lam_1`` near
+   0.05) and the raw condition number is then dominated by units rather than by
+   degeneracy.
+
+   :param fisher:
+   :type fisher: numpy.ndarray
+   :param names: Used only to name parameters in the warning.
+   :type names: sequence of str or None
+   :param rcond:
+   :type rcond: float
+
+   :returns: ``(covariance, condition_number)``.
+   :rtype: tuple
+
+
+.. py:function:: population_fisher(model, events, free_parameters=None, fixed_parameters=None, parameters=None, method='auto', rcond=DEFAULT_RCOND, n_total=None)
+
+   Term-I population Fisher matrix for a detected catalogue.
+
+   :param model:
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param events: Source parameters of the **detected** events. They must be drawn from
+                  the population at ``parameters``, or the centred-score identity that
+                  supplies the selection term does not hold.
+   :type events: dict
+   :param free_parameters: Hyper-parameters to vary. Defaults to every name the model has that is
+                           not in ``fixed_parameters``.
+   :type free_parameters: sequence of str or None
+   :param fixed_parameters: Name to value, held fixed and excluded from the matrix.
+   :type fixed_parameters: dict or None
+   :param parameters: Fiducial point. Defaults to ``model.fiducial``.
+   :type parameters: dict or None
+   :param method: Passed to :meth:`~GWForge.population_fisher.base.PopulationModel.score`.
+   :type method: str
+   :param rcond: Pseudo-inverse threshold.
+   :type rcond: float
+   :param n_total: Events offered before cuts, for reporting. Defaults to ``len(events)``.
+   :type n_total: int or None
+
+   :rtype: PopulationFisherResult
+
+   :raises ValueError: If no parameters are free, or no event has a finite score.
+
+

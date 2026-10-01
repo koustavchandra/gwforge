@@ -1,0 +1,261 @@
+gwforge.GWForge.population_fisher.catalogue
+===========================================
+
+.. py:module:: gwforge.GWForge.population_fisher.catalogue
+
+.. autoapi-nested-parse::
+
+   Assemble a detected catalogue from GWForge population and SNR files.
+
+   The pipeline this consumes is the ordinary GWForge one:
+
+   .. code-block:: bash
+
+      gwforge_population   --config-file bgp.ini --output-file population.h5
+      gwforge_optimal_snr  --injection-file population.h5 --output-file snr.h5 \
+                           --ifos CE40 CE20 ET
+
+   ``gwforge_population`` writes the source parameters, ``gwforge_optimal_snr``
+   writes one ``{IFO}_optimal_snr`` column per detector plus the ``index`` of the
+   injection it came from. This module joins the two on that index, forms the
+   network SNR in quadrature, applies a threshold, and hands back the events dict
+   the population models expect.
+
+   Joining on ``index`` rather than on row order matters as soon as the SNR stage
+   is split across jobs with ``--start-index``/``--end-index``, which is the normal
+   way to run 30,000 sources. Older SNR files predate the column; those are joined
+   positionally and the overlap is checked against the injection file, which will
+   notice a misalignment rather than silently forecasting for the wrong sources.
+
+   What ``n_total`` is for
+   -----------------------
+
+   The Term-I Fisher is a sum over *detected* events, so its scale is
+   :math:`N_{\rm det}` and nothing else -- the total number of injections never
+   enters the matrix. It is carried anyway, because the detected fraction is the
+   first thing to look at when a forecast comes out surprising: a threshold that
+   admits 99% of a population is telling you something different from one that
+   admits 3%.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.catalogue.CATALOGUE_KEYS
+   gwforge.GWForge.population_fisher.catalogue._ALIGNMENT_KEYS
+   gwforge.GWForge.population_fisher.catalogue._ALIGNMENT_TOLERANCE
+   gwforge.GWForge.population_fisher.catalogue.TRIANGULAR_ARMS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.catalogue.Catalogue
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.catalogue.expand_detectors
+   gwforge.GWForge.population_fisher.catalogue._read
+   gwforge.GWForge.population_fisher.catalogue.network_snr_from
+   gwforge.GWForge.population_fisher.catalogue.derive_event_keys
+   gwforge.GWForge.population_fisher.catalogue.load_catalogue
+   gwforge.GWForge.population_fisher.catalogue.load_injections
+
+
+Module Contents
+---------------
+
+.. py:data:: CATALOGUE_KEYS
+   :value: ('mass_1_source', 'mass_2_source', 'mass_1', 'mass_2', 'redshift', 'luminosity_distance', 'a_1',...
+
+
+.. py:data:: _ALIGNMENT_KEYS
+   :value: ('mass_1', 'luminosity_distance')
+
+
+.. py:data:: _ALIGNMENT_TOLERANCE
+   :value: 1e-06
+
+
+.. py:data:: TRIANGULAR_ARMS
+
+.. py:class:: Catalogue(events, network_snr, detectors, snr_threshold, n_total, n_with_snr)
+
+   A detected catalogue, and the counts that describe how it was cut.
+
+   .. attribute:: events
+
+      Source parameters of the detected events, plus derived ``mass_ratio``
+      and ``cos_tilt_1``/``cos_tilt_2`` where the inputs allow.
+
+      :type: dict
+
+   .. attribute:: network_snr
+
+      Network optimal SNR of the detected events.
+
+      :type: numpy.ndarray
+
+   .. attribute:: detectors
+
+      Detector columns that went into the network SNR.
+
+      :type: list of str
+
+   .. attribute:: snr_threshold
+
+
+
+      :type: float
+
+   .. attribute:: n_total
+
+      Injections in the population file.
+
+      :type: int
+
+   .. attribute:: n_with_snr
+
+      Injections the SNR stage actually covered.
+
+      :type: int
+
+   .. attribute:: n_detected
+
+      Injections above threshold. GWForge applies no duty cycle, so this is
+      also the analysis sample.
+
+      :type: int
+
+
+   .. py:attribute:: events
+
+
+   .. py:attribute:: network_snr
+
+
+   .. py:attribute:: detectors
+
+
+   .. py:attribute:: snr_threshold
+
+
+   .. py:attribute:: n_total
+
+
+   .. py:attribute:: n_with_snr
+
+
+   .. py:attribute:: n_detected
+
+
+   .. py:property:: detected_fraction
+
+      Fraction of the SNR-covered injections that passed the threshold.
+
+
+   .. py:method:: summary()
+
+      A plain-text description of the cuts.
+
+      :rtype: str
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:function:: expand_detectors(detectors)
+
+   Expand triangular detectors into the arm names the SNR file uses.
+
+   ``["CE40", "ET"]`` becomes ``["CE40", "ET1", "ET2", "ET3"]``, matching what
+   ``gwforge_optimal_snr`` writes.
+
+   :param detectors:
+   :type detectors: sequence of str
+
+   :rtype: list of str
+
+
+.. py:function:: _read(path, keys=None)
+
+   Read one-dimensional datasets from an HDF5 file into a dict.
+
+
+.. py:function:: network_snr_from(snr_data, detectors=None)
+
+   Quadrature sum of the per-detector optimal SNRs.
+
+   :param snr_data: As written by ``gwforge_optimal_snr``.
+   :type snr_data: dict
+   :param detectors: Detector names (triangles already expanded). Defaults to every
+                     ``*_optimal_snr`` column in the file.
+   :type detectors: sequence of str or None
+
+   :returns: ``(network_snr, detectors_used)``.
+   :rtype: tuple
+
+   :raises KeyError: If a requested detector has no column.
+
+
+.. py:function:: derive_event_keys(events)
+
+   Add the parameters the population models want but the file does not store.
+
+   ``mass_ratio`` from the component masses, and ``cos_tilt_i`` from the tilts.
+   Both are cheap and both are what a model would otherwise recompute per call.
+
+   :param events: Modified in place and returned.
+   :type events: dict
+
+   :rtype: dict
+
+
+.. py:function:: load_catalogue(population_file, snr_file, snr_threshold=10.0, detectors=None, keys=CATALOGUE_KEYS)
+
+   Join a population file to its SNR file and cut on network SNR.
+
+   :param population_file: HDF5 from ``gwforge_population``.
+   :type population_file: str
+   :param snr_file: HDF5 from ``gwforge_optimal_snr``.
+   :type snr_file: str
+   :param snr_threshold: Network optimal-SNR threshold for detection.
+   :type snr_threshold: float
+   :param detectors: Detectors to sum. ``"ET"`` is expanded to its three arms. Defaults to
+                     every detector in the SNR file.
+   :type detectors: sequence of str or None
+   :param keys: Source parameters to carry over.
+   :type keys: sequence of str
+
+   :rtype: Catalogue
+
+   :raises ValueError: If the two files cannot be aligned, or nothing passes the threshold.
+
+
+.. py:function:: load_injections(population_file, keys=CATALOGUE_KEYS)
+
+   Every injection, detected or not, as an events dict.
+
+   This is what the maximum-likelihood fits in
+   :mod:`GWForge.population_fisher.fit` run on: the fiducial hyper-parameters
+   describe the *astrophysical* population, so they are fitted to what was
+   drawn, not to what was detected.
+
+   :param population_file:
+   :type population_file: str
+   :param keys:
+   :type keys: sequence of str
+
+   :rtype: dict
+
+

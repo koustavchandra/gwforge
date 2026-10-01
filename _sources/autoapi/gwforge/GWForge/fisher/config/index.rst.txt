@@ -1,0 +1,173 @@
+gwforge.GWForge.fisher.config
+=============================
+
+.. py:module:: gwforge.GWForge.fisher.config
+
+.. autoapi-nested-parse::
+
+   Configuration handling for ``gwforge_fisher``.
+
+   Kept out of the executable so the parsing is importable and testable, and so the
+   CLI stays a thin driver like the other ``bin/`` scripts.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.config.SOURCE_MODELS
+   gwforge.GWForge.fisher.config.PARAMETER_CONVERSIONS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.config._optional_source_model
+   gwforge.GWForge.fisher.config.parse_collection
+   gwforge.GWForge.fisher.config.read_injections
+   gwforge.GWForge.fisher.config._read_injection_file
+   gwforge.GWForge.fisher.config.waveform_settings
+   gwforge.GWForge.fisher.config.fisher_settings
+   gwforge.GWForge.fisher.config.prior_settings
+   gwforge.GWForge.fisher.config._aligned_spin
+   gwforge.GWForge.fisher.config.segment_duration
+
+
+Module Contents
+---------------
+
+.. py:function:: _optional_source_model(module_name, attribute)
+
+   Import a source model from an optional package, or None if absent.
+
+
+.. py:data:: SOURCE_MODELS
+
+.. py:data:: PARAMETER_CONVERSIONS
+
+.. py:function:: parse_collection(config, section, option, fallback=None)
+
+   Read a list or dict written with single quotes from an ini file.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+   :param option:
+   :type option: str
+   :param fallback: Returned when the option is absent or empty.
+   :type fallback: object or None
+
+   :rtype: object
+
+
+.. py:function:: read_injections(config, section='Injection_Parameters')
+
+   Collect the sources to forecast.
+
+   Accepts either parameters written inline in the configuration, or an
+   ``injection-file`` pointing at a ``gwforge_population`` HDF5, optionally
+   sliced with ``start-index`` and ``end-index``.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+
+   :returns: One dict of parameters per source.
+   :rtype: list of dict
+
+   :raises ValueError: If the section is missing or defines no source.
+
+
+.. py:function:: _read_injection_file(path, start=0, end=None)
+
+   Read a ``gwforge_population`` HDF5 into a list of parameter dicts.
+
+
+.. py:function:: waveform_settings(config, section='Waveform_Generator')
+
+   Waveform arguments, source model and parameter conversion.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+
+   :returns: With keys ``waveform_arguments``, ``frequency_domain_source_model``,
+             ``parameter_conversion`` and ``minimum_frequency``.
+   :rtype: dict
+
+   :raises ValueError: If the named source model is unknown or unavailable in this bilby.
+
+
+.. py:function:: fisher_settings(config, section='Fisher')
+
+   Read the ``[Fisher]`` section.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+
+   :returns: With keys ``order``, ``earth_rotation``, ``finite_size``,
+             ``parameters``, ``step_sizes``, ``calibrate`` and ``target_change``.
+   :rtype: dict
+
+
+.. py:function:: prior_settings(config, order, section='Priors')
+
+   Read the ``[Priors]`` section and enforce the order-dependent rule.
+
+   Order 1 is a closed-form covariance and needs no prior; order 2 samples a
+   truncated Taylor expansion, which is only meaningful inside bounds, so a
+   prior file is required there.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param order: Expansion order, from :func:`fisher_settings`.
+   :type order: int
+   :param section:
+   :type section: str
+
+   :returns: With keys ``prior_file`` and ``enforce_physicality``.
+   :rtype: dict
+
+   :raises ValueError: If ``order >= 2`` and no ``prior-file`` is given.
+
+
+.. py:function:: _aligned_spin(parameters, component)
+
+   Aligned spin component, however the parameters happen to spell it.
+
+   ``convert_to_lal_binary_black_hole_parameters`` produces ``a_1`` and
+   ``cos_tilt_1`` rather than ``spin_1z``, so reading ``spin_1z`` alone
+   silently treats every binary as non-spinning and shortens the estimated
+   duration.
+
+
+.. py:function:: segment_duration(parameters, minimum_frequency, approximant, maximum=None)
+
+   Segment length long enough to hold the signal.
+
+   Getting this wrong is not a subtle error: a segment shorter than the inspiral wraps it, and the
+   resulting derivatives are meaningless.
+
+   :param parameters: Source parameters; needs component masses and aligned spins, which are
+                      derived from whatever mass parametrisation is present.
+   :type parameters: dict
+   :param minimum_frequency: Waveform starting frequency in Hz.
+   :type minimum_frequency: float
+   :param approximant:
+   :type approximant: str
+   :param maximum: Cap on the returned duration, in seconds.
+   :type maximum: float or None
+
+   :returns: Duration in seconds, rounded up to a power of two.
+   :rtype: float
+
+

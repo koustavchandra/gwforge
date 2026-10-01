@@ -1,0 +1,179 @@
+gwforge.GWForge.population_fisher.fit
+=====================================
+
+.. py:module:: gwforge.GWForge.population_fisher.fit
+
+.. autoapi-nested-parse::
+
+   Maximum-likelihood fits of a population model to a set of samples.
+
+   This exists for one necessary reason and one useful one.
+
+   **Necessary.** :class:`GWForge.population.redshift.Redshift` always convolves
+   the Madau-Dickinson star-formation rate with a formation-to-merger time-delay
+   distribution, so a population it generates is *not* distributed as
+   :math:`\psi_{\rm MD}(z)\,dV_c/dz/(1+z)`. Running a Fisher forecast for the
+   direct Madau-Dickinson form on such a catalogue at the generation
+   :math:`(\gamma, \kappa, z_p)` would be a forecast about the wrong fiducial
+   point. Fitting the direct form to the injected redshifts gives the *effective*
+   parameters that population actually corresponds to, and those are what the
+   Fisher should be evaluated at.
+
+   **Useful.** The mass and spin blocks need no such fit: ``gwforge_population``
+   draws them straight from the BGP and ``Default`` densities, so the fiducials are
+   the config values. Running the fit on them anyway is therefore a test with
+   teeth -- it must return the config values to within Monte-Carlo error, and if it
+   does not, the log density here disagrees with the sampler over there.
+
+   Both use the analytic gradient, so an eleven-parameter BGP fit to 30,000 samples
+   is seconds rather than minutes.
+
+   Simplex parameters
+   ------------------
+
+   ``lam_0`` and ``lam_1`` are mixture weights and must satisfy
+   :math:`\lambda_0, \lambda_1 \ge 0` and :math:`\lambda_0 + \lambda_1 \le 1`; a
+   box constraint cannot express the last one. They are therefore fitted through a
+   softmax of two unconstrained logits, which stays in the simplex by construction
+   and has no boundary for the optimiser to stick to. The chain rule for the
+   gradient is in :class:`_SimplexReparameterisation`.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.fit.SIMPLEX_PARAMETERS
+   gwforge.GWForge.population_fisher.fit.FIT_OPTIONS
+   gwforge.GWForge.population_fisher.fit.OUT_OF_SUPPORT_PENALTY
+   gwforge.GWForge.population_fisher.fit.DEFAULT_BOUNDS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.fit._SimplexReparameterisation
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.fit.fit_model
+   gwforge.GWForge.population_fisher.fit._restrict_to_support
+   gwforge.GWForge.population_fisher.fit.compare_to
+
+
+Module Contents
+---------------
+
+.. py:data:: SIMPLEX_PARAMETERS
+   :value: ('lam_0', 'lam_1')
+
+
+.. py:data:: FIT_OPTIONS
+
+.. py:data:: OUT_OF_SUPPORT_PENALTY
+   :value: 100000000.0
+
+
+.. py:data:: DEFAULT_BOUNDS
+
+.. py:class:: _SimplexReparameterisation
+
+   Softmax map from two logits to ``(lam_0, lam_1)``.
+
+   With :math:`w = (v_0, v_1, 0)` and :math:`\lambda_i = e^{w_i}/\sum_j e^{w_j}`,
+
+   .. math::
+
+      \frac{\partial \lambda_i}{\partial v_j}
+        = \lambda_i(\delta_{ij} - \lambda_j),
+
+   which is the standard softmax Jacobian restricted to the two free logits.
+   Fixing the third logit at zero removes the map's one redundant direction.
+
+
+   .. py:attribute:: names
+      :value: ('lam_0', 'lam_1')
+
+
+
+   .. py:method:: to_weights(logits)
+      :staticmethod:
+
+
+      Two logits to ``(lam_0, lam_1, lam_2)``.
+
+
+
+   .. py:method:: to_logits(lam_0, lam_1)
+      :staticmethod:
+
+
+      ``(lam_0, lam_1)`` back to two logits.
+
+
+
+   .. py:method:: jacobian(weights)
+      :staticmethod:
+
+
+      ``d(lam_0, lam_1)/d(logit_0, logit_1)``, a ``(2, 2)`` array.
+
+
+
+.. py:function:: fit_model(model, samples, free_parameters=None, start=None, bounds=None, fixed_parameters=None)
+
+   Fit a population model to samples by maximum likelihood.
+
+   :param model:
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param samples: Event parameters to fit to. For a fiducial, these should be *all*
+                   injections, not just the detected ones: the population model describes
+                   the astrophysical population, and fitting to the detected subset would
+                   absorb the selection function into the hyper-parameters.
+   :type samples: dict
+   :param free_parameters: Defaults to every hyper-parameter not in ``fixed_parameters``.
+   :type free_parameters: sequence of str or None
+   :param start: Starting point. Defaults to ``model.fiducial``.
+   :type start: dict or None
+   :param bounds: Name to ``(low, high)``. Merged onto :data:`DEFAULT_BOUNDS`.
+   :type bounds: dict or None
+   :param fixed_parameters:
+   :type fixed_parameters: dict or None
+
+   :returns: The fitted values, merged onto the starting point, with the keys
+             ``"_success"``, ``"_message"`` and ``"_mean_log_prob"`` describing the
+             optimisation.
+   :rtype: dict
+
+
+.. py:function:: _restrict_to_support(model, samples, parameters)
+
+   Drop samples the model gives zero probability at ``parameters``.
+
+   :returns: ``(samples, n_dropped)``. ``samples`` is the original object when
+             nothing was dropped.
+   :rtype: tuple
+
+
+.. py:function:: compare_to(fitted, reference, names)
+
+   A plain-text table of fitted values against the values used to generate.
+
+   :param fitted:
+   :type fitted: dict
+   :param reference:
+   :type reference: dict
+   :param names:
+   :type names: sequence of str
+
+   :rtype: str
+
+

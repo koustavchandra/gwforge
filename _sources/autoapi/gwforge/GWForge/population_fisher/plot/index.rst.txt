@@ -1,0 +1,187 @@
+gwforge.GWForge.population_fisher.plot
+======================================
+
+.. py:module:: gwforge.GWForge.population_fisher.plot
+
+.. autoapi-nested-parse::
+
+   Figures for population Fisher forecasts.
+
+   Two kinds.
+
+   The **corner** is the covariance itself: a Fisher forecast is a Gaussian, so the
+   way to draw it is to realise that Gaussian and hand the samples to
+   :func:`GWForge.plotting.corner_plot`, which is where the style, the palettes and
+   the contour machinery live.
+
+   The **reconstruction** plots are the more useful ones. A table of sigmas says how
+   well each hyper-parameter is pinned; a band on :math:`\pi(m_1)` or :math:`p(z)`
+   says what that means for the distribution anyone actually cares about, and it is
+   where a degeneracy shows up as a band that is narrow everywhere the parameters
+   are correlated and wide where they are not. Both overlay the injected histogram,
+   which is also the quickest way to catch a fiducial that was fitted badly.
+
+   Everything here draws inside ``matplotlib.rc_context`` so that importing this
+   module, or calling anything in it, leaves the caller's matplotlib configuration
+   alone.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.plot.LVK_COLOUR
+   gwforge.GWForge.population_fisher.plot.XG_COLOUR
+   gwforge.GWForge.population_fisher.plot.CREDIBLE_LEVEL
+   gwforge.GWForge.population_fisher.plot.CONTOUR_LEVELS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.plot.samples_from_covariance
+   gwforge.GWForge.population_fisher.plot.labels_for
+   gwforge.GWForge.population_fisher.plot.corner_plot
+   gwforge.GWForge.population_fisher.plot.plot_mass_distribution
+   gwforge.GWForge.population_fisher.plot.plot_redshift_distribution
+
+
+Module Contents
+---------------
+
+.. py:function:: samples_from_covariance(mean, covariance, size=200000, seed=None)
+
+   Draw from the multivariate normal a Fisher matrix describes.
+
+   :param mean: Fiducial parameter values.
+   :type mean: array_like
+   :param covariance: ``(n, n)`` covariance matrix.
+   :type covariance: array_like
+   :param size: Number of samples.
+   :type size: int
+   :param seed: Seed for reproducibility.
+   :type seed: int or None
+
+   :returns: ``(size, n)`` samples.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Notes
+
+   A Fisher covariance can pick up tiny negative eigenvalues from rounding when
+   the matrix is poorly conditioned, which makes the normal undrawable. Those
+   are clipped to zero with a warning; a genuinely indefinite covariance means
+   the forecast itself is not trustworthy.
+
+
+.. py:data:: LVK_COLOUR
+   :value: '#d0587e'
+
+
+.. py:data:: XG_COLOUR
+   :value: '#009392'
+
+
+.. py:function:: labels_for(parameters)
+
+   LaTeX labels for parameter names, falling back to the escaped raw name.
+
+   The fallback escapes underscores so mathtext does not read them as
+   subscripts and silently mangle the label.
+
+   :param parameters:
+   :type parameters: sequence of str
+
+   :rtype: list of str
+
+
+.. py:data:: CREDIBLE_LEVEL
+   :value: 0.9
+
+
+.. py:data:: CONTOUR_LEVELS
+   :value: (0.67, 0.9)
+
+
+.. py:function:: corner_plot(results, save=None, title=None, seed=None, parameters=None, colours=None, palette_name='tealrose')
+
+   Corner plot of one or more population Fisher forecasts, overlaid.
+
+   :param results: ``(label, PopulationFisherResult)`` pairs. Every result must expose the
+                   same free parameters, so that overlaying them compares like with like.
+   :type results: sequence of tuple
+   :param save: Path to write to. The figure is closed after saving.
+   :type save: str or None
+   :param title:
+   :type title: str or None
+   :param seed: Each dataset is drawn with a **freshly seeded** generator, so they share
+                the same underlying standard normals and the contours nest visually
+                instead of jittering independently against each other.
+   :type seed: int or None
+   :param parameters: Restrict the plot to these. Drawn from the *marginal* of the full
+                      covariance, so the contours are marginalised, not the conditional ones a
+                      re-fit over a subset would give. Defaults to all of them, which is
+                      unreadable beyond about eight.
+   :type parameters: sequence of str or None
+   :param colours: One per dataset. Defaults to the palette's cycle, which starts
+                   teal/rose.
+   :type colours: sequence of str or None
+   :param palette_name: ``"tealrose"`` or ``"okabe-ito"``.
+   :type palette_name: str
+
+   :rtype: matplotlib.figure.Figure
+
+   :raises ValueError: If the results do not share their parameter list, or a requested
+       parameter is not among them.
+
+
+.. py:function:: plot_mass_distribution(model, result, injections=None, save=None, size=BAND_DRAWS, seed=None, colour=XG_COLOUR)
+
+   Reconstructed primary-mass distribution with a credible band.
+
+   :param model:
+   :type model: GWForge.population_fisher.model.BrokenPowerLawTwoPeakMass
+   :param result:
+   :type result: GWForge.population_fisher.population_fisher_term_I.PopulationFisherResult
+   :param injections: ``mass_1_source`` of the injections, drawn as a histogram behind the
+                      band.
+   :type injections: array_like or None
+   :param save:
+   :type save: str or None
+   :param size:
+   :type size: int
+   :param seed:
+   :type seed: int or None
+   :param colour: Band and median colour. Defaults to the XG teal; pass
+                  :data:`GWForge.plotting.LVK_COLOUR` for a 2G network.
+   :type colour: str
+
+   :rtype: matplotlib.figure.Figure
+
+
+.. py:function:: plot_redshift_distribution(model, result, injections=None, save=None, size=BAND_DRAWS, seed=None, colour=XG_COLOUR)
+
+   Reconstructed merger-rate redshift distribution with a credible band.
+
+   :param model:
+   :type model: GWForge.population_fisher.model.MadauDickinsonRedshift
+   :param result:
+   :type result: GWForge.population_fisher.population_fisher_term_I.PopulationFisherResult
+   :param injections: Injected redshifts, drawn as a histogram behind the band.
+   :type injections: array_like or None
+   :param save:
+   :type save: str or None
+   :param size:
+   :type size: int
+   :param seed:
+   :type seed: int or None
+   :param colour: Band and median colour. Defaults to the XG teal; pass
+                  :data:`GWForge.plotting.LVK_COLOUR` for a 2G network.
+   :type colour: str
+
+   :rtype: matplotlib.figure.Figure
+
+

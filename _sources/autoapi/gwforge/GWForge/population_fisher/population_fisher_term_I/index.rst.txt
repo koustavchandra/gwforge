@@ -1,0 +1,344 @@
+gwforge.GWForge.population_fisher.population_fisher_term_I
+==========================================================
+
+.. py:module:: gwforge.GWForge.population_fisher.population_fisher_term_I
+
+.. autoapi-nested-parse::
+
+   The Term-I population Fisher matrix.
+
+   Gair, Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
+   expand the hyper-parameter Fisher into five terms. This module implements the
+   first, which dominates whenever per-event measurement uncertainties are small
+   compared with the width of the population distribution -- the regime XG
+   detectors put most sources in.
+
+   For :math:`N_{\rm det}` detected events :math:`\theta_k`,
+
+   .. math::
+
+      s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}{\partial \Lambda^i},
+      \qquad
+      \langle s \rangle^i = \frac{1}{N_{\rm det}}\sum_k s_k^i,
+      \qquad
+      \Gamma^{ij} = \sum_k \big(s_k^i - \langle s\rangle^i\big)
+                           \big(s_k^j - \langle s\rangle^j\big),
+
+   and :math:`\Sigma = \Gamma^{-1}`.
+
+   Where the selection function went
+   ---------------------------------
+
+   Not away -- it is never *evaluated*, which is a different thing. Term I is an
+   expectation under the **detected** density, so :math:`p_{\rm det}` is in it
+   twice over: as the measure, and through the detectable fraction
+   :math:`\alpha(\Lambda)`. Two facts collapse both into the centred sum above.
+
+   First, :math:`p_{\rm det}(\theta)` carries no hyper-parameter, so it drops from
+   the score. Second, the detected catalogue is itself a fair Monte-Carlo draw from
+   :math:`p_{\rm det}(\theta) p(\theta|\Lambda)/\alpha(\Lambda)`, so
+
+   .. math::
+
+      \frac{\partial \ln \alpha}{\partial \Lambda^i}
+        = \int p_{\rm det}(\theta)\,\frac{p(\theta|\Lambda)}{\alpha(\Lambda)}\,
+          \frac{\partial \ln p}{\partial \Lambda^i}\,d\theta
+        = \mathbb{E}_{\rm det}\!\left[s^i\right],
+
+   which the sample mean estimates. So there is no separate selection integral to
+   evaluate, no injection reweighting and no rate normalisation -- but the
+   selection is still doing work, carried entirely by *which events are in the
+   sum*. The SNR threshold is an input to the forecast, not a preprocessing step:
+   change it and :math:`\Gamma` changes. The absolute scale is set by how many
+   events were detected, and every :math:`\sigma` therefore scales as
+   :math:`1/\sqrt{T_{\rm obs}}`.
+
+   ``validation/population_detection_fraction.py`` reports what a given threshold
+   removes. :math:`p_{\rm det}` reappears explicitly at higher order -- as
+   :math:`\partial_\theta \ln p_{\rm det}` in Gair's :math:`\Gamma_4` -- which is
+   one reason this module stops at Term I.
+
+   Two consequences worth knowing. First, any :math:`\Lambda`-dependent but
+   *event-independent* normalisation cancels identically under centring, so a model
+   that forgets one still gives the right Fisher (it will not give the right
+   ``log_prob``, which is why the models here compute it anyway). Second, the
+   identity is exact only if :math:`p_{\rm det}` carries no hyper-parameter -- the
+   reason :mod:`GWForge.population_fisher.model` builds its density in the
+   detector frame rather than pushing events to the source frame at a trial
+   cosmology.
+
+   Degenerate directions
+   ---------------------
+
+   A parameter whose score is the *same number* for every event -- a hard mass
+   cutoff, in the interior of a power law -- has an identically zero centred score,
+   so its Fisher row and column vanish and the matrix is singular. That is a
+   statement about the model, not a numerical accident: within Term I such a
+   parameter is unmeasurable. :func:`population_fisher` detects it, names it, and
+   falls back to a pseudo-inverse rather than returning a plausible-looking number.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.population_fisher_term_I.CONDITION_NUMBER_WARNING
+   gwforge.GWForge.population_fisher.population_fisher_term_I.DEFAULT_RCOND
+   gwforge.GWForge.population_fisher.population_fisher_term_I.DEGENERACY_THRESHOLD
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.population_fisher_term_I.PopulationFisherResult
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.population_fisher.population_fisher_term_I.covariance_from_fisher
+   gwforge.GWForge.population_fisher.population_fisher_term_I.population_fisher
+
+
+Module Contents
+---------------
+
+.. py:data:: CONDITION_NUMBER_WARNING
+   :value: 100000000000000.0
+
+
+.. py:data:: DEFAULT_RCOND
+   :value: 1e-12
+
+
+.. py:data:: DEGENERACY_THRESHOLD
+   :value: 1e-10
+
+
+.. py:class:: PopulationFisherResult(parameter_names, fixed_parameters, fiducial, fisher, covariance, condition_number, n_events, n_total, scores, mean_score, degenerate)
+
+   Everything :func:`population_fisher` computed, and how to read it.
+
+   .. attribute:: parameter_names
+
+      Free hyper-parameters, in matrix order.
+
+      :type: list of str
+
+   .. attribute:: fixed_parameters
+
+      Hyper-parameters held fixed, excluded from the matrix.
+
+      :type: dict
+
+   .. attribute:: fiducial
+
+      Values the Fisher was evaluated at, free and fixed together.
+
+      :type: dict
+
+   .. attribute:: fisher
+
+      ``(n, n)`` Term-I Fisher matrix.
+
+      :type: numpy.ndarray
+
+   .. attribute:: covariance
+
+      Its inverse (or pseudo-inverse).
+
+      :type: numpy.ndarray
+
+   .. attribute:: sigma
+
+      Name to one-sigma marginalised uncertainty.
+
+      :type: dict
+
+   .. attribute:: condition_number
+
+
+
+      :type: float
+
+   .. attribute:: n_events
+
+      Events with finite scores, i.e. those that entered the sum.
+
+      :type: int
+
+   .. attribute:: n_total
+
+      Events offered, before the support and finiteness cuts.
+
+      :type: int
+
+   .. attribute:: scores
+
+      ``(n_events, n)`` raw, uncentred scores.
+
+      :type: numpy.ndarray
+
+   .. attribute:: mean_score
+
+      ``(n,)``; the Monte-Carlo estimate of ``d ln alpha / d Lambda``.
+
+      :type: numpy.ndarray
+
+   .. attribute:: degenerate
+
+      Free parameters whose centred score vanished.
+
+      :type: list of str
+
+
+   .. py:attribute:: parameter_names
+
+
+   .. py:attribute:: fixed_parameters
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: fisher
+
+
+   .. py:attribute:: covariance
+
+
+   .. py:attribute:: condition_number
+
+
+   .. py:attribute:: n_events
+
+
+   .. py:attribute:: n_total
+
+
+   .. py:attribute:: scores
+
+
+   .. py:attribute:: mean_score
+
+
+   .. py:attribute:: degenerate
+
+
+   .. py:attribute:: sigma
+
+
+   .. py:method:: from_npz(path)
+      :classmethod:
+
+
+      Reload a forecast that :file:`bin/gwforge_population_fisher` saved.
+
+      Comparing two networks, or redrawing a figure in a new style, should not
+      mean recomputing either forecast. The saved archive carries everything a
+      plot needs: the matrix, its covariance, the parameter names, the
+      fiducial values and the event counts.
+
+      The score matrix is *not* saved -- it is one row per detected event and
+      would dominate the file -- so the reloaded result has an empty
+      ``scores`` and ``mean_score``. Everything the plotting path touches is
+      present.
+
+      :param path: A ``.npz`` written by the CLI.
+      :type path: str
+
+      :rtype: PopulationFisherResult
+
+
+
+   .. py:method:: correlation_matrix()
+
+      Correlation matrix implied by :attr:`covariance`.
+
+
+
+   .. py:method:: scaled_to(n_events)
+
+      This forecast rescaled to a different number of detected events.
+
+      The Term-I Fisher is a sum over events, so it is proportional to
+      :math:`N_{\rm det}` in expectation and :math:`\sigma \propto
+      N_{\rm det}^{-1/2}`. Use this to turn a one-month catalogue into a
+      ten-year forecast without regenerating anything -- or, more usefully, to
+      state plainly that a headline number is a pure :math:`\sqrt{T}`
+      extrapolation rather than a computed one.
+
+      :param n_events:
+      :type n_events: int
+
+      :rtype: PopulationFisherResult
+
+
+
+   .. py:method:: summary()
+
+      A plain-text table of the forecast.
+
+      :rtype: str
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:function:: covariance_from_fisher(fisher, names=None, rcond=DEFAULT_RCOND)
+
+   Invert a Fisher matrix, falling back to a pseudo-inverse when it is singular.
+
+   The matrix is normalised by its diagonal before inversion -- the same trick
+   :func:`GWForge.fisher.matrix.covariance` uses -- because hyper-parameters
+   differ by many orders of magnitude in scale (``H0`` near 68, ``lam_1`` near
+   0.05) and the raw condition number is then dominated by units rather than by
+   degeneracy.
+
+   :param fisher:
+   :type fisher: numpy.ndarray
+   :param names: Used only to name parameters in the warning.
+   :type names: sequence of str or None
+   :param rcond:
+   :type rcond: float
+
+   :returns: ``(covariance, condition_number)``.
+   :rtype: tuple
+
+
+.. py:function:: population_fisher(model, events, free_parameters=None, fixed_parameters=None, parameters=None, method='auto', rcond=DEFAULT_RCOND, n_total=None)
+
+   Term-I population Fisher matrix for a detected catalogue.
+
+   :param model:
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param events: Source parameters of the **detected** events. They must be drawn from
+                  the population at ``parameters``, or the centred-score identity that
+                  supplies the selection term does not hold.
+   :type events: dict
+   :param free_parameters: Hyper-parameters to vary. Defaults to every name the model has that is
+                           not in ``fixed_parameters``.
+   :type free_parameters: sequence of str or None
+   :param fixed_parameters: Name to value, held fixed and excluded from the matrix.
+   :type fixed_parameters: dict or None
+   :param parameters: Fiducial point. Defaults to ``model.fiducial``.
+   :type parameters: dict or None
+   :param method: Passed to :meth:`~GWForge.population_fisher.base.PopulationModel.score`.
+   :type method: str
+   :param rcond: Pseudo-inverse threshold.
+   :type rcond: float
+   :param n_total: Events offered before cuts, for reporting. Defaults to ``len(events)``.
+   :type n_total: int or None
+
+   :rtype: PopulationFisherResult
+
+   :raises ValueError: If no parameters are free, or no event has a finite score.
+
+

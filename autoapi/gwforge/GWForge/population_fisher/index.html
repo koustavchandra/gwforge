@@ -1,0 +1,1951 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>gwforge.GWForge.population_fisher - GWForge 0.0.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">GWForge 0.0.dev1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">GWForge 0.0.dev1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation:</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../usage.html">Usage and Examples</a><input aria-label="Toggle navigation of Usage and Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../population.html">Simulating the source population</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../noise.html">Simulating the detector noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../inject.html">Injecting a signal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../antenna.html">Detector response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../fisher.html">Fisher and DALI Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../population_fisher.html">Population Fisher Forecasts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../workflow.html">A workflow for gwforge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../../_sources/autoapi/gwforge/GWForge/population_fisher/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-gwforge.GWForge.population_fisher">
+<span id="gwforge-gwforge-population-fisher"></span><h1>gwforge.GWForge.population_fisher<a class="headerlink" href="#module-gwforge.GWForge.population_fisher" title="Link to this heading">¶</a></h1>
+<p>Population (hyper-parameter) Fisher forecasting for GWForge.</p>
+<p>Where <code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.fisher</span></code> asks how well a network measures <em>one source</em>, this
+asks how well it measures the <em>population</em>: the shape of the mass function, the
+history of the merger rate, the spin distribution, and – through spectral
+sirens – the cosmology.</p>
+<p>The estimator is the first term of the hyper-parameter Fisher expansion of Gair,
+Antonelli &amp; Barbieri (<a class="reference external" href="https://arxiv.org/abs/2205.07893">arXiv:2205.07893</a> Eq. 21),</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Gamma^{ij} = \sum_{k\ \rm detected}
+  \big(s_k^i - \langle s\rangle^i\big)\big(s_k^j - \langle s\rangle^j\big),
+\qquad
+s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}{\partial \Lambda^i},\]</div>
+</div>
+<p>which is the small-measurement-error limit. The mean subtraction is the
+selection term, so there is no separate detection integral to evaluate and no
+rate normalisation to get right – see <code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.population_fisher_term_I</span></code>.</p>
+<section id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gwforge_population<span class="w">        </span>--config-file<span class="w"> </span>bgp-gwtc5.ini<span class="w"> </span>--output-file<span class="w"> </span>population.h5
+gwforge_optimal_snr<span class="w">       </span>--injection-file<span class="w"> </span>population.h5<span class="w"> </span>--output-file<span class="w"> </span>snr.h5<span class="w"> </span>--ifos<span class="w"> </span>CE40<span class="w"> </span>CE20<span class="w"> </span>ET
+gwforge_population_fisher<span class="w"> </span>--config-file<span class="w"> </span>mass_redshift.ini
+</pre></div>
+</div>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading">¶</a></h2>
+<p>All four live in <code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.model</span></code>. The densities are
+GWForge’s own, called directly rather than reimplemented:
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population._smoothed_mass</span></code> for the BGP mass model,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">GWForge.population.redshift.madau_dickinson_psi_of_z()</span></code> for the merger
+rate, and <code class="xref py py-func docutils literal notranslate"><span class="pre">GWForge.population.spin.truncated_normal()</span></code> for both halves of
+the <code class="docutils literal notranslate"><span class="pre">Default</span></code> spin model – so a forecast and the catalogue it runs on
+describe the same population by construction.</p>
+</section>
+<section id="derivatives">
+<h2>Derivatives<a class="headerlink" href="#derivatives" title="Link to this heading">¶</a></h2>
+<p>Analytic, everywhere, cosmology included – see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.base</span></code> for the two-tier policy and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.cosmology</span></code> for why differentiating under the integral beats
+finite-differencing the integral. Finite differences are the test oracle and the
+fallback for a model added later, not a production path; there is no autodiff
+tier and no JAX dependency.</p>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base/index.html">gwforge.GWForge.population_fisher.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="catalogue/index.html">gwforge.GWForge.population_fisher.catalogue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compare/index.html">gwforge.GWForge.population_fisher.compare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config/index.html">gwforge.GWForge.population_fisher.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit/index.html">gwforge.GWForge.population_fisher.fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model/index.html">gwforge.GWForge.population_fisher.model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot/index.html">gwforge.GWForge.population_fisher.plot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_fisher_term_I/index.html">gwforge.GWForge.population_fisher.population_fisher_term_I</a></li>
+</ul>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel" title="gwforge.GWForge.population_fisher.JointPopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JointPopulationModel</span></code></a></p></td>
+<td><p>Product of independent sub-models over disjoint event parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel" title="gwforge.GWForge.population_fisher.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PopulationModel</span></code></a></p></td>
+<td><p>Base class: a normalised density over event parameters, given hyper-parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue" title="gwforge.GWForge.population_fisher.Catalogue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Catalogue</span></code></a></p></td>
+<td><p>A detected catalogue, and the counts that describe how it was cut.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass" title="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass</span></code></a></p></td>
+<td><p>BGP primary mass and power-law mass ratio, with analytic scores.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin" title="gwforge.GWForge.population_fisher.DefaultSpin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultSpin</span></code></a></p></td>
+<td><p>GWTC-5.0 Default BBH spins: truncated-Gaussian magnitudes, mixture tilts.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift" title="gwforge.GWForge.population_fisher.MadauDickinsonRedshift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MadauDickinsonRedshift</span></code></a></p></td>
+<td><p>Merger-rate density following the Madau-Dickinson shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel" title="gwforge.GWForge.population_fisher.SpectralSirenModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectralSirenModel</span></code></a></p></td>
+<td><p>Source-frame population observed in the detector frame, cosmology free.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult" title="gwforge.GWForge.population_fisher.PopulationFisherResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PopulationFisherResult</span></code></a></p></td>
+<td><p>Everything <a class="reference internal" href="#gwforge.GWForge.population_fisher.population_fisher" title="gwforge.GWForge.population_fisher.population_fisher"><code class="xref py py-func docutils literal notranslate"><span class="pre">population_fisher()</span></code></a> computed, and how to read it.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.load_catalogue" title="gwforge.GWForge.population_fisher.load_catalogue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_catalogue</span></code></a>(population_file, snr_file[, ...])</p></td>
+<td><p>Join a population file to its SNR file and cut on network SNR.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.load_injections" title="gwforge.GWForge.population_fisher.load_injections"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_injections</span></code></a>(population_file[, keys])</p></td>
+<td><p>Every injection, detected or not, as an events dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.network_snr_from" title="gwforge.GWForge.population_fisher.network_snr_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">network_snr_from</span></code></a>(snr_data[, detectors])</p></td>
+<td><p>Quadrature sum of the per-detector optimal SNRs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.compare_to" title="gwforge.GWForge.population_fisher.compare_to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compare_to</span></code></a>(fitted, reference, names)</p></td>
+<td><p>A plain-text table of fitted values against the values used to generate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.fit_model" title="gwforge.GWForge.population_fisher.fit_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_model</span></code></a>(model, samples[, free_parameters, start, ...])</p></td>
+<td><p>Fit a population model to samples by maximum likelihood.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.covariance_from_fisher" title="gwforge.GWForge.population_fisher.covariance_from_fisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">covariance_from_fisher</span></code></a>(fisher[, names, rcond])</p></td>
+<td><p>Invert a Fisher matrix, falling back to a pseudo-inverse when it is singular.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.population_fisher" title="gwforge.GWForge.population_fisher.population_fisher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">population_fisher</span></code></a>(model, events[, free_parameters, ...])</p></td>
+<td><p>Term-I population Fisher matrix for a detected catalogue.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">JointPopulationModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#JointPopulationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel" title="gwforge.GWForge.population_fisher.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PopulationModel</span></code></a></p>
+<p>Product of independent sub-models over disjoint event parameters.</p>
+<p>The log density adds and the score columns concatenate, in the order the
+sub-models were given. Duplicate hyper-parameter names across sub-models are
+an error rather than a silent tie: two blocks sharing a name almost always
+means one of them was built with the wrong keyword.</p>
+<section id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">JointPopulationModel</span><span class="p">([</span><span class="n">mass_model</span><span class="p">,</span> <span class="n">redshift_model</span><span class="p">,</span> <span class="n">spin_model</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.models">
+<span class="sig-name descname"><span class="pre">models</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.models" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.event_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.fiducial">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.fiducial" title="Link to this definition">¶</a></dt>
+<dd><p>Sub-model fiducials, merged live.</p>
+<p>A property rather than a dict copied at construction: the fiducials of
+a block can be <em>refitted</em> after the joint model is built (see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.compare</span></code>, which the redshift block
+always needs), and a snapshot taken in <code class="docutils literal notranslate"><span class="pre">__init__</span></code> would silently send
+the Fisher back to the pre-fit point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#JointPopulationModel.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>Sum of the sub-model log densities.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#JointPopulationModel.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Horizontally stacked sub-model scores, <code class="docutils literal notranslate"><span class="pre">None</span></code> if any sub-model lacks one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.JointPopulationModel.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#JointPopulationModel.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.JointPopulationModel.score" title="Link to this definition">¶</a></dt>
+<dd><p>Per-sub-model dispatch, so one analytic block is not lost to another’s fallback.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">PopulationModel</span></span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel" title="Link to this definition">¶</a></dt>
+<dd><p>Base class: a normalised density over event parameters, given hyper-parameters.</p>
+<p>Subclasses must set <a class="reference internal" href="#id0" title="gwforge.GWForge.population_fisher.PopulationModel.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a>, <a class="reference internal" href="#id1" title="gwforge.GWForge.population_fisher.PopulationModel.fiducial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fiducial</span></code></a> and
+<a class="reference internal" href="#id2" title="gwforge.GWForge.population_fisher.PopulationModel.event_keys"><code class="xref py py-attr docutils literal notranslate"><span class="pre">event_keys</span></code></a>, and implement <a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.log_prob" title="gwforge.GWForge.population_fisher.PopulationModel.log_prob"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log_prob()</span></code></a>. Implementing
+<a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.analytic_score" title="gwforge.GWForge.population_fisher.PopulationModel.analytic_score"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analytic_score()</span></code></a> is strongly preferred but optional.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>Hyper-parameter names, in the order the score columns come out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.fiducial">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.fiducial" title="Link to this definition">¶</a></dt>
+<dd><p>Default hyper-parameter values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.event_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Keys the model requires in the <code class="docutils literal notranslate"><span class="pre">events</span></code> dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.log_prob">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>Log density of each event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>events</strong> (<em>dict</em>) – Arrays of event parameters, all the same length.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em>) – Hyper-parameter values; must cover <a class="reference internal" href="#id0" title="gwforge.GWForge.population_fisher.PopulationModel.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(n_events,)</span></code>. <code class="docutils literal notranslate"><span class="pre">-inf</span></code> outside the support.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form score, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if this model has none.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Shape <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">len(parameter_names))</span></code>, columns in
+<a class="reference internal" href="#id0" title="gwforge.GWForge.population_fisher.PopulationModel.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a> order.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.score" title="Link to this definition">¶</a></dt>
+<dd><p>Score of each event with respect to every hyper-parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>events</strong> (<em>dict</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em> or </em><em>None</em>) – Defaults to <a class="reference internal" href="#id1" title="gwforge.GWForge.population_fisher.PopulationModel.fiducial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fiducial</span></code></a>.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – One of <code class="xref py py-data docutils literal notranslate"><span class="pre">SCORE_METHODS</span></code>. <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> tries analytic, then falls
+back to finite differences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">len(parameter_names))</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel._finite_difference_score">
+<span class="sig-name descname"><span class="pre">_finite_difference_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel._finite_difference_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel._finite_difference_score" title="Link to this definition">¶</a></dt>
+<dd><p>Score by centred finite differences. The test oracle; see the module docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.to_vector">
+<span class="sig-name descname"><span class="pre">to_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.to_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.to_vector" title="Link to this definition">¶</a></dt>
+<dd><p>Hyper-parameter dict to array, in <a class="reference internal" href="#id0" title="gwforge.GWForge.population_fisher.PopulationModel.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a> order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.from_vector">
+<span class="sig-name descname"><span class="pre">from_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.from_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.from_vector" title="Link to this definition">¶</a></dt>
+<dd><p>Array back to a hyper-parameter dict, merged onto <code class="docutils literal notranslate"><span class="pre">parameters</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel.check_events">
+<span class="sig-name descname"><span class="pre">check_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel.check_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel.check_events" title="Link to this definition">¶</a></dt>
+<dd><p>Raise if <code class="docutils literal notranslate"><span class="pre">events</span></code> is missing a key this model needs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel._n_events">
+<span class="sig-name descname"><span class="pre">_n_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel._n_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel._n_events" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationModel._column_index">
+<span class="sig-name descname"><span class="pre">_column_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/base.html#PopulationModel._column_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationModel._column_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">Catalogue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_snr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_with_snr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#Catalogue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue" title="Link to this definition">¶</a></dt>
+<dd><p>A detected catalogue, and the counts that describe how it was cut.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.events">
+<span class="sig-name descname"><span class="pre">events</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.events" title="Link to this definition">¶</a></dt>
+<dd><p>Source parameters of the detected events, plus derived <code class="docutils literal notranslate"><span class="pre">mass_ratio</span></code>
+and <code class="docutils literal notranslate"><span class="pre">cos_tilt_1</span></code>/<code class="docutils literal notranslate"><span class="pre">cos_tilt_2</span></code> where the inputs allow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.network_snr">
+<span class="sig-name descname"><span class="pre">network_snr</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.network_snr" title="Link to this definition">¶</a></dt>
+<dd><p>Network optimal SNR of the detected events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.detectors">
+<span class="sig-name descname"><span class="pre">detectors</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.detectors" title="Link to this definition">¶</a></dt>
+<dd><p>Detector columns that went into the network SNR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.snr_threshold">
+<span class="sig-name descname"><span class="pre">snr_threshold</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.snr_threshold" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.n_total">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.n_total" title="Link to this definition">¶</a></dt>
+<dd><p>Injections in the population file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.n_with_snr">
+<span class="sig-name descname"><span class="pre">n_with_snr</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.n_with_snr" title="Link to this definition">¶</a></dt>
+<dd><p>Injections the SNR stage actually covered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.n_detected">
+<span class="sig-name descname"><span class="pre">n_detected</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.n_detected" title="Link to this definition">¶</a></dt>
+<dd><p>Injections above threshold. GWForge applies no duty cycle, so this is
+also the analysis sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">events</span></span><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">network_snr</span></span><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">detectors</span></span><a class="headerlink" href="#id5" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">snr_threshold</span></span><a class="headerlink" href="#id6" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#id7" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">n_with_snr</span></span><a class="headerlink" href="#id8" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">n_detected</span></span><a class="headerlink" href="#id9" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.detected_fraction">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">detected_fraction</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.detected_fraction" title="Link to this definition">¶</a></dt>
+<dd><p>Fraction of the SNR-covered injections that passed the threshold.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#Catalogue.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.summary" title="Link to this definition">¶</a></dt>
+<dd><p>A plain-text description of the cuts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.Catalogue.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#Catalogue.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.Catalogue.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.load_catalogue">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">load_catalogue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snr_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CATALOGUE_KEYS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#load_catalogue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.load_catalogue" title="Link to this definition">¶</a></dt>
+<dd><p>Join a population file to its SNR file and cut on network SNR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>population_file</strong> (<em>str</em>) – HDF5 from <code class="docutils literal notranslate"><span class="pre">gwforge_population</span></code>.</p></li>
+<li><p><strong>snr_file</strong> (<em>str</em>) – HDF5 from <code class="docutils literal notranslate"><span class="pre">gwforge_optimal_snr</span></code>.</p></li>
+<li><p><strong>snr_threshold</strong> (<em>float</em>) – Network optimal-SNR threshold for detection.</p></li>
+<li><p><strong>detectors</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Detectors to sum. <code class="docutils literal notranslate"><span class="pre">&quot;ET&quot;</span></code> is expanded to its three arms. Defaults to
+every detector in the SNR file.</p></li>
+<li><p><strong>keys</strong> (<em>sequence</em><em> of </em><em>str</em>) – Source parameters to carry over.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue" title="gwforge.GWForge.population_fisher.Catalogue">Catalogue</a></p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the two files cannot be aligned, or nothing passes the threshold.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.load_injections">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">load_injections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CATALOGUE_KEYS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#load_injections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.load_injections" title="Link to this definition">¶</a></dt>
+<dd><p>Every injection, detected or not, as an events dict.</p>
+<p>This is what the maximum-likelihood fits in
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.fit</span></code> run on: the fiducial hyper-parameters
+describe the <em>astrophysical</em> population, so they are fitted to what was
+drawn, not to what was detected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>population_file</strong> (<em>str</em>)</p></li>
+<li><p><strong>keys</strong> (<em>sequence</em><em> of </em><em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.network_snr_from">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">network_snr_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snr_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/catalogue.html#network_snr_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.network_snr_from" title="Link to this definition">¶</a></dt>
+<dd><p>Quadrature sum of the per-detector optimal SNRs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>snr_data</strong> (<em>dict</em>) – As written by <code class="docutils literal notranslate"><span class="pre">gwforge_optimal_snr</span></code>.</p></li>
+<li><p><strong>detectors</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Detector names (triangles already expanded). Defaults to every
+<code class="docutils literal notranslate"><span class="pre">*_optimal_snr</span></code> column in the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(network_snr,</span> <span class="pre">detectors_used)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If a requested detector has no column.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.compare_to">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">compare_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/fit.html#compare_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.compare_to" title="Link to this definition">¶</a></dt>
+<dd><p>A plain-text table of fitted values against the values used to generate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fitted</strong> (<em>dict</em>)</p></li>
+<li><p><strong>reference</strong> (<em>dict</em>)</p></li>
+<li><p><strong>names</strong> (<em>sequence</em><em> of </em><em>str</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.fit_model">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">fit_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/fit.html#fit_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.fit_model" title="Link to this definition">¶</a></dt>
+<dd><p>Fit a population model to samples by maximum likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><em>GWForge.population_fisher.base.PopulationModel</em></a>)</p></li>
+<li><p><strong>samples</strong> (<em>dict</em>) – Event parameters to fit to. For a fiducial, these should be <em>all</em>
+injections, not just the detected ones: the population model describes
+the astrophysical population, and fitting to the detected subset would
+absorb the selection function into the hyper-parameters.</p></li>
+<li><p><strong>free_parameters</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Defaults to every hyper-parameter not in <code class="docutils literal notranslate"><span class="pre">fixed_parameters</span></code>.</p></li>
+<li><p><strong>start</strong> (<em>dict</em><em> or </em><em>None</em>) – Starting point. Defaults to <code class="docutils literal notranslate"><span class="pre">model.fiducial</span></code>.</p></li>
+<li><p><strong>bounds</strong> (<em>dict</em><em> or </em><em>None</em>) – Name to <code class="docutils literal notranslate"><span class="pre">(low,</span> <span class="pre">high)</span></code>. Merged onto <code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_BOUNDS</span></code>.</p></li>
+<li><p><strong>fixed_parameters</strong> (<em>dict</em><em> or </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The fitted values, merged onto the starting point, with the keys
+<code class="docutils literal notranslate"><span class="pre">&quot;_success&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;_message&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;_mean_log_prob&quot;</span></code> describing the
+optimisation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">BrokenPowerLawTwoPeakMass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BGP_PARAMETERS['mmin']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BGP_PARAMETERS['m_high']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BGP_PARAMETERS['maximum_mass']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mmin_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BGP_PARAMETERS['mmin_2']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_m_2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">BGP_PARAMETERS['delta_m_2']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MASS_GRID_NODES</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gwforge.GWForge.population_fisher.base.PopulationModel</span></code></a></p>
+<p>BGP primary mass and power-law mass ratio, with analytic scores.</p>
+<section id="id10">
+<h3>Usage<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">BrokenPowerLawTwoPeakMass</span><span class="p">(</span><span class="n">mmin</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">m_high</span><span class="o">=</span><span class="mf">100.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">({</span><span class="s2">"mass_1_source"</span><span class="p">:</span> <span class="n">m1</span><span class="p">,</span> <span class="s2">"mass_ratio"</span><span class="p">:</span> <span class="n">q</span><span class="p">},</span> <span class="n">model</span><span class="o">.</span><span class="n">fiducial</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">({</span><span class="s2">"mass_1_source"</span><span class="p">:</span> <span class="n">m1</span><span class="p">,</span> <span class="s2">"mass_ratio"</span><span class="p">:</span> <span class="n">q</span><span class="p">})</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>The eleven free hyper-parameters, using
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GWForge.population.mass.Mass</span></code>’s spelling so that a generation
+config and a Fisher config read the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">mmin,</span> <span class="pre">m_high,</span> <span class="pre">maximum_mass</span></span></dt>
+<dd><p>Support parameters, fixed by construction. See the module docstring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['alpha_1',</span> <span class="pre">'alpha_2',</span> <span class="pre">'m_break',</span> <span class="pre">'lam_0',</span> <span class="pre">'lam_1',</span> <span class="pre">'mpp_1',</span> <span class="pre">'sigpp_1',</span> <span class="pre">'mpp_2',</span> <span class="pre">'sigpp_2',...</span></span><a class="headerlink" href="#id11" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['mass_1_source']</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.event_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin">
+<span class="sig-name descname"><span class="pre">mmin</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin_2">
+<span class="sig-name descname"><span class="pre">mmin_2</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin_2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.m_high">
+<span class="sig-name descname"><span class="pre">m_high</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.m_high" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.maximum_mass">
+<span class="sig-name descname"><span class="pre">maximum_mass</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.maximum_mass" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.fiducial">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.fiducial" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.delta_m_2">
+<span class="sig-name descname"><span class="pre">delta_m_2</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.delta_m_2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.grid">
+<span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._components">
+<span class="sig-name descname"><span class="pre">_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._components" title="Link to this definition">¶</a></dt>
+<dd><p>The three normalised mixture components and the taper, at <code class="docutils literal notranslate"><span class="pre">mass</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator">
+<span class="sig-name descname"><span class="pre">_primary_numerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._primary_numerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator" title="Link to this definition">¶</a></dt>
+<dd><p>Un-normalised <span class="math notranslate nohighlight">\(\pi(m_1)\)</span>: the mixture times the taper.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator_derivatives">
+<span class="sig-name descname"><span class="pre">_primary_numerator_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._primary_numerator_derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator_derivatives" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">d(numerator)/dLambda</span></code> at <code class="docutils literal notranslate"><span class="pre">mass</span></code>, as a dict of arrays.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._cumulative_secondary">
+<span class="sig-name descname"><span class="pre">_cumulative_secondary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._cumulative_secondary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._cumulative_secondary" title="Link to this definition">¶</a></dt>
+<dd><p>The cumulative secondary-mass integral and its derivatives.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[G(M) = \int_{m_{\min}}^{M} m_2^{\beta}\, S(m_2)\, dm_2,\]</div>
+</div>
+<p>so that <span class="math notranslate nohighlight">\(C(m_1) = m_1^{-(\beta+1)} G(m_1)\)</span> is the mass-ratio
+normalisation. Substituting <span class="math notranslate nohighlight">\(m_2 = m_1 q\)</span> turns one integral per
+event into one cumulative integral on the shared grid, interpolated –
+which is also how <code class="docutils literal notranslate"><span class="pre">_smoothed_mass._norm_p_q</span></code> does it, so the two agree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">{&quot;value&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;beta&quot;:</span> <span class="pre">...,</span> <span class="pre">&quot;delta_m&quot;:</span> <span class="pre">...}</span></code>, each a callable
+cubic-Hermite interpolant of the corresponding cumulative integral.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.dlog_prob_dmasses">
+<span class="sig-name descname"><span class="pre">dlog_prob_dmasses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass.dlog_prob_dmasses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.dlog_prob_dmasses" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(d</span> <span class="pre">ln</span> <span class="pre">p</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">m_1,</span> <span class="pre">d</span> <span class="pre">ln</span> <span class="pre">p</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">m_2)</span></code> at fixed hyper-parameters.</p>
+<p>Not needed by the Fisher itself – these are derivatives with respect to
+the <em>event</em> parameters, not the hyper-parameters. They are needed by
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.model</span></code>, where a trial cosmology
+moves the redshift assigned to a measured distance and so moves the
+source-frame masses:
+<span class="math notranslate nohighlight">\(\partial_\Lambda m^{\rm src} = -m^{\rm src}/(1+z)\cdot\partial_\Lambda z\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln p}{\partial m_1}
+  = \frac{\partial \ln(\text{mixture})}{\partial m_1}
+  + \frac{\partial \ln S(m_1)}{\partial m_1}
+  - \frac{m_1^{\beta} S(m_1)}{G(m_1)},\]</div>
+</div>
+<p>the last term because <span class="math notranslate nohighlight">\(m_1\)</span> is the upper limit of the mass-ratio
+normalisation <span class="math notranslate nohighlight">\(G\)</span>, and</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln p}{\partial m_2}
+  = \frac{\beta}{m_2} + \frac{\partial \ln S(m_2)}{\partial m_2}.\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">(d</span> <span class="pre">ln</span> <span class="pre">p</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">m_1,</span> <span class="pre">d</span> <span class="pre">ln</span> <span class="pre">p</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">m_2)</span></code>, <code class="docutils literal notranslate"><span class="pre">nan</span></code> outside the support.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple of numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._secondary_mass">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_secondary_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._secondary_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._secondary_mass" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">m_2</span></code> from either <code class="docutils literal notranslate"><span class="pre">mass_2_source</span></code> or <code class="docutils literal notranslate"><span class="pre">mass_ratio</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._support">
+<span class="sig-name descname"><span class="pre">_support</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass._support"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._support" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">GWForge.population_fisher.base.PopulationModel.log_prob()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#BrokenPowerLawTwoPeakMass.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form score, <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">11)</span></code>.</p>
+<p>Each column is the log-derivative of the numerator minus that of the
+normalisation,
+<span class="math notranslate nohighlight">\(\partial_\Lambda \ln(\text{numerator}) - \partial_\Lambda \ln Z\)</span>,
+for the primary mass, plus the mass-ratio
+contribution for the two parameters (<code class="docutils literal notranslate"><span class="pre">beta</span></code> and <code class="docutils literal notranslate"><span class="pre">delta_m</span></code>) that
+appear in both. <span class="math notranslate nohighlight">\(\partial_\Lambda Z\)</span> is the trapezoid of
+<span class="math notranslate nohighlight">\(\partial_\Lambda(\text{numerator})\)</span> on the <em>same</em> nodes that
+normalise <code class="docutils literal notranslate"><span class="pre">log_prob</span></code>, which is exact because the nodes do not move.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">DefaultSpin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_spin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_MAXIMUM_SPIN</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_cosine_tilt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_MINIMUM_COSINE_TILT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gwforge.GWForge.population_fisher.base.PopulationModel</span></code></a></p>
+<p>GWTC-5.0 Default BBH spins: truncated-Gaussian magnitudes, mixture tilts.</p>
+<section id="id12">
+<h3>Usage<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DefaultSpin</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">({</span><span class="s2">"a_1"</span><span class="p">:</span> <span class="n">a1</span><span class="p">,</span> <span class="s2">"a_2"</span><span class="p">:</span> <span class="n">a2</span><span class="p">,</span> <span class="s2">"tilt_1"</span><span class="p">:</span> <span class="n">t1</span><span class="p">,</span> <span class="s2">"tilt_2"</span><span class="p">:</span> <span class="n">t2</span><span class="p">},</span> <span class="n">model</span><span class="o">.</span><span class="n">fiducial</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">[&quot;mu_chi&quot;,</span> <span class="pre">&quot;sigma_chi&quot;,</span> <span class="pre">&quot;mu_t&quot;,</span> <span class="pre">&quot;sigma_t&quot;,</span> <span class="pre">&quot;xi_spin&quot;]</span></code> – the names
+<code class="docutils literal notranslate"><span class="pre">GWForge.population.spin.Spin</span></code> takes in <code class="docutils literal notranslate"><span class="pre">spin-parameters</span></code>. The
+posterior files call <code class="docutils literal notranslate"><span class="pre">mu_t</span></code>/<code class="docutils literal notranslate"><span class="pre">sigma_t</span></code> <code class="docutils literal notranslate"><span class="pre">mu_spin</span></code>/<code class="docutils literal notranslate"><span class="pre">sigma_spin</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['mu_chi',</span> <span class="pre">'sigma_chi',</span> <span class="pre">'mu_t',</span> <span class="pre">'sigma_t',</span> <span class="pre">'xi_spin']</span></span><a class="headerlink" href="#id13" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['a_1',</span> <span class="pre">'a_2']</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.event_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.fiducial">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.fiducial" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.maximum_spin">
+<span class="sig-name descname"><span class="pre">maximum_spin</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.maximum_spin" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.minimum_cosine_tilt">
+<span class="sig-name descname"><span class="pre">minimum_cosine_tilt</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.minimum_cosine_tilt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.isotropic_density">
+<span class="sig-name descname"><span class="pre">isotropic_density</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.isotropic_density" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin._cosine_tilts">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_cosine_tilts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin._cosine_tilts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin._cosine_tilts" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(cos</span> <span class="pre">tilt_1,</span> <span class="pre">cos</span> <span class="pre">tilt_2)</span></code>, from either name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin._magnitudes">
+<span class="sig-name descname"><span class="pre">_magnitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin._magnitudes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin._magnitudes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.check_events">
+<span class="sig-name descname"><span class="pre">check_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin.check_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.check_events" title="Link to this definition">¶</a></dt>
+<dd><p>Raise if the magnitudes or either spelling of the tilts is missing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin._magnitude_terms">
+<span class="sig-name descname"><span class="pre">_magnitude_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin._magnitude_terms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin._magnitude_terms" title="Link to this definition">¶</a></dt>
+<dd><p>Truncated-normal terms for both spin magnitudes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin._tilt_terms">
+<span class="sig-name descname"><span class="pre">_tilt_terms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin._tilt_terms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin._tilt_terms" title="Link to this definition">¶</a></dt>
+<dd><p>Truncated-normal terms for both cosine tilts.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">GWForge.population_fisher.base.PopulationModel.log_prob()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.DefaultSpin.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#DefaultSpin.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.DefaultSpin.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form score, <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">5)</span></code>.</p>
+<p>The magnitude columns are the sum of the two components’
+<span class="math notranslate nohighlight">\(\partial \ln N/\partial(\mu_\chi, \sigma_\chi)\)</span>. The tilt columns
+differentiate the <em>joint</em> mixture, so each picks up both terms of the
+product rule:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln \pi}{\partial \mu_t}
+  = \frac{\xi\,N_1 N_2\left(\partial_{\mu_t}\ln N_1
+                          + \partial_{\mu_t}\ln N_2\right)}{\pi},
+\qquad
+\frac{\partial \ln \pi}{\partial \xi}
+  = \frac{N_1 N_2 - (1-t_{\min})^{-2}}{\pi}.\]</div>
+</div>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">MadauDickinsonRedshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_redshift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NORMALISATION_NODES</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gwforge.GWForge.population_fisher.base.PopulationModel</span></code></a></p>
+<p>Merger-rate density following the Madau-Dickinson shape.</p>
+<section id="id14">
+<h3>Usage<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">MadauDickinsonRedshift</span><span class="p">(</span><span class="n">maximum_redshift</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">log_prob</span><span class="p">({</span><span class="s2">"redshift"</span><span class="p">:</span> <span class="n">z</span><span class="p">},</span> <span class="n">model</span><span class="o">.</span><span class="n">fiducial</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">({</span><span class="s2">"redshift"</span><span class="p">:</span> <span class="n">z</span><span class="p">})</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">[&quot;gamma&quot;,</span> <span class="pre">&quot;kappa&quot;,</span> <span class="pre">&quot;z_peak&quot;]</span></code> – the names
+<code class="xref py py-class docutils literal notranslate"><span class="pre">GWForge.population.redshift.Redshift</span></code> uses, so a generation
+config and a Fisher config read the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['gamma',</span> <span class="pre">'kappa',</span> <span class="pre">'z_peak']</span></span><a class="headerlink" href="#id15" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['redshift']</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.event_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.maximum_redshift">
+<span class="sig-name descname"><span class="pre">maximum_redshift</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.maximum_redshift" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.cosmology">
+<span class="sig-name descname"><span class="pre">cosmology</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.cosmology" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.fiducial">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.fiducial" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_measure_nodes">
+<span class="sig-name descname"><span class="pre">_log_measure_nodes</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_measure_nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_shape">
+<span class="sig-name descname"><span class="pre">log_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift.log_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_shape" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">psi(z)</span></code>: the Madau-Dickinson shape alone, without the measure.</p>
+<p>Public because <code class="xref py py-mod docutils literal notranslate"><span class="pre">GWForge.population_fisher.model</span></code> rebuilds
+the measure at a trial cosmology and needs the shape on its own.</p>
+<p>Includes the <span class="math notranslate nohighlight">\([1 + (1+z_p)^{-\kappa}]\)</span> factor that sets
+<span class="math notranslate nohighlight">\(\psi(0) = 1\)</span>. That factor is independent of <span class="math notranslate nohighlight">\(z\)</span>, so it
+multiplies the numerator and the normalisation alike and cancels from
+<code class="docutils literal notranslate"><span class="pre">log_prob</span></code> identically – which is why <a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.shape_gradient" title="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.shape_gradient"><code class="xref py py-meth docutils literal notranslate"><span class="pre">shape_gradient()</span></code></a> omits it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_normalisation">
+<span class="sig-name descname"><span class="pre">_log_normalisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift._log_normalisation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_normalisation" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">Z</span></code>, the trapezoidal integral of the numerator over the support.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">GWForge.population_fisher.base.PopulationModel.log_prob()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.shape_gradient">
+<span class="sig-name descname"><span class="pre">shape_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift.shape_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.shape_gradient" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">ln</span> <span class="pre">psi</span> <span class="pre">/</span> <span class="pre">dLambda</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">3)</span></code>.</p>
+<p>Public for the same reason as <a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_shape" title="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_shape"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log_shape()</span></code></a>.</p>
+<p>With <span class="math notranslate nohighlight">\(u = (1+z)/(1+z_p)\)</span> and <span class="math notranslate nohighlight">\(r = u^\kappa\)</span>,
+<span class="math notranslate nohighlight">\(f = r/(1+r)\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\partial_\gamma = \ln(1+z), \quad
+\partial_\kappa = -f \ln u, \quad
+\partial_{z_p} = \frac{\kappa f}{1 + z_p}.\]</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.MadauDickinsonRedshift.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#MadauDickinsonRedshift.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form score, <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">3)</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">g(z)</span> <span class="pre">-</span> <span class="pre">E_p[g]</span></code>: the first term from the numerator, the second from
+<span class="math notranslate nohighlight">\(\partial_\Lambda \ln Z\)</span>, evaluated on the normalisation grid.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">SpectralSirenModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mass_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redshift_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">COSMOLOGY_PARAMETERS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gwforge.GWForge.population_fisher.base.PopulationModel</span></code></a></p>
+<p>Source-frame population observed in the detector frame, cosmology free.</p>
+<section id="id16">
+<h3>Usage<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">SpectralSirenModel</span><span class="p">(</span><span class="n">mass_model</span><span class="p">,</span> <span class="n">redshift_model</span><span class="p">,</span> <span class="n">spin_model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">({</span><span class="s2">"mass_1"</span><span class="p">:</span> <span class="n">m1_det</span><span class="p">,</span> <span class="s2">"mass_2"</span><span class="p">:</span> <span class="n">m2_det</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">"luminosity_distance"</span><span class="p">:</span> <span class="n">distance</span><span class="p">})</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>Mass, then redshift, then spin, then the cosmology parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.maximum_redshift">
+<span class="sig-name descname"><span class="pre">maximum_redshift</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.maximum_redshift" title="Link to this definition">¶</a></dt>
+<dd><p>Upper edge of the redshift support, taken from the redshift model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.mass_model">
+<span class="sig-name descname"><span class="pre">mass_model</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.mass_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.redshift_model">
+<span class="sig-name descname"><span class="pre">redshift_model</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.redshift_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.spin_model">
+<span class="sig-name descname"><span class="pre">spin_model</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.spin_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.cosmology_parameters">
+<span class="sig-name descname"><span class="pre">cosmology_parameters</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['H0',</span> <span class="pre">'Om0',</span> <span class="pre">'w0']</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.cosmology_parameters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">maximum_redshift</span></span><a class="headerlink" href="#id17" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.blocks">
+<span class="sig-name descname"><span class="pre">blocks</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.blocks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="headerlink" href="#id18" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_fiducial">
+<span class="sig-name descname"><span class="pre">_cosmology_fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_fiducial" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.event_keys">
+<span class="sig-name descname"><span class="pre">event_keys</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['mass_1',</span> <span class="pre">'mass_2',</span> <span class="pre">'luminosity_distance']</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.event_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.nodes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.fiducial">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.fiducial" title="Link to this definition">¶</a></dt>
+<dd><p>Block fiducials plus the cosmology, merged live.</p>
+<p>A property for the same reason as
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">GWForge.population_fisher.base.JointPopulationModel.fiducial</span></code>:
+the redshift block is always refitted after the model is built, and a
+snapshot would send the Fisher back to the pre-fit point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology">
+<span class="sig-name descname"><span class="pre">_cosmology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._cosmology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology" title="Link to this definition">¶</a></dt>
+<dd><p>The trial cosmology, cosmology parameters taken from <code class="docutils literal notranslate"><span class="pre">parameters</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._source_frame">
+<span class="sig-name descname"><span class="pre">_source_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._source_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._source_frame" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(z,</span> <span class="pre">m_1^src,</span> <span class="pre">m_2^src)</span></code> at a trial cosmology.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._log_redshift_numerator">
+<span class="sig-name descname"><span class="pre">_log_redshift_numerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._log_redshift_numerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._log_redshift_numerator" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ln</span> <span class="pre">psi(z)</span> <span class="pre">+</span> <span class="pre">ln(dV_c/dz)</span> <span class="pre">-</span> <span class="pre">ln(1+z)</span></code>, the measure at the trial cosmology.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._redshift_weights">
+<span class="sig-name descname"><span class="pre">_redshift_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._redshift_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._redshift_weights" title="Link to this definition">¶</a></dt>
+<dd><p>Normalised <code class="docutils literal notranslate"><span class="pre">p(z)</span></code> on <a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.nodes" title="gwforge.GWForge.population_fisher.SpectralSirenModel.nodes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">nodes</span></code></a>, and its normalisation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.log_prob">
+<span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel.log_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.log_prob" title="Link to this definition">¶</a></dt>
+<dd><p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">GWForge.population_fisher.base.PopulationModel.log_prob()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel.analytic_score">
+<span class="sig-name descname"><span class="pre">analytic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel.analytic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.analytic_score" title="Link to this definition">¶</a></dt>
+<dd><p>Closed-form score, <code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">len(parameter_names))</span></code>.</p>
+<p>The population columns are the source-frame scores evaluated at the
+source-frame parameters the trial cosmology implies; the cosmology
+columns are the chain rule in the module docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_score">
+<span class="sig-name descname"><span class="pre">_cosmology_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmology</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._cosmology_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_score" title="Link to this definition">¶</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">(H0,</span> <span class="pre">Om0,</span> <span class="pre">w0)</span></code> columns; see the chain rule in the module docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.SpectralSirenModel._dlog_shape_dz">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dlog_shape_dz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/model.html#SpectralSirenModel._dlog_shape_dz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._dlog_shape_dz" title="Link to this definition">¶</a></dt>
+<dd><p><span class="math notranslate nohighlight">\(\partial \ln\psi/\partial z = (\gamma - \kappa f)/(1+z)\)</span>.</p>
+<p>With <span class="math notranslate nohighlight">\(r = ((1+z)/(1+z_p))^{\kappa}\)</span> and <span class="math notranslate nohighlight">\(f = r/(1+r)\)</span>.</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">PopulationFisherResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fisher</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degenerate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult" title="Link to this definition">¶</a></dt>
+<dd><p>Everything <a class="reference internal" href="#gwforge.GWForge.population_fisher.population_fisher" title="gwforge.GWForge.population_fisher.population_fisher"><code class="xref py py-func docutils literal notranslate"><span class="pre">population_fisher()</span></code></a> computed, and how to read it.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.parameter_names">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>Free hyper-parameters, in matrix order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.fixed_parameters">
+<span class="sig-name descname"><span class="pre">fixed_parameters</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fixed_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Hyper-parameters held fixed, excluded from the matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.fiducial">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fiducial" title="Link to this definition">¶</a></dt>
+<dd><p>Values the Fisher was evaluated at, free and fixed together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.fisher">
+<span class="sig-name descname"><span class="pre">fisher</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fisher" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">n)</span></code> Term-I Fisher matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.covariance">
+<span class="sig-name descname"><span class="pre">covariance</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.covariance" title="Link to this definition">¶</a></dt>
+<dd><p>Its inverse (or pseudo-inverse).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.sigma">
+<span class="sig-name descname"><span class="pre">sigma</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.sigma" title="Link to this definition">¶</a></dt>
+<dd><p>Name to one-sigma marginalised uncertainty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.condition_number">
+<span class="sig-name descname"><span class="pre">condition_number</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.condition_number" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.n_events">
+<span class="sig-name descname"><span class="pre">n_events</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.n_events" title="Link to this definition">¶</a></dt>
+<dd><p>Events with finite scores, i.e. those that entered the sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.n_total">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.n_total" title="Link to this definition">¶</a></dt>
+<dd><p>Events offered, before the support and finiteness cuts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.scores">
+<span class="sig-name descname"><span class="pre">scores</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.scores" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(n_events,</span> <span class="pre">n)</span></code> raw, uncentred scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.mean_score">
+<span class="sig-name descname"><span class="pre">mean_score</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.mean_score" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(n,)</span></code>; the Monte-Carlo estimate of <code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">ln</span> <span class="pre">alpha</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">Lambda</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.degenerate">
+<span class="sig-name descname"><span class="pre">degenerate</span></span><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.degenerate" title="Link to this definition">¶</a></dt>
+<dd><p>Free parameters whose centred score vanished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#id19" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">fixed_parameters</span></span><a class="headerlink" href="#id20" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">fiducial</span></span><a class="headerlink" href="#id21" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">fisher</span></span><a class="headerlink" href="#id22" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">covariance</span></span><a class="headerlink" href="#id23" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-name descname"><span class="pre">condition_number</span></span><a class="headerlink" href="#id24" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id25">
+<span class="sig-name descname"><span class="pre">n_events</span></span><a class="headerlink" href="#id25" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id26">
+<span class="sig-name descname"><span class="pre">n_total</span></span><a class="headerlink" href="#id26" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id27">
+<span class="sig-name descname"><span class="pre">scores</span></span><a class="headerlink" href="#id27" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id28">
+<span class="sig-name descname"><span class="pre">mean_score</span></span><a class="headerlink" href="#id28" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id29">
+<span class="sig-name descname"><span class="pre">degenerate</span></span><a class="headerlink" href="#id29" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id30">
+<span class="sig-name descname"><span class="pre">sigma</span></span><a class="headerlink" href="#id30" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.from_npz">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_npz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult.from_npz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.from_npz" title="Link to this definition">¶</a></dt>
+<dd><p>Reload a forecast that <code class="file docutils literal notranslate"><span class="pre">bin/gwforge_population_fisher</span></code> saved.</p>
+<p>Comparing two networks, or redrawing a figure in a new style, should not
+mean recomputing either forecast. The saved archive carries everything a
+plot needs: the matrix, its covariance, the parameter names, the
+fiducial values and the event counts.</p>
+<p>The score matrix is <em>not</em> saved – it is one row per detected event and
+would dominate the file – so the reloaded result has an empty
+<code class="docutils literal notranslate"><span class="pre">scores</span></code> and <code class="docutils literal notranslate"><span class="pre">mean_score</span></code>. Everything the plotting path touches is
+present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – A <code class="docutils literal notranslate"><span class="pre">.npz</span></code> written by the CLI.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult" title="gwforge.GWForge.population_fisher.PopulationFisherResult">PopulationFisherResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.correlation_matrix">
+<span class="sig-name descname"><span class="pre">correlation_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult.correlation_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.correlation_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Correlation matrix implied by <a class="reference internal" href="#id23" title="gwforge.GWForge.population_fisher.PopulationFisherResult.covariance"><code class="xref py py-attr docutils literal notranslate"><span class="pre">covariance</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.scaled_to">
+<span class="sig-name descname"><span class="pre">scaled_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult.scaled_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.scaled_to" title="Link to this definition">¶</a></dt>
+<dd><p>This forecast rescaled to a different number of detected events.</p>
+<p>The Term-I Fisher is a sum over events, so it is proportional to
+<span class="math notranslate nohighlight">\(N_{\rm det}\)</span> in expectation and <span class="math notranslate nohighlight">\(\sigma \propto
+N_{\rm det}^{-1/2}\)</span>. Use this to turn a one-month catalogue into a
+ten-year forecast without regenerating anything – or, more usefully, to
+state plainly that a headline number is a pure <span class="math notranslate nohighlight">\(\sqrt{T}\)</span>
+extrapolation rather than a computed one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_events</strong> (<em>int</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult" title="gwforge.GWForge.population_fisher.PopulationFisherResult">PopulationFisherResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.summary" title="Link to this definition">¶</a></dt>
+<dd><p>A plain-text table of the forecast.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.PopulationFisherResult.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#PopulationFisherResult.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.covariance_from_fisher">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">covariance_from_fisher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fisher</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_RCOND</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#covariance_from_fisher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.covariance_from_fisher" title="Link to this definition">¶</a></dt>
+<dd><p>Invert a Fisher matrix, falling back to a pseudo-inverse when it is singular.</p>
+<p>The matrix is normalised by its diagonal before inversion – the same trick
+<code class="xref py py-func docutils literal notranslate"><span class="pre">GWForge.fisher.matrix.covariance()</span></code> uses – because hyper-parameters
+differ by many orders of magnitude in scale (<code class="docutils literal notranslate"><span class="pre">H0</span></code> near 68, <code class="docutils literal notranslate"><span class="pre">lam_1</span></code> near
+0.05) and the raw condition number is then dominated by units rather than by
+degeneracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fisher</strong> (<em>numpy.ndarray</em>)</p></li>
+<li><p><strong>names</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Used only to name parameters in the warning.</p></li>
+<li><p><strong>rcond</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(covariance,</span> <span class="pre">condition_number)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gwforge.GWForge.population_fisher.population_fisher">
+<span class="sig-prename descclassname"><span class="pre">gwforge.GWForge.population_fisher.</span></span><span class="sig-name descname"><span class="pre">population_fisher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DEFAULT_RCOND</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gwforge/GWForge/population_fisher/population_fisher_term_I.html#population_fisher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwforge.GWForge.population_fisher.population_fisher" title="Link to this definition">¶</a></dt>
+<dd><p>Term-I population Fisher matrix for a detected catalogue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="base/index.html#gwforge.GWForge.population_fisher.base.PopulationModel" title="gwforge.GWForge.population_fisher.base.PopulationModel"><em>GWForge.population_fisher.base.PopulationModel</em></a>)</p></li>
+<li><p><strong>events</strong> (<em>dict</em>) – Source parameters of the <strong>detected</strong> events. They must be drawn from
+the population at <code class="docutils literal notranslate"><span class="pre">parameters</span></code>, or the centred-score identity that
+supplies the selection term does not hold.</p></li>
+<li><p><strong>free_parameters</strong> (<em>sequence</em><em> of </em><em>str</em><em> or </em><em>None</em>) – Hyper-parameters to vary. Defaults to every name the model has that is
+not in <code class="docutils literal notranslate"><span class="pre">fixed_parameters</span></code>.</p></li>
+<li><p><strong>fixed_parameters</strong> (<em>dict</em><em> or </em><em>None</em>) – Name to value, held fixed and excluded from the matrix.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em> or </em><em>None</em>) – Fiducial point. Defaults to <code class="docutils literal notranslate"><span class="pre">model.fiducial</span></code>.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">score()</span></code>.</p></li>
+<li><p><strong>rcond</strong> (<em>float</em>) – Pseudo-inverse threshold.</p></li>
+<li><p><strong>n_total</strong> (<em>int</em><em> or </em><em>None</em>) – Events offered before cuts, for reporting. Defaults to <code class="docutils literal notranslate"><span class="pre">len(events)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult" title="gwforge.GWForge.population_fisher.PopulationFisherResult">PopulationFisherResult</a></p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If no parameters are free, or no event has a finite score.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Koustav Chandra
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">gwforge.GWForge.population_fisher</a><ul>
+<li><a class="reference internal" href="#pipeline">Pipeline</a></li>
+<li><a class="reference internal" href="#models">Models</a></li>
+<li><a class="reference internal" href="#derivatives">Derivatives</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.models"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.models</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.event_keys"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.fiducial"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.log_prob"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.analytic_score"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.analytic_score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.JointPopulationModel.score"><code class="docutils literal notranslate"><span class="pre">JointPopulationModel.score()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel"><code class="docutils literal notranslate"><span class="pre">PopulationModel</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">PopulationModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.fiducial"><code class="docutils literal notranslate"><span class="pre">PopulationModel.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.event_keys"><code class="docutils literal notranslate"><span class="pre">PopulationModel.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">PopulationModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">PopulationModel.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">PopulationModel.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.log_prob"><code class="docutils literal notranslate"><span class="pre">PopulationModel.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.analytic_score"><code class="docutils literal notranslate"><span class="pre">PopulationModel.analytic_score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.score"><code class="docutils literal notranslate"><span class="pre">PopulationModel.score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel._finite_difference_score"><code class="docutils literal notranslate"><span class="pre">PopulationModel._finite_difference_score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.to_vector"><code class="docutils literal notranslate"><span class="pre">PopulationModel.to_vector()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.from_vector"><code class="docutils literal notranslate"><span class="pre">PopulationModel.from_vector()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel.check_events"><code class="docutils literal notranslate"><span class="pre">PopulationModel.check_events()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel._n_events"><code class="docutils literal notranslate"><span class="pre">PopulationModel._n_events()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationModel._column_index"><code class="docutils literal notranslate"><span class="pre">PopulationModel._column_index()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue"><code class="docutils literal notranslate"><span class="pre">Catalogue</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.events"><code class="docutils literal notranslate"><span class="pre">Catalogue.events</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.network_snr"><code class="docutils literal notranslate"><span class="pre">Catalogue.network_snr</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.detectors"><code class="docutils literal notranslate"><span class="pre">Catalogue.detectors</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.snr_threshold"><code class="docutils literal notranslate"><span class="pre">Catalogue.snr_threshold</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.n_total"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_total</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.n_with_snr"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_with_snr</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.n_detected"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_detected</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Catalogue.events</span></code></a></li>
+<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Catalogue.network_snr</span></code></a></li>
+<li><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">Catalogue.detectors</span></code></a></li>
+<li><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">Catalogue.snr_threshold</span></code></a></li>
+<li><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_total</span></code></a></li>
+<li><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_with_snr</span></code></a></li>
+<li><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">Catalogue.n_detected</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.detected_fraction"><code class="docutils literal notranslate"><span class="pre">Catalogue.detected_fraction</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.summary"><code class="docutils literal notranslate"><span class="pre">Catalogue.summary()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.Catalogue.__repr__"><code class="docutils literal notranslate"><span class="pre">Catalogue.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.load_catalogue"><code class="docutils literal notranslate"><span class="pre">load_catalogue()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.load_injections"><code class="docutils literal notranslate"><span class="pre">load_injections()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.network_snr_from"><code class="docutils literal notranslate"><span class="pre">network_snr_from()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.compare_to"><code class="docutils literal notranslate"><span class="pre">compare_to()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.fit_model"><code class="docutils literal notranslate"><span class="pre">fit_model()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.parameter_names"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.event_keys"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.mmin</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.mmin_2"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.mmin_2</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.m_high"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.m_high</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.maximum_mass"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.maximum_mass</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.fiducial"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.delta_m_2"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.delta_m_2</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.grid"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.grid</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._components"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._components()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._primary_numerator()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._primary_numerator_derivatives"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._primary_numerator_derivatives()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._cumulative_secondary"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._cumulative_secondary()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.dlog_prob_dmasses"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.dlog_prob_dmasses()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._secondary_mass"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._secondary_mass()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass._support"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass._support()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.log_prob"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.BrokenPowerLawTwoPeakMass.analytic_score"><code class="docutils literal notranslate"><span class="pre">BrokenPowerLawTwoPeakMass.analytic_score()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin"><code class="docutils literal notranslate"><span class="pre">DefaultSpin</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.parameter_names"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.event_keys"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.fiducial"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.maximum_spin"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.maximum_spin</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.minimum_cosine_tilt"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.minimum_cosine_tilt</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.isotropic_density"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.isotropic_density</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin._cosine_tilts"><code class="docutils literal notranslate"><span class="pre">DefaultSpin._cosine_tilts()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin._magnitudes"><code class="docutils literal notranslate"><span class="pre">DefaultSpin._magnitudes()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.check_events"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.check_events()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin._magnitude_terms"><code class="docutils literal notranslate"><span class="pre">DefaultSpin._magnitude_terms()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin._tilt_terms"><code class="docutils literal notranslate"><span class="pre">DefaultSpin._tilt_terms()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.log_prob"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.DefaultSpin.analytic_score"><code class="docutils literal notranslate"><span class="pre">DefaultSpin.analytic_score()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.parameter_names"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.event_keys"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.maximum_redshift"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.maximum_redshift</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.cosmology"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.cosmology</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.fiducial"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.nodes"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.nodes</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_measure_nodes"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift._log_measure_nodes</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_shape"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.log_shape()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift._log_normalisation"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift._log_normalisation()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.log_prob"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.shape_gradient"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.shape_gradient()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.MadauDickinsonRedshift.analytic_score"><code class="docutils literal notranslate"><span class="pre">MadauDickinsonRedshift.analytic_score()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.maximum_redshift"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.maximum_redshift</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.mass_model"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.mass_model</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.redshift_model"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.redshift_model</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.spin_model"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.spin_model</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.cosmology_parameters"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.cosmology_parameters</span></code></a></li>
+<li><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.maximum_redshift</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.blocks"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.blocks</span></code></a></li>
+<li><a class="reference internal" href="#id18"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_fiducial"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._cosmology_fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.event_keys"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.event_keys</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.nodes"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.nodes</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.fiducial"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._cosmology()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._source_frame"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._source_frame()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._log_redshift_numerator"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._log_redshift_numerator()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._redshift_weights"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._redshift_weights()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.log_prob"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.log_prob()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel.analytic_score"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel.analytic_score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._cosmology_score"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._cosmology_score()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.SpectralSirenModel._dlog_shape_dz"><code class="docutils literal notranslate"><span class="pre">SpectralSirenModel._dlog_shape_dz()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult</span></code></a><ul>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.parameter_names"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fixed_parameters"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fixed_parameters</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fiducial"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.fisher"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fisher</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.covariance"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.covariance</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.sigma"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.sigma</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.condition_number"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.condition_number</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.n_events"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.n_events</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.n_total"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.n_total</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.scores"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.scores</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.mean_score"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.mean_score</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.degenerate"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.degenerate</span></code></a></li>
+<li><a class="reference internal" href="#id19"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#id20"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fixed_parameters</span></code></a></li>
+<li><a class="reference internal" href="#id21"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fiducial</span></code></a></li>
+<li><a class="reference internal" href="#id22"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.fisher</span></code></a></li>
+<li><a class="reference internal" href="#id23"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.covariance</span></code></a></li>
+<li><a class="reference internal" href="#id24"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.condition_number</span></code></a></li>
+<li><a class="reference internal" href="#id25"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.n_events</span></code></a></li>
+<li><a class="reference internal" href="#id26"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.n_total</span></code></a></li>
+<li><a class="reference internal" href="#id27"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.scores</span></code></a></li>
+<li><a class="reference internal" href="#id28"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.mean_score</span></code></a></li>
+<li><a class="reference internal" href="#id29"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.degenerate</span></code></a></li>
+<li><a class="reference internal" href="#id30"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.sigma</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.from_npz"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.from_npz()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.correlation_matrix"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.correlation_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.scaled_to"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.scaled_to()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.summary"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.summary()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.PopulationFisherResult.__repr__"><code class="docutils literal notranslate"><span class="pre">PopulationFisherResult.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.covariance_from_fisher"><code class="docutils literal notranslate"><span class="pre">covariance_from_fisher()</span></code></a></li>
+<li><a class="reference internal" href="#gwforge.GWForge.population_fisher.population_fisher"><code class="docutils literal notranslate"><span class="pre">population_fisher()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=f5ac8a26"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>

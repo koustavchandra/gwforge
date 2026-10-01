@@ -1,0 +1,343 @@
+gwforge.GWForge.cosmology
+=========================
+
+.. py:module:: gwforge.GWForge.cosmology
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.cosmology.SPEED_OF_LIGHT
+   gwforge.GWForge.cosmology.QUADRATURE_ORDER
+   gwforge.GWForge.cosmology.NEWTON_ITERATIONS
+   gwforge.GWForge.cosmology._GUESS_NODES
+   gwforge.GWForge.cosmology.COSMOLOGY_PARAMETERS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.cosmology.FlatwCDM
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.cosmology.astropy_cosmology
+   gwforge.GWForge.cosmology.differential_comoving_volume
+   gwforge.GWForge.cosmology.luminosity_distance
+
+
+Module Contents
+---------------
+
+.. py:data:: SPEED_OF_LIGHT
+
+.. py:data:: QUADRATURE_ORDER
+   :value: 64
+
+
+.. py:data:: NEWTON_ITERATIONS
+   :value: 6
+
+
+.. py:data:: _GUESS_NODES
+
+.. py:data:: COSMOLOGY_PARAMETERS
+   :value: ('H0', 'Om0', 'w0')
+
+
+.. py:function:: astropy_cosmology(name='Planck18', H0=None, Om0=None, Ode0=None, Tcmb0=2.725, Ob0=None)
+
+   Resolve a GWForge cosmology specification to an ``astropy`` cosmology.
+
+   Setting ``Tcmb0 = 0`` removes radiation and massive neutrinos, which makes
+   the result *identical* to ``FlatwCDM(H0, Om0, w0=-1)`` when
+   ``Ode0 = 1 - Om0``.
+
+   :param name: An ``astropy.cosmology`` realization name, or anything else (e.g.
+                ``"custom"``) to request an explicit ``LambdaCDM``.
+   :type name: str
+   :param H0: Hubble constant in km/s/Mpc. Required if ``name`` is not a realization.
+   :type H0: float or None
+   :param Om0: Present-day matter and dark-energy density parameters.
+   :type Om0: float or None
+   :param Ode0: Present-day matter and dark-energy density parameters.
+   :type Ode0: float or None
+   :param Tcmb0: CMB temperature in K. ``0`` disables radiation and neutrinos.
+   :type Tcmb0: float
+   :param Ob0: Baryon density parameter.
+   :type Ob0: float or None
+
+   :rtype: astropy.cosmology.FLRW
+
+   :raises ValueError: If ``name`` is not a realization and the explicit parameters are
+       incomplete.
+
+
+.. py:class:: FlatwCDM(H0=67.66, Om0=0.3111, w0=-1.0)
+
+   Flat dark-energy background with analytic parameter derivatives.
+
+   .. math::
+
+      E(z)^2 = \Omega_{m,0}(1 + z)^3
+               + (1 - \Omega_{m,0})(1 + z)^{3(1 + w_0)}
+
+   Usage
+   -----
+   >>> cosmology = FlatwCDM(H0=67.66, Om0=0.3111)
+   >>> cosmology.luminosity_distance(1.0)            # Mpc
+   >>> cosmology.derivatives(1.0)["Om0"]["luminosity_distance"]
+
+   .. attribute:: H0
+
+      Hubble constant, km/s/Mpc.
+
+      :type: float
+
+   .. attribute:: Om0
+
+      Present-day matter density parameter.
+
+      :type: float
+
+   .. attribute:: w0
+
+      Dark-energy equation of state. ``-1`` is flat LCDM.
+
+      :type: float
+
+   .. attribute:: hubble_distance
+
+      :math:`D_H = c / H_0`, Mpc.
+
+      :type: float
+
+
+   .. py:attribute:: H0
+
+
+   .. py:attribute:: Om0
+
+
+   .. py:attribute:: w0
+
+
+   .. py:attribute:: hubble_distance
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: from_astropy(cosmology, w0=-1.0, fold_neutrinos=True)
+      :classmethod:
+
+
+      Build a :class:`FlatwCDM` matching an ``astropy`` cosmology.
+
+      ``astropy`` realizations carry radiation and massive neutrinos, which
+      this two-component background does not have. ``fold_neutrinos`` adds
+      ``Onu0`` to ``Om0``, treating neutrinos as cold matter -- a good
+      approximation at the redshifts gravitational-wave catalogues reach, and
+      the convention this module documents its residuals against.
+
+      :param cosmology:
+      :type cosmology: astropy.cosmology.FLRW
+      :param w0: Equation of state to give the result.
+      :type w0: float
+      :param fold_neutrinos: Add ``Onu0`` to ``Om0``.
+      :type fold_neutrinos: bool
+
+      :rtype: FlatwCDM
+
+
+
+   .. py:method:: to_astropy()
+
+      The exactly equivalent ``astropy`` cosmology (no radiation, no neutrinos).
+
+      :rtype: astropy.cosmology.FlatLambdaCDM or astropy.cosmology.FlatwCDM
+
+
+
+   .. py:method:: efunc(redshift)
+
+      :math:`E(z) = H(z) / H_0`.
+
+
+
+   .. py:method:: _efunc_squared(redshift)
+
+
+   .. py:method:: defunc_dz(redshift)
+
+      :math:`dE/dz`.
+
+      Carries the dark-energy term. The LCDM expression
+      :math:`1.5\,\Omega_{m,0}(1+z)^2 / E` is the :math:`w_0 = -1` special
+      case only, and using it under wCDM is wrong by 26% at :math:`w_0 = -0.8`.
+
+
+
+   .. py:method:: _quadrature_nodes(redshift)
+
+      Gauss-Legendre nodes and half-width for ``[0, z]``, broadcast over ``z``.
+
+      Returns ``(sample_redshifts, half)`` with shapes ``(..., order)`` and
+      ``(..., 1)``, so the integral of ``f`` is ``(half * (weights * f).sum(-1))``.
+
+
+
+   .. py:method:: comoving_distance(redshift)
+
+      :math:`D_C(z) = D_H \int_0^z dz'/E(z')`, Mpc.
+
+
+
+   .. py:method:: luminosity_distance(redshift)
+
+      :math:`d_L = (1 + z) D_C(z)`, Mpc.
+
+
+
+   .. py:method:: ddL_dz(redshift)
+
+      :math:`dd_L/dz = D_C(z) + (1 + z) D_H / E(z)`, Mpc.
+
+
+
+   .. py:method:: d2dL_dz2(redshift)
+
+      :math:`d^2 d_L/dz^2 = 2 D_H/E - (1 + z) D_H E'/E^2`, Mpc.
+
+
+
+   .. py:method:: differential_comoving_volume(redshift)
+
+      Full-sky :math:`dV_c/dz = 4\pi D_C^2 D_H / E`, Mpc^3.
+
+      Note the :math:`4\pi`: ``astropy``'s method of the same name is *per
+      steradian*.
+
+
+
+   .. py:method:: redshift_of_distance(distance)
+
+      Invert :math:`d_L(z)`, by table-seeded Newton on the exact derivative.
+
+      :param distance: Luminosity distance in Mpc.
+      :type distance: array_like
+
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: _dinv_efunc(redshift)
+
+      ``d(1/E)/dLambda`` for each cosmology parameter, as a dict of arrays.
+
+      These are the closed-form integrands that make
+      :meth:`derivatives` exact: the same Gauss-Legendre weights that build
+      :math:`D_C` also build :math:`\partial D_C/\partial\Lambda`.
+
+
+
+   .. py:method:: _defunc(redshift)
+
+      ``dE/dLambda`` at fixed ``z``, as a dict of arrays.
+
+
+
+   .. py:method:: derivatives(redshift, parameters=COSMOLOGY_PARAMETERS)
+
+      Analytic derivatives of the background quantities at fixed ``z``.
+
+      :param redshift:
+      :type redshift: array_like
+      :param parameters: Any subset of :data:`COSMOLOGY_PARAMETERS`.
+      :type parameters: sequence of str
+
+      :returns: ``{parameter: {"comoving_distance": ..., "luminosity_distance": ...,
+                "ddL_dz": ..., "differential_comoving_volume": ...}}``, every entry
+                an array shaped like ``redshift``.
+      :rtype: dict
+
+      .. rubric:: Notes
+
+      ``H0`` enters only through :math:`D_H = c/H_0`, because :math:`E(z)` is
+      dimensionless and carries no :math:`H_0`. Hence
+      :math:`\partial_{H_0} D_C = -D_C/H_0`,
+      :math:`\partial_{H_0}(dV_c/dz) = -3 (dV_c/dz)/H_0` and
+      :math:`\partial_{H_0}(dd_L/dz) = -(dd_L/dz)/H_0` -- the
+      :math:`-3/H_0 + 1/H_0 = -2/H_0` that the spectral-siren measure term
+      reduces to.
+
+
+
+   .. py:method:: dredshift_dparameter(redshift, parameters=COSMOLOGY_PARAMETERS)
+
+      ``dz/dLambda`` at **fixed luminosity distance**.
+
+      Implicit differentiation of :math:`d_L(z;\Lambda) = \mathrm{const}`:
+
+      .. math::
+
+         \frac{\partial z}{\partial\Lambda}
+           = -\left(\frac{\partial d_L}{\partial\Lambda}\right)_{\!z}
+              \Big/ \frac{d d_L}{d z}.
+
+      This is the chain that carries cosmology into the spectral-siren score:
+      a trial cosmology moves the redshift assigned to a measured distance,
+      which moves the source-frame masses and the merger-rate shape.
+
+      :param redshift: Redshift at the fiducial cosmology.
+      :type redshift: array_like
+      :param parameters:
+      :type parameters: sequence of str
+
+      :returns: ``{parameter: array}``.
+      :rtype: dict
+
+
+
+   .. py:method:: parameters()
+
+      The cosmology parameters as a plain dict.
+
+
+
+.. py:function:: differential_comoving_volume(cosmology, redshift)
+
+   Full-sky ``dV_c/dz`` in Mpc^3 for either cosmology flavour.
+
+   ``astropy``'s ``differential_comoving_volume`` is per steradian and carries
+   units; :class:`FlatwCDM`'s is already full-sky and unitless. Population code
+   wants one number either way, so it goes through here.
+
+   :param cosmology:
+   :type cosmology: FlatwCDM or astropy.cosmology.FLRW
+   :param redshift:
+   :type redshift: array_like
+
+   :rtype: numpy.ndarray
+
+
+.. py:function:: luminosity_distance(cosmology, redshift)
+
+   Luminosity distance in Mpc for either cosmology flavour.
+
+   :param cosmology:
+   :type cosmology: FlatwCDM or astropy.cosmology.FLRW
+   :param redshift:
+   :type redshift: array_like
+
+   :rtype: numpy.ndarray
+
+

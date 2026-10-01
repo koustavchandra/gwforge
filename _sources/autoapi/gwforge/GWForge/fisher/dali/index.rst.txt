@@ -1,0 +1,197 @@
+gwforge.GWForge.fisher.dali
+===========================
+
+.. py:module:: gwforge.GWForge.fisher.dali
+
+.. autoapi-nested-parse::
+
+   Doublet-DALI likelihood and posterior sampling.
+
+   At ``order = 1`` the log-likelihood is exactly quadratic, so the Fisher posterior is
+   Gaussian and :math:`\Sigma = F^{-1}` describes it completely -- every marginal is
+   an ellipse available in closed form.
+
+   The doublet adds cubic and quartic terms,
+
+   .. math::
+
+      \log L = -\tfrac{1}{2}F_{ab}\Delta^a\Delta^b
+               - \tfrac{1}{2}G_{abc}\Delta^a\Delta^b\Delta^c
+               - \tfrac{1}{8}H_{abcd}\Delta^a\Delta^b\Delta^c\Delta^d,
+
+   which has neither a closed-form normalisation nor closed-form marginals.
+
+   The contractions are written as flattened matrix products rather than
+   :func:`numpy.einsum` so they reach BLAS: measured at 1.9 million evaluations per
+   second versus 0.03 million for the equivalent ``einsum`` call.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.dali.PHYSICAL_RANGES
+   gwforge.GWForge.fisher.dali.NARROW_PRIOR_SIGMAS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.dali.DALILikelihood
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.dali.build_priors
+   gwforge.GWForge.fisher.dali._warn_about_narrow_priors
+   gwforge.GWForge.fisher.dali._add_physical_constraints
+   gwforge.GWForge.fisher.dali.sample_posterior
+
+
+Module Contents
+---------------
+
+.. py:data:: PHYSICAL_RANGES
+
+.. py:class:: DALILikelihood(fisher, order=2)
+
+   Bases: :py:obj:`bilby.core.likelihood.Likelihood`
+
+
+   Doublet-DALI log-likelihood as a bilby likelihood.
+
+   Usage
+   -----
+   >>> likelihood = DALILikelihood(fisher)
+   >>> result = sample_posterior(likelihood, priors, outdir="out", label="src0")
+
+   .. attribute:: names
+
+      Parameter names, in tensor order.
+
+      :type: list of str
+
+   .. attribute:: fiducial
+
+      The point the expansion is about; samples are offsets from it.
+
+      :type: dict
+
+
+   .. py:attribute:: names
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: order
+      :value: 2
+
+
+
+   .. py:attribute:: _fisher
+
+
+   .. py:method:: log_likelihood(parameters=None)
+
+      Log-likelihood at ``parameters`` (or at ``self.parameters``).
+
+      :param parameters: Absolute parameter values, not offsets. Accepting them as an
+                         argument is the bilby 3 interface; bilby 2 still sets
+                         ``self.parameters`` instead, and both work here.
+      :type parameters: dict or None
+
+      :rtype: float
+
+
+
+   .. py:method:: log_likelihood_from_offsets(offsets)
+
+      Vectorised log-likelihood for a stack of parameter offsets.
+
+      :param offsets: ``(n_points, n_parameters)`` displacements from the fiducial point.
+      :type offsets: numpy.ndarray
+
+      :returns: ``(n_points,)`` log-likelihood values.
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: noise_log_likelihood()
+
+      Zero: the expansion is about the maximum, where the residual vanishes.
+
+
+
+.. py:data:: NARROW_PRIOR_SIGMAS
+   :value: 3.0
+
+
+.. py:function:: build_priors(prior_file, names, fiducial, enforce_physicality=False, sigmas=None)
+
+   Load and validate the sampling priors.
+
+   :param prior_file: Path to a bilby ``.prior`` file.
+   :type prior_file: str
+   :param names: Fisher parameter names that must all be covered.
+   :type names: sequence of str
+   :param fiducial: Fiducial values, checked to lie inside the prior support -- a prior that
+                    excludes the point the expansion is about would be sampling nothing.
+   :type fiducial: dict
+   :param enforce_physicality: Also reject samples outside :data:`PHYSICAL_RANGES`.
+   :type enforce_physicality: bool
+   :param sigmas: Fisher one-sigma widths. When given, priors narrower than
+                  :data:`NARROW_PRIOR_SIGMAS` sigmas are warned about.
+   :type sigmas: dict or None
+
+   :rtype: bilby.core.prior.PriorDict
+
+   :raises KeyError: If the file does not define every parameter. bilby's own prior files use
+       ``mass_ratio``, ``a_1`` and friends, which do not line up with the
+       default Fisher parameters, so this is a likely mistake and is worth
+       failing loudly for rather than silently sampling the wrong space.
+   :raises ValueError: If a fiducial value falls outside its prior.
+
+
+.. py:function:: _warn_about_narrow_priors(priors, names, fiducial, sigmas)
+
+   Flag priors too tight for the posterior they are supposed to bound.
+
+
+.. py:function:: _add_physical_constraints(priors, names)
+
+   Clip each prior to its physical range, in place.
+
+
+.. py:function:: sample_posterior(likelihood, priors, outdir, label, sampler='emcee', nwalkers=200, nsteps=2000, nburn=500, **kwargs)
+
+   Sample a DALI posterior through bilby.
+
+   :param likelihood:
+   :type likelihood: DALILikelihood
+   :param priors:
+   :type priors: bilby.core.prior.PriorDict
+   :param outdir: Output directory for the sampler.
+   :type outdir: str
+   :param label: Run label, used for the output filenames.
+   :type label: str
+   :param sampler: Any bilby sampler; ``emcee`` by default.
+   :type sampler: str
+   :param nwalkers: emcee settings, ignored by nested samplers.
+   :type nwalkers: int
+   :param nsteps: emcee settings, ignored by nested samplers.
+   :type nsteps: int
+   :param nburn: emcee settings, ignored by nested samplers.
+   :type nburn: int
+   :param \*\*kwargs: Passed straight to :func:`bilby.run_sampler`.
+
+   :rtype: bilby.core.result.Result
+
+

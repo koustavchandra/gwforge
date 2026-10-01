@@ -1,0 +1,218 @@
+gwforge.GWForge.fisher.matrix
+=============================
+
+.. py:module:: gwforge.GWForge.fisher.matrix
+
+.. autoapi-nested-parse::
+
+   Fisher matrix and doublet-DALI tensors for a detector network.
+
+   Expanding the Gaussian log-likelihood
+   :math:`\log L = -\tfrac{1}{2}\langle d - h(\theta)\mid d - h(\theta)\rangle`
+   about the fiducial parameters with :math:`d = h_0`, and writing
+   :math:`\Delta h = h_{,a}\Delta^a + \tfrac{1}{2}h_{,ab}\Delta^a\Delta^b + \ldots`,
+
+   .. math::
+
+      \log L = -\tfrac{1}{2} F_{ab}\Delta^a\Delta^b
+               - \tfrac{1}{2} G_{abc}\Delta^a\Delta^b\Delta^c
+               - \tfrac{1}{8} H_{abcd}\Delta^a\Delta^b\Delta^c\Delta^d
+               + \ldots
+
+   with
+
+   .. math::
+
+      F_{ab} = \langle h_{,a}\mid h_{,b}\rangle, \quad
+      G_{abc} = \langle h_{,ab}\mid h_{,c}\rangle, \quad
+      H_{abcd} = \langle h_{,ab}\mid h_{,cd}\rangle .
+
+   The :math:`\tfrac{1}{2}` and :math:`\tfrac{1}{8}` come from the :math:`2\times
+   \tfrac{1}{2}` and :math:`(\tfrac{1}{2})^2` cross terms, reproducing eq. (15) of
+   Sellentin, Quartin & Amendola. Truncating at :math:`F` is the Fisher matrix of
+   Vallisneri; keeping all three is doublet-DALI.
+
+   The quartic term is :math:`-\tfrac{1}{8}\lVert h_{,ab}\Delta^a\Delta^b\rVert^2`,
+   which is negative-definite, so the doublet posterior is normalisable by
+   construction.
+
+   Third-order DALI ("triplet") is deliberately not implemented: there is no group
+   of terms beyond the three above that can be written with first and second
+   derivatives alone. See :func:`check_order`.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.matrix.SUPPORTED_ORDERS
+   gwforge.GWForge.fisher.matrix.CONDITION_NUMBER_WARNING
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.matrix.FisherMatrix
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   gwforge.GWForge.fisher.matrix.check_order
+   gwforge.GWForge.fisher.matrix.covariance
+
+
+Module Contents
+---------------
+
+.. py:data:: SUPPORTED_ORDERS
+   :value: (1, 2)
+
+
+.. py:data:: CONDITION_NUMBER_WARNING
+   :value: 1000000000000000.0
+
+
+.. py:function:: check_order(order)
+
+   Validate the requested expansion order.
+
+   :param order: ``1`` for the Fisher matrix, ``2`` for doublet-DALI.
+   :type order: int
+
+   :rtype: int
+
+   :raises NotImplementedError: For ``order = 3``. Triplet-DALI needs genuine *third* derivatives of the
+       waveform -- the terms :math:`\langle h_{,a}\mid h_{,bcd}\rangle`,
+       :math:`\langle h_{,ab}\mid h_{,cde}\rangle` and
+       :math:`\langle h_{,abc}\mid h_{,def}\rangle` of Sellentin+ eq. (16).
+       Grouping the expansion by highest derivative, the Fisher term plus
+       :math:`G` and :math:`H` already exhausts everything expressible with
+       first and second derivatives, so there is no consistent third order that
+       avoids them.
+   :raises ValueError: For any other unsupported value.
+
+
+.. py:class:: FisherMatrix(interferometers, waveform_generator, parameters, fisher_parameters=None, earth_rotation=True, finite_size=True, step_sizes=None, order=1, calibrate=True, target_change=TARGET_FRACTIONAL_CHANGE, estimate_noise=True)
+
+   Network Fisher matrix, and DALI tensors when ``order = 2``.
+
+   Every tensor is a sum over detectors of noise-weighted inner products, so
+   the network result is the sum of the per-detector results (Vallisneri
+   eq. 13). ET contributes as three separate interferometers, which is how
+   :class:`GWForge.ifo.detectors.Network` already presents it.
+
+   Usage
+   -----
+   >>> fisher = FisherMatrix(ifos, waveform_generator, injection_parameters)
+   >>> sigmas = numpy.sqrt(numpy.diag(fisher.covariance))
+
+   .. attribute:: names
+
+      Parameter names in matrix order.
+
+      :type: list of str
+
+   .. attribute:: matrix
+
+      ``(n, n)`` network Fisher matrix.
+
+      :type: numpy.ndarray
+
+   .. attribute:: per_detector
+
+      Detector name to its own ``(n, n)`` Fisher matrix.
+
+      :type: dict
+
+   .. attribute:: doublet, quartic
+
+      :math:`G_{abc}` and :math:`H_{abcd}`; ``None`` when ``order < 2``.
+
+      :type: numpy.ndarray or None
+
+   .. attribute:: optimal_snrs
+
+      Detector name to optimal SNR, plus ``"network"``.
+
+      :type: dict
+
+
+   .. py:attribute:: order
+      :value: 1
+
+
+
+   .. py:attribute:: parameters
+
+
+   .. py:attribute:: derivatives
+
+
+   .. py:attribute:: names
+
+
+   .. py:method:: _accumulate(interferometers)
+
+      Sum the per-detector tensors over the network.
+
+
+
+   .. py:property:: covariance
+
+      Inverse Fisher matrix, the linearised-signal covariance.
+
+
+   .. py:property:: sigmas
+
+      One-sigma marginalised uncertainties, as a name to value dict.
+
+
+   .. py:method:: with_gaussian_prior(prior_sigmas)
+
+      Add Gaussian prior information to the Fisher matrix.
+
+      A Gaussian prior of width :math:`\sigma_a` contributes
+      :math:`1/\sigma_a^2` to the diagonal -- the only way a prior can enter a
+      Fisher matrix, since a uniform prior carries no information in its
+      interior.
+
+      :param prior_sigmas: Parameter name to prior standard deviation. Names not in
+                           :attr:`names` are ignored.
+      :type prior_sigmas: dict
+
+      :returns: A new ``(n, n)`` matrix; :attr:`matrix` is left untouched.
+      :rtype: numpy.ndarray
+
+
+
+.. py:function:: covariance(fisher, names=None, condition_number_warning=CONDITION_NUMBER_WARNING)
+
+   Invert a Fisher matrix and report how much to trust the result.
+
+   Fisher matrices for a gravitational-wave network are badly scaled -- a
+   chirp-mass entry and a time entry differ by many orders of magnitude -- so
+   the matrix is normalised by its diagonal before inversion and un-normalised
+   afterwards.
+
+   :param fisher: ``(n, n)`` symmetric positive-definite matrix.
+   :type fisher: numpy.ndarray
+   :param names: Parameter names, used only to make the warnings readable.
+   :type names: sequence of str or None
+   :param condition_number_warning: Warn above this condition number.
+   :type condition_number_warning: float
+
+   :returns: ``(covariance, diagnostics)``. ``diagnostics`` holds
+             ``condition_number`` and ``inversion_error``, the latter being
+             ``max|Sigma F - I|``.
+   :rtype: tuple
+
+   :raises numpy.linalg.LinAlgError: If the matrix is singular even after normalisation.
+
+

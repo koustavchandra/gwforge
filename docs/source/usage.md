@@ -15,6 +15,12 @@
 5. **Detector Response:**
    Project signals onto the detectors with a frequency- and time-dependent antenna response, which drops the long-wavelength and static-pattern approximations that break for XG detectors.
 
+6. **Population Forecasts:**
+   Forecast how well a network measures the population itself -- the mass function, the merger-rate history, the spin distribution and, through spectral sirens, the cosmology -- with the population Fisher matrix.
+
+7. **Workflows:**
+   Chain noise generation and injections over long stretches of data as an HTCondor DAG.
+
 I have curated some examples below for reference. Please give them a try!
 ```{toctree}
 :caption: 'Contents:'
@@ -29,7 +35,7 @@ population_fisher
 workflow
 ```
 
-To generate the documentation, just run:
+To generate the documentation, install the `docs` extra and run:
 ```bash
-sphinx-autobuild docs/source/ docs/build/html/
+make -C docs html
 ```

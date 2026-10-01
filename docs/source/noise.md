@@ -33,9 +33,11 @@ duration = 86400
 ```
 And remove the gps option.
 
+If the data already exist in the output directory you will be warned that they may be overwritten; the noise is reproducible, so rerunning the same configuration writes the same realisation.
+
 For zero noise, set `noise = zero`. Both noise types are produced by the same code path, so zero noise is available for every detector including ET.
 
-Finally, you can supply your own noise curves:
+Finally, you can supply your own noise curves (a `psd-dict` that does not parse, or names a detector that is not in `detectors`, is an error rather than a silent fall-back to the shipped curves):
 ```ini
 [IFOS]
 detectors = ['H1', 'L1', 'V1']
@@ -70,16 +72,25 @@ The *white* noise stitches across chunks exactly, but the *coloured* noise does 
 | `noise-low-frequency-cutoff` | Low-frequency cutoff in Hz. Defaults per detector to its own `minimum_frequency`. |
 
 ```{deprecated} 0.1
-`noise-type` (which used to select a `bilby` or `pycbc` backend) and `fft-scheme` are ignored. GWForge now generates all noise itself, and numpy's FFT has no size limit to work around. Both keys log a warning and are otherwise harmless.
+`noise-type` (which used to select a `bilby` or `pycbc` backend) and `fft-scheme` are ignored by `gwforge_noise`. GWForge now generates all noise itself, and numpy's FFT has no size limit to work around. Both keys log a warning and are otherwise harmless. `fft-scheme` in the same `[IFOS]` section is still read by `gwforge_inject`'s `pycbc` injection method -- see {doc}`inject`.
 ```
 
 ## Overriding a detector's noise curve
 
-Detector tokens carry a sensitivity with them. `CE40`, `CE20` and `ET` come from
-GWForge's own `.ifo` files; everything else falls through to bilby, and bilby's
-choices are not always the ones a study wants. In particular, `H1` and `L1`
-carry `aLIGO_O4_high_asd.txt` and `V1` carries `AdV_psd.txt` — of the 2G
-detectors only `A1` (LIGO-India) is A+ out of the box.
+Detector tokens carry a sensitivity with them. These come from GWForge's own
+`.ifo` files and noise curves in `GWForge/ifo/`:
+
+| token | detector | starts at |
+| --- | --- | --- |
+| `CE40`, `CE20` (aliases `CEA`, `CEB`) | Cosmic Explorer, 40 km and 20 km | 6 Hz |
+| `ET` | Einstein Telescope triangle, expanded to `ET1`, `ET2`, `ET3` everywhere | 2 Hz |
+| `ETSL`, `ETMRL` | Einstein Telescope 2L: 15 km L-shaped detectors in Sardinia and the Meuse-Rhine region, arms rotated by 45 degrees, cryogenic 15 km ASD | 5 Hz |
+| `LI` | LIGO-India at A+ sensitivity | 10 Hz |
+
+Everything else falls through to bilby, and bilby's choices are not always the
+ones a study wants. In particular, `H1` and `L1` carry `aLIGO_O4_high_asd.txt`
+and `V1` carries `AdV_psd.txt`; bilby's `A1` is LIGO-India at A+, as is
+GWForge's `LI`.
 
 `gwforge_optimal_snr --psd-dict` replaces the curve without touching the
 geometry:
@@ -110,3 +121,19 @@ starts. So `--minimum-frequency 5` against a detector whose `.ifo` says
 A quick way to confirm an override took: run a handful of events with and
 without it. A no-op leaves the SNRs bit-identical, and swapping A+ for
 O4-high moves H1 and L1 by a factor of about two.
+
+## Estimating a PSD from the data
+
+`gwforge_estimate_psd` reads the HDF5 files `gwforge_noise` writes and estimates
+the power spectrum window by window with Welch's median-mean method, which is
+what you want after the signals have been injected:
+
+```bash
+gwforge_estimate_psd --frame-file data/CE40/CE40-1893024018-4096.h5 --channel CE40:INJ \
+                     --gps-start-time 1893024018 --duration 4096 \
+                     --stride 512 --psd-segment-length 16 --psd-segment-stride 8 \
+                     --low-frequency-cutoff 6 --output-file psd_CE40
+```
+
+It writes `psd_CE40.csv` with a `frequency_array` column and one `psd_k` column
+per stride. The frequency resolution is the inverse of the stride.

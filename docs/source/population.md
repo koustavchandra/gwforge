@@ -11,9 +11,9 @@ The first step in generating a source population is to determine the distributio
 - Local merger rate density in $Gpc^{-3}yr^{-1}$
 - Maximum redshift of the source
 - Cosmological parameters such as $H_0,~O_{m0}, O_{de0}$ and $T^{cmb}_0$, assuming [LambdaCDM cosmology](http://hyperphysics.phy-astr.gsu.edu/hbase/Astro/lambda.html)
-- A reference start time when you switch on your detector.
+- A reference start time when you switch on your detector (`gps-start-time`, required).
 
-The last is optional. If not provided, GWForge assumes [Planck18](https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html) cosmology. 
+The cosmology is optional. If not provided, GWForge assumes [Planck18](https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html):
 $$
 H_0 = 67.66~km/s/Mpc,~O_{m0} = 0.30966,~T^{cmb}_0 = 2.7255 K
 $$
@@ -27,12 +27,12 @@ redshift-model = MadauDickinson
 redshift-parameters = {'gamma': 2.7, 'kappa': 5.6, 'z_peak': 1.9}
 local-merger-rate-density = 22
 maximum-redshift = 30
-; custom cosmology
+; custom cosmology (these are also the fallbacks if you leave one out)
 cosmology = custom 
 H0 = 70
 Om0 = 0.3
 Ode0 = 0.7
-Tcmb0 = 2.735
+Tcmb0 = 2.725
 ; analysis start time
 gps-start-time = 1893024018
 ```
@@ -115,10 +115,10 @@ The currently available mass distribution models and their parameters are:
   | Model Name | Parameters | Description | 
   | ---|---| ---| 
   |[`PowerLaw+Peak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.SinglePeakSmoothedMassDistribution.html#gwpopulation.models.mass.SinglePeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, mpp, sigpp, delta_m` | Powerlaw + peak model for two-dimensional mass distribution with low mass smoothing.
-  |[`MultiPeak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.MultiPeakSmoothedMassDistribution.html#gwpopulation.models.mass.MultiPeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, lam_1, mpp_1, mpp_2, sigpp_1, sigp_2, delta_m` | Powerlaw + two peak model for two-dimensional mass distribution with low mass smoothing.
+  |[`MultiPeak`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.MultiPeakSmoothedMassDistribution.html#gwpopulation.models.mass.MultiPeakSmoothedMassDistribution)| `alpha, beta, mmin, mmax, lam, lam_1, mpp_1, mpp_2, sigpp_1, sigpp_2, delta_m` | Powerlaw + two peak model for two-dimensional mass distribution with low mass smoothing.
   |[`BrokenPowerLaw`](https://colmtalbot.github.io/gwpopulation/_autosummary/gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution.html#gwpopulation.models.mass.BrokenPowerLawSmoothedMassDistribution)| `alpha_1, alpha_2, beta, break_fraction, mmin, mmax, delta_m` | Broken power law for two-dimensional mass distribution with low mass smoothing. |
   |`BGP`| `alpha_1, alpha_2, m_break, mmin, delta_m, mmin_2, delta_m_2, m_high, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, beta` | Broken power law + two Gaussian peaks — the fiducial BBH mass model from GWTC-4.0/5.0. See [below](#the-bgp-model). |
-  |`UniformSecondary`| `alpha, beta, delta_m, mmin, mmax, 88.81, lam, mpp, sigpp, minimum_secondary_mass, maximum_secondary_mass` | PowerLaw + Peak for primary mass and uniform for secondary |
+  |`UniformSecondary`| `alpha, beta, delta_m, mmin, mmax, lam, mpp, sigpp, minimum_secondary_mass, maximum_secondary_mass` | PowerLaw + Peak for primary mass and uniform for secondary |
   |`DoubleGaussian`| `mu_1, sigma_1, mu_2, sigma_2, breaking_fraction, mmin, mmax` | Truncated Gaussian distribution for primary and secondary
   |`LogNormal`| `mu, sigma` | Log-normal distribution with mean mu and width sigma for primary and secondary | 
   |`PowerLawDipBreak`|`mmin, mmax, alpha_1, alpha_2, gamma_low, gamma_high, eta_low, eta_high, A, n` | Extension of power law break model |
@@ -169,6 +169,7 @@ mass-parameters = {'alpha_1': 1.456442737, 'alpha_2': 5.100400428, 'm_break': 37
 | `mpp_1, sigpp_1` | Location and width of the **first** Gaussian peak |
 | `mpp_2, sigpp_2` | Location and width of the **second** Gaussian peak |
 | `beta` | Power-law slope of the mass ratio |
+| `maximum_mass` | *(optional)* upper edge of the evaluation grid, `300` $M_\odot$ in the shipped block (`200` if you pass your own `mass-parameters` without it). Must exceed `m_high` |
 
 ```{note}
 Which peak is which is a matter of the values you supply, not of the name: at
@@ -183,14 +184,13 @@ everything that needs them — the Fisher model and the shipped configs included
 The Default BBH spin values below live the same way, in
 {data}`GWForge.population.spin.DEFAULT_BBH_SPIN_PARAMETERS`.
 ```
-| `maximum_mass` | *(optional)* upper bound of the evaluation grid, default `200` $M_\odot$. Must exceed `m_high` |
 
 The exact definitions are Eqs. (B10)–(B14) of the [GWTC-5.0 population paper](https://arxiv.org/abs/2605.27226).
 
 ### User-defined populations
 Sometimes you already have a population — say, the output of a population-synthesis code — and you simply want GWForge to draw from it. The `UserDefined` model lets you do exactly that: you hand it a JSON file that tabulates the support `xx` and the (un-normalised) probability density `yy` of each parameter, and GWForge turns each into a prior it can sample from. The file looks like this:
 
-```json
+```js
 {
   "mass_1_source": {"xx": [...], "yy": [...]},
   "mass_ratio":    {"xx": [...], "yy": [...]}
@@ -358,7 +358,7 @@ To generate the binary parameters for the population, execute the following:
 ```bash
 gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
-It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH. For other options, please check `gwforge_population --help`. Please note that the waveform approximant that you use for your waveform generation supports tidal parameters if the source-type is bns or bhns (`nsbh` is accepted as an alias).
+It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH; `--source-type` takes `bbh`, `bns`, `bhns` (`nsbh` is accepted as an alias), `pbh`, `imbhb` or `imbbh`. For `bns` and `bhns` the tidal deformabilities are written too -- `lambda_1` and `lambda_2` for a BNS, only `lambda_2` for a BHNS, since the black hole has none -- so make sure the waveform approximant you inject with supports them.
 
 If you want the population to be reproducible, pass a `--seed`:
 ```bash
@@ -367,12 +367,12 @@ gwforge_population --config-file bbh.ini --output-file bbh.h5 --seed 42
 Running with the same seed and the same configuration gives you byte-for-byte the same population every time. Without a seed, each run gives you a fresh realisation.
 
 ```{note}
-By default `gwforge_population` generates a year's worth of population. If you want some other value, add the `duration` option (in seconds) to the `[Redshift]` section — for example `duration = 4096`. Please note that the population generated should be greater than the number of signals injected.
+By default `gwforge_population` generates a year's worth of population. If you want some other value, add the `duration` option (in seconds) to the `[Redshift]` section — for example `duration = 4096`. The number of mergers is a Poisson draw about the rate times the duration, and the merger times are the running sum of exponential gaps, so the last one may fall a little before or after the end of the duration. Generate past the end of the data you intend to inject into.
 ```
 
-A few more example configuration files ship with the package under `GWForge/population/population_configuration_files/` (inside your environment's `site-packages`, or in the [source tree](https://github.com/koustavchandra/gwforge/tree/main/GWForge/population/population_configuration_files)). Feel free to modify them and see what you get.
+A few more example configuration files ship with the package under `GWForge/population/population_configuration_files/` (inside your environment's `site-packages`, or in the [source tree](https://github.com/koustavchandra/gwforge/tree/main/GWForge/population/population_configuration_files)): `bgp-gwtc5.ini`, `aligned_spin_bbh.ini`, `precessing_bbh_powerlawpeak.ini`, `aligned_spin_bns_tides_on.ini` and `aligned_spin_bhns.ini`. Feel free to modify them and see what you get.
 
-The one to start from is `bgp-gwtc5.ini`: the GWTC-5.0 `Default BBH` population, with every mass and spin value a posterior median of the O4b analysis and a header recording where each came from. It is also the default: leave `mass-model` out of the `[Mass]` section and this is what `gwforge_population` generates. It generates about 33,700 BBH mergers a year out to $z = 10$:
+The one to start from is `bgp-gwtc5.ini`: the GWTC-5.0 `Default BBH` population, with every mass and spin value a posterior median of the O4b analysis and a header recording where each came from. It is also the default: leave `mass-model` out of the `[Mass]` section and this is what `gwforge_population` generates. It generates about 33,700 BBH mergers a year out to $z = 10$ (give or take the Poisson scatter):
 
 ```bash
 gwforge_population --config-file bgp-gwtc5.ini --output-file bbh.h5 \
@@ -386,8 +386,14 @@ Its `[Redshift]` block is deliberately *not* the paper's. GWForge reads Madau-Di
 ### Naive way to check the population
 You can check the binary parameters of the population by doing the following:
 ```python
-from GWForge.utils import cornerplot
-cornerplot(file='bbh.h5', parameters=['mass_1_source', 'mass_2_source', 'spin_1z','spin_2z',  'redshift'], save='pop.png')
+import h5py
+import numpy
+from GWForge.plotting import corner_plot, labels_for
+
+parameters = ['mass_1_source', 'mass_2_source', 'spin_1z', 'spin_2z', 'redshift']
+with h5py.File('bbh.h5') as f:
+    samples = numpy.column_stack([f[key][:] for key in parameters])
+corner_plot(samples, labels=labels_for(parameters)).savefig('pop.png')
 ```
 This will create a plot called `pop.png` in the current working directory with the parameters. The list of parameters can be found by doing `h5ls -r bbh.h5`. It list all the keys of an HDF5 file.
 

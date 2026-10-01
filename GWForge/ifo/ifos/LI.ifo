@@ -1,0 +1,12 @@
+# LIGO-India (Aundha) at A+ design sensitivity, 10 Hz low-frequency cutoff
+# (geometry as CE_STM_CBC/detectors/ifos/LIA+.ifo)
+name = 'LI'
+power_spectral_density = None
+minimum_frequency = 10
+maximum_frequency = 4096
+length = 4
+latitude = 19.613
+longitude = 77.031
+elevation = 0
+xarm_azimuth = 242.384
+yarm_azimuth = 332.384

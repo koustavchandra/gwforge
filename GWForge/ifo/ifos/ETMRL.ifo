@@ -1,0 +1,13 @@
+# Einstein Telescope, 2L configuration: 15 km L-shaped detector in the
+# Meuse-Rhine region, arms rotated by 45 deg with respect to Sardinia
+# (geometry as CE_STM_CBC/detectors/ifos/ETMRL45d.ifo; ET cryogenic 15 km ASD)
+name = 'ETMRL'
+power_spectral_density = None
+minimum_frequency = 5
+maximum_frequency = 4096
+length = 15
+latitude = 50.72305556
+longitude = 5.92055556
+elevation = 0
+xarm_azimuth = 45
+yarm_azimuth = 135

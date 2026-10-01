@@ -1,0 +1,12 @@
+# Einstein Telescope, 2L configuration: 15 km L-shaped detector in Sardinia
+# (geometry as CE_STM_CBC/detectors/ifos/ETSL.ifo; ET cryogenic 15 km ASD)
+name = 'ETSL'
+power_spectral_density = None
+minimum_frequency = 5
+maximum_frequency = 4096
+length = 15
+latitude = 40.51666667
+longitude = 9.41666667
+elevation = 0
+xarm_azimuth = 0
+yarm_azimuth = 90

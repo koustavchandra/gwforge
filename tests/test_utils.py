@@ -43,3 +43,11 @@ def test_reference_priors_are_physical():
     assert isinstance(utils.reference_prior_dict["dec"], bilby.core.prior.Cosine)
     assert isinstance(utils.reference_prior_dict["theta_jn"], bilby.core.prior.Sine)
     assert utils.reference_prior_dict["dec"].minimum < 0
+
+
+def test_bhns_is_canonical_and_nsbh_is_accepted():
+    """The source type is spelled ``bhns``; ``nsbh`` keeps working everywhere."""
+    assert utils.source_type("bhns") == "bhns"
+    assert utils.source_type("nsbh") == "bhns"
+    assert utils.source_type("NSBH") == "bhns"
+    assert utils.source_type("BBH") == "bbh"

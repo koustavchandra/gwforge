@@ -33,3 +33,10 @@ def test_cli_help(script):
     )
     assert result.returncode == 0, f"{script} --help failed:\n{result.stderr}"
     assert "usage" in result.stdout.lower()
+
+
+@pytest.mark.parametrize("script, option", [("gwforge_population", "nsbh"), ("gwforge_workflow", "--nsbh-configuration-file")])
+def test_nsbh_is_still_accepted_on_the_command_line(script, option):
+    """``bhns`` is the spelling; the ``nsbh`` alias must not disappear from the CLIs."""
+    result = subprocess.run([sys.executable, str(BIN / script), "--help"], capture_output=True, text=True)
+    assert option in result.stdout and "bhns" in result.stdout

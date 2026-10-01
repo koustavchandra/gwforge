@@ -302,11 +302,6 @@ def _product_rule(left, right, factor):
     return product
 
 
-def _scale(mapping, factor):
-    """Multiply every entry of a derivative dictionary by a scalar or array."""
-    return {key: mapping[key] * factor for key in _LABELS}
-
-
 def _combine(left, right, sign=1.0):
     """Add or subtract two derivative dictionaries entry by entry."""
     return {key: left[key] + sign * right[key] for key in _LABELS}

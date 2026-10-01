@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def test_population_cli_runs(tmp_path):
-    config_file = Path(__file__).parent / "test.ini"
+    config_file = Path(__file__).parent.parent / "GWForge" / "population" / "population_configuration_files" / "aligned_spin_bbh.ini"
     output_file = tmp_path / "test.h5"
 
     cmd = [

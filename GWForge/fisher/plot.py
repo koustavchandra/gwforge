@@ -11,7 +11,7 @@ import logging
 import numpy
 import pylab
 
-from ..utils import GWLATEX_LABELS
+from ..plotting import labels_for
 
 # Contour levels at one, two and three sigma in two dimensions.
 CONTOUR_LEVELS = (
@@ -68,17 +68,6 @@ def samples_from_covariance(mean, covariance, size=200000, seed=None):
 
     generator = numpy.random.default_rng(seed)
     return generator.multivariate_normal(mean, covariance, size=size, method="eigh")
-
-
-def labels_for(parameters):
-    """LaTeX axis labels, falling back to the raw name when none is known.
-
-    The fallback escapes underscores so matplotlib's mathtext does not read them
-    as subscripts and silently mangle the label.
-    """
-    return [
-        GWLATEX_LABELS.get(name, name.replace("_", r"\_")) for name in parameters
-    ]
 
 
 def overlay_corner(datasets, parameters, truths=None, save=None, title=None):

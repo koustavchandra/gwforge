@@ -14,17 +14,16 @@ jobs:
  
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2.2.1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
  
       - name: Install dependencies
         run: |
-          pip install sphinx>=4.2.0 myst-parser>=2.0.0 furo>=2023.9.10 sphinx-math-dollar
-          python -m pip install .
+          python -m pip install ".[docs]"
 
       - name: make the sphinx docs
         run: |

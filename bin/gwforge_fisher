@@ -235,13 +235,13 @@ def main():
         pickle.dump(results, handle)
 
     if config.getboolean("Output", "plot-corner", fallback=True):
-        _plot(results, output_directory, fisher_options)
+        _plot(results, output_directory)
 
     _summarise(results)
     logging.info("Done!")
 
 
-def _plot(results, output_directory, fisher_options):
+def _plot(results, output_directory):
     """Write one corner plot per successful source."""
     from GWForge.fisher.plot import overlay_corner, samples_from_covariance
 

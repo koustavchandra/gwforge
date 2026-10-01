@@ -6,172 +6,11 @@ NotchFilterBinnedPairingMassDistribution population model.
 """
 
 import numpy
-from tqdm import tqdm
+from rich.progress import track
 import bilby
 
 # Import from GWForge
 from GWForge.population.pdb_external import NotchFilterBinnedPairingMassDistribution
-
-
-def rejection_sampling_uniform_grid(
-    n_samples,
-    A,
-    A2,
-    NSmin,
-    NSmax,
-    BHmin,
-    BHmax,
-    UPPERmin,
-    UPPERmax,
-    n0,
-    n1,
-    n2,
-    n3,
-    n4,
-    n5,
-    alpha_1,
-    alpha_2,
-    alpha_dip,
-    mu1,
-    sig1,
-    mix1,
-    mu2,
-    sig2,
-    mix2,
-    beta_pair_1,
-    beta_pair_2,
-    mbreak,
-    mmin=0.5,
-    mmax=350.0,
-    max_iterations=10000,
-    verbose=False,
-):
-
-    # Initialize the model class
-    model = NotchFilterBinnedPairingMassDistribution(mmin=mmin, mmax=mmax)
-
-    # Hyperparameters dict for the model
-    hyperparams = {
-        "A": A,
-        "A2": A2,
-        "NSmin": NSmin,
-        "NSmax": NSmax,
-        "BHmin": BHmin,
-        "BHmax": BHmax,
-        "UPPERmin": UPPERmin,
-        "UPPERmax": UPPERmax,
-        "n0": n0,
-        "n1": n1,
-        "n2": n2,
-        "n3": n3,
-        "n4": n4,
-        "n5": n5,
-        "alpha_1": alpha_1,
-        "alpha_2": alpha_2,
-        "alpha_dip": alpha_dip,
-        "mu1": mu1,
-        "sig1": sig1,
-        "mix1": mix1,
-        "mu2": mu2,
-        "sig2": sig2,
-        "mix2": mix2,
-        "beta_pair_1": beta_pair_1,
-        "beta_pair_2": beta_pair_2,
-        "mbreak": mbreak,
-    }
-
-    # Initialize storage for accepted samples
-    m1_accepted = []
-    m2_accepted = []
-
-    # Estimate maximum of the probability density for rejection sampling
-    # Sample a large grid to find approximate maximum
-    test_m1 = numpy.linspace(mmin, mmax, 100)
-    test_m2 = numpy.linspace(mmin, mmax, 100)
-    test_m1_grid, test_m2_grid = numpy.meshgrid(test_m1, test_m2)
-
-    # Enforce m1 >= m2 constraint
-    valid = test_m1_grid >= test_m2_grid
-    test_m1_flat = test_m1_grid[valid]
-    test_m2_flat = test_m2_grid[valid]
-
-    # Create dataset dict for model evaluation
-    test_dataset = {
-        "mass_1": test_m1_flat,
-        "mass_2": test_m2_flat,
-    }
-
-    # Compute joint probability using the model
-    joint_prob = model(test_dataset, **hyperparams)
-
-    p_max = numpy.max(joint_prob)
-    if p_max <= 0:
-        raise ValueError("Maximum probability is non-positive. Check hyperparameters.")
-
-    if verbose:
-        print(f"Estimated maximum probability: {p_max}")
-        print(f"Starting rejection sampling for {n_samples} samples...")
-
-    total_proposals = 0
-    iteration = 0
-
-    pbar = tqdm(total=n_samples, desc="Sampling", disable=not verbose, unit="samples")
-
-    while len(m1_accepted) < n_samples and iteration < max_iterations:
-        # Number of proposals to draw in this iteration
-        n_proposals = max(100, int(2 * (n_samples - len(m1_accepted))))
-
-        # Sample m1 uniformly from [mmin, mmax]
-        m1_proposal = numpy.random.uniform(mmin, mmax, n_proposals)
-
-        # Sample m2 uniformly from [mmin, m1] to ensure m1 >= m2
-        m2_proposal = numpy.random.uniform(mmin, m1_proposal)
-
-        # Create dataset dict for model evaluation
-        dataset = {
-            "mass_1": m1_proposal,
-            "mass_2": m2_proposal,
-        }
-
-        # Evaluate joint probability using the model
-        joint_prob = model(dataset, **hyperparams)
-
-        # Acceptance test with uniform random numbers
-        u = numpy.random.uniform(0, 1, len(m1_proposal))
-        acceptance_threshold = joint_prob / p_max
-        accepted = u < acceptance_threshold
-
-        # Store accepted samples
-        m1_accepted.extend(m1_proposal[accepted])
-        m2_accepted.extend(m2_proposal[accepted])
-
-        n_accepted = numpy.sum(accepted)
-        total_proposals += len(m1_proposal)
-        iteration += 1
-
-        pbar.update(min(n_accepted, n_samples - pbar.n))
-
-    pbar.close()
-
-    if len(m1_accepted) < n_samples and verbose:
-        print(
-            f"Warning: Could only generate {len(m1_accepted)} out of {n_samples} requested samples after {max_iterations} iterations."
-        )
-
-    # Convert to arrays - return however many samples were obtained
-    m1_samples = numpy.array(m1_accepted)
-    m2_samples = numpy.array(m2_accepted)
-
-    actual_samples = len(m1_samples)
-    acceptance_rate = actual_samples / total_proposals if total_proposals > 0 else 0
-
-    if verbose:
-        print("Sampling complete!")
-        print(f"Generated {actual_samples} samples (requested {n_samples})")
-        print(f"Total proposals: {total_proposals}")
-        print(f"Acceptance rate: {acceptance_rate:.4f}")
-
-    return m1_samples, m2_samples, acceptance_rate
 
 
 def importance_sampling_m1_m2_prop(
@@ -581,7 +420,7 @@ def importance_sampling_m1_q_prop(
     # p(q | m1)
     q_pdf = numpy.zeros_like(q_prop)
 
-    for i in tqdm(range(N_prop), disable=not verbose):
+    for i in track(range(N_prop), description="Sampling", disable=not verbose):
         m1 = m1_prop[i]
         beta = beta_pair_1 if m1 < mbreak else beta_pair_2
 

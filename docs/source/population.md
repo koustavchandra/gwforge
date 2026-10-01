@@ -372,7 +372,7 @@ By default `gwforge_population` generates a year's worth of population. If you w
 
 A few more example configuration files ship with the package under `GWForge/population/population_configuration_files/` (inside your environment's `site-packages`, or in the [source tree](https://github.com/koustavchandra/gwforge/tree/main/GWForge/population/population_configuration_files)). Feel free to modify them and see what you get.
 
-The one to start from is `bgp-gwtc5.ini`: the GWTC-5.0 `Default BBH` population, with every mass and spin value a posterior median of the O4b analysis and a header recording where each came from. It generates about 33,700 BBH mergers a year out to $z = 10$:
+The one to start from is `bgp-gwtc5.ini`: the GWTC-5.0 `Default BBH` population, with every mass and spin value a posterior median of the O4b analysis and a header recording where each came from. It is also the default: leave `mass-model` out of the `[Mass]` section and this is what `gwforge_population` generates. It generates about 33,700 BBH mergers a year out to $z = 10$:
 
 ```bash
 gwforge_population --config-file bgp-gwtc5.ini --output-file bbh.h5 \

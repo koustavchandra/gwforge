@@ -98,6 +98,12 @@ def test_generation_mass_defaults_are_the_medians():
     assert Mass("BGP", 1).parameters == BGP_PARAMETERS
 
 
+def test_bgp_is_the_default_mass_model():
+    """``Mass()`` with nothing at all is the GWTC-5.0 Default BBH population."""
+    assert Mass().mass_model == "bgp"
+    assert Mass().parameters == BGP_PARAMETERS
+
+
 def test_generation_spin_defaults_are_the_medians():
     parameters = Spin("Default", 1).parameters
     for name, value in DEFAULT_BBH_SPIN_PARAMETERS.items():

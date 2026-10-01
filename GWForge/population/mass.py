@@ -259,8 +259,8 @@ def _invert_rows(cumulative, support, draws):
 class Mass:
     def __init__(
         self,
-        mass_model,
-        number_of_samples,
+        mass_model="BGP",
+        number_of_samples=1,
         parameters=None,
         full_pop_sampler="importance_m1_m2",
     ):
@@ -268,7 +268,8 @@ class Mass:
         Parameters:
         ----------
         mass_model : str
-            The parameterized mass model. [Options: {}]
+            The parameterized mass model. [Options: {}] [Default: BGP, the
+            GWTC-5.0 Default BBH model]
         number_of_samples : (int)
             The number of samples to generate. [Ideal: Exactly same as redshift samples]
         parameters: (dict, optional)

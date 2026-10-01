@@ -136,7 +136,9 @@ def optional_parameters(section, option):
 
 # Generate mass samples
 logging.info("Generating mass samples")
-mass_model = config.get("Mass", "mass-model")
+mass_model = config.get("Mass", "mass-model", fallback="BGP")
+if not config.has_option("Mass", "mass-model"):
+    logging.info("No mass-model given. Assuming BGP, the GWTC-5.0 Default BBH model")
 parameters = optional_parameters("Mass", "mass-parameters")
 
 # Create Mass object and generate samples

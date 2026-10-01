@@ -12,7 +12,7 @@ Run after ``gwforge_population_fisher`` and a per-event ``gwforge_fisher`` pass:
 What this measures, and what it does not
 ----------------------------------------
 
-Gair, Ghosh et al. (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
+Gair, Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
 expand the hyper-parameter Fisher into five terms. GWForge computes the first.
 Term I is the leading order of an expansion in the size of the *per-event
 measurement uncertainty* relative to the curvature of the population density, so

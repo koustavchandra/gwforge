@@ -12,7 +12,7 @@ Where P_det sits in the forecast
 --------------------------------
 
 It is easy to read the Term-I estimator as having no selection function, because
-nothing in it evaluates one. That is not right. The first term of Gair+2022
+nothing in it evaluates one. That is not right. The first term of Gair, Antonelli & Barbieri (2022)
 Eq. 21 is an expectation *under the detected density*,
 
 .. math::

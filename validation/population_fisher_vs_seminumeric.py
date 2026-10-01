@@ -2,7 +2,7 @@
 """Reproduce the seminumeric population-Fisher forecasts with GWForge.
 
 The `population_fisher_seminumeric` tree is an independent implementation of the
-same estimator -- Gair+2022 (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
+same estimator -- Gair, Antonelli & Barbieri (2022) (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
 Eq. 21 Term I -- written before GWForge had one, and its published forecasts are
 checked in. This runs GWForge's models on *that code's own catalogue*, so the
 detected events are identical and any difference in sigma is a difference in the

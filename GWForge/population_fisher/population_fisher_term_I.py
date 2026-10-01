@@ -1,6 +1,6 @@
 r"""The Term-I population Fisher matrix.
 
-Gair, Ghosh et al. (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
+Gair, Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
 expand the hyper-parameter Fisher into five terms. This module implements the
 first, which dominates whenever per-event measurement uncertainties are small
 compared with the width of the population distribution -- the regime XG
@@ -243,7 +243,7 @@ class PopulationFisherResult:
         rule = "-" * 74
         lines = [
             rule,
-            "Population Fisher (Gair+2022 Term I)",
+            "Population Fisher (Gair, Antonelli & Barbieri 2022, Term I)",
             rule,
             "  Events used      : {} / {} offered".format(self.n_events, self.n_total),
             "  Condition number : {:.4g}".format(self.condition_number),

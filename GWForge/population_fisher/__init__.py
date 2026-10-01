@@ -6,7 +6,7 @@ history of the merger rate, the spin distribution, and -- through spectral
 sirens -- the cosmology.
 
 The estimator is the first term of the hyper-parameter Fisher expansion of Gair,
-Ghosh et al. (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_ Eq. 21),
+Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_ Eq. 21),
 
 .. math::
 

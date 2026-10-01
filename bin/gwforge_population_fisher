@@ -4,7 +4,7 @@ Forecast how well a detector network measures the *population* -- the mass
 function, the merger-rate history, the spin distribution, and optionally the
 cosmology -- from a GWForge population and its optimal SNRs.
 
-Implements the first term of the Gair et al. (2022) hyper-parameter Fisher
+Implements the first term of the Gair, Antonelli & Barbieri (2022) hyper-parameter Fisher
 expansion; see GWForge.population_fisher for the maths and its regime of
 validity.
 """

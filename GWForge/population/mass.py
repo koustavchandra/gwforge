@@ -70,6 +70,24 @@ BGP_PARAMETERS = {
     "maximum_mass": 300.0,
 }
 
+# The historical ``PowerLaw+Peak`` defaults (GWTC-3 medians), the catch-all every
+# model without an entry of its own falls back to when no parameters are given.
+POWER_LAW_PEAK_PARAMETERS = {
+    "alpha": 3.37,
+    "beta": 0.76,
+    "delta_m": 5.23,
+    "mmin": 4.89,
+    "mmax": 88.81,
+    "lam": 0.04,
+    "mpp": 33.60,
+    "sigpp": 4.59,
+}
+
+# Fiducial ``mass-parameters`` per model, keyed by the normalised model name.
+DEFAULT_PARAMETERS = {
+    "bgp": BGP_PARAMETERS,
+}
+
 CONDITIONAL_SAMPLING_CHUNK = 4096
 
 NODES_PER_PEAK_WIDTH = 40
@@ -255,15 +273,16 @@ class Mass:
             The number of samples to generate. [Ideal: Exactly same as redshift samples]
         parameters: (dict, optional)
             A dictionary of model parameters. Omit it to get the model's
-            fiducial values from :data:`BGP_PARAMETERS` -- the GWTC-5.0
-            medians for BGP if mass_model is "bgp".
+            fiducial values from :data:`DEFAULT_PARAMETERS` -- the GWTC-5.0
+            medians for BGP -- or, for any other model, the historical
+            :data:`POWER_LAW_PEAK_PARAMETERS`.
         full_pop_sampler : str
             Sampler to be used for full pop gwtc-4 model. [Options: {}] [Default: importance_m1_m2]
         """.format(choices, sampler_choices)
         self.mass_model = utils.remove_special_characters(mass_model.lower())
         self.number_of_samples = number_of_samples
         if parameters is None:
-            parameters = BGP_PARAMETERS if self.mass_model == "bgp" else {}
+            parameters = DEFAULT_PARAMETERS.get(self.mass_model, POWER_LAW_PEAK_PARAMETERS)
         # Copy so the module-level defaults above cannot be mutated through an
         # instance, and so a caller's dictionary is left alone.
         self.parameters = dict(parameters)

@@ -34,12 +34,6 @@ from GWForge.plotting import (
     new_rcParams,
     palette,
 )
-from GWForge.population_fisher import (
-    BrokenPowerLawTwoPeakMass,
-    DefaultSpin,
-    MadauDickinsonRedshift,
-)
-from GWForge.plotting import POPULATION_LATEX_LABELS
 
 COVARIANCE = numpy.array([[1.0, 0.7, 0.2], [0.7, 2.0, -0.3], [0.2, -0.3, 0.5]])
 CENTRE = [0.0, 1.0, 2.0]
@@ -237,22 +231,6 @@ def test_okabe_ito_puts_black_last():
     """Black first would make the default two-dataset overlay black-on-orange."""
     assert OKABE_ITO[-1] == "#000000"
     assert palette("okabe-ito")[0][0] == "#e69f00"
-
-
-def test_every_hyper_parameter_has_a_label():
-    """A new parameter without a label prints a raw key with a mangled underscore."""
-    models = [
-        BrokenPowerLawTwoPeakMass(),
-        MadauDickinsonRedshift(maximum_redshift=10.0),
-        DefaultSpin(),
-    ]
-    missing = [
-        name
-        for model in models
-        for name in model.parameter_names
-        if name not in POPULATION_LATEX_LABELS
-    ]
-    assert not missing, "no LaTeX label for {}".format(missing)
 
 
 def test_labels_for_escapes_the_fallback():

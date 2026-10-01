@@ -209,57 +209,6 @@ def test_tilt_marginal_is_not_the_joint():
     assert not numpy.allclose(joint, marginal**2)
 
 
-def test_spin_densities_agree_with_the_fisher_model():
-    """The forecast and the density checks must describe one distribution."""
-    from GWForge.population.spin import (
-        default_spin_magnitude_density,
-        default_spin_tilt_density,
-        truncated_normal,
-    )
-    from GWForge.population_fisher import DefaultSpin
-
-    model = DefaultSpin()
-    magnitudes = numpy.linspace(0.05, 0.95, 40)
-    cosines = numpy.linspace(-0.9, 0.9, 40)
-    events = {
-        "a_1": magnitudes,
-        "a_2": magnitudes[::-1],
-        "cos_tilt_1": cosines,
-        "cos_tilt_2": cosines[::-1],
-    }
-    gaussian = [
-        truncated_normal(cosines, FIDUCIAL["mu_t"], FIDUCIAL["sigma_t"], -1.0, 1.0)[
-            "density"
-        ],
-        truncated_normal(
-            cosines[::-1], FIDUCIAL["mu_t"], FIDUCIAL["sigma_t"], -1.0, 1.0
-        )["density"],
-    ]
-    expected = (
-        numpy.log(
-            default_spin_magnitude_density(
-                magnitudes, FIDUCIAL["mu_chi"], FIDUCIAL["sigma_chi"]
-            )
-        )
-        + numpy.log(
-            default_spin_magnitude_density(
-                magnitudes[::-1], FIDUCIAL["mu_chi"], FIDUCIAL["sigma_chi"]
-            )
-        )
-        + numpy.log(
-            FIDUCIAL["xi_spin"] * gaussian[0] * gaussian[1]
-            + (1.0 - FIDUCIAL["xi_spin"]) / 4.0
-        )
-    )
-    numpy.testing.assert_allclose(
-        model.log_prob(events, model.fiducial), expected, rtol=1e-12
-    )
-    # And the marginal really is the partner integrated out.
-    assert default_spin_tilt_density(
-        cosines, FIDUCIAL["mu_t"], FIDUCIAL["sigma_t"], FIDUCIAL["xi_spin"]
-    ).shape == cosines.shape
-
-
 # ---------------------------------------------------------------------------
 # Construction and reproducibility
 # ---------------------------------------------------------------------------

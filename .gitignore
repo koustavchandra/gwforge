@@ -57,3 +57,5 @@ population_fisher_comparison/
 
 # validation/population_detection_fraction.py output
 detection_fraction/
+time_delay_forecasting_for_bbhs/output/
+time_delay_forecasting_for_bbhs/output_n200/

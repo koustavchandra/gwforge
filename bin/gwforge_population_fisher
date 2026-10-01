@@ -1,0 +1,298 @@
+#!/usr/bin/env python
+"""
+Forecast how well a detector network measures the *population* -- the mass
+function, the merger-rate history, the spin distribution, and optionally the
+cosmology -- from a GWForge population and its optimal SNRs.
+
+Implements the first term of the Gair et al. (2022) hyper-parameter Fisher
+expansion; see GWForge.population_fisher for the maths and its regime of
+validity.
+"""
+import argparse
+import configparser
+import json
+import logging
+import os
+
+import matplotlib
+
+matplotlib.use("Agg")
+
+import numpy
+
+from GWForge.population_fisher import load_catalogue, load_injections
+from GWForge.population_fisher.compare import compare_block
+from GWForge.population_fisher.config import (
+    build_model,
+    catalogue_settings,
+    fisher_settings,
+    fit_settings,
+    output_settings,
+)
+from GWForge.population_fisher.population_fisher_term_I import (
+    PopulationFisherResult,
+    population_fisher,
+)
+from GWForge.population_fisher.plot import (
+    corner_plot,
+    plot_mass_distribution,
+    plot_redshift_distribution,
+)
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+
+def parse_arguments(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config-file", help="Configuration ini file (omit when using --compare)"
+    )
+    parser.add_argument(
+        "--compare",
+        nargs="+",
+        metavar="LABEL=FILE.npz",
+        help="Overlay previously computed forecasts, e.g. "
+        "--compare 'CE40+CE20+ET=mass_snr10.npz' 'H1+L1+V1=mass_lvk_snr10.npz'. "
+        "Reads the saved .npz archives, so comparing two networks does not mean "
+        "recomputing either",
+    )
+    parser.add_argument(
+        "--parameters",
+        help="Restrict a --compare corner to these hyper-parameters, as a "
+        "single-quoted list, e.g. \"['alpha_1', 'm_break']\"",
+    )
+    parser.add_argument(
+        "--output-file", help="Where to write the --compare figure"
+    )
+    parser.add_argument(
+        "--palette",
+        default="tealrose",
+        choices=("tealrose", "okabe-ito"),
+        help="Colour palette for the figures",
+    )
+    parser.add_argument(
+        "--output-directory",
+        default=None,
+        help="Where to write results; overrides [Output] output-directory",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=250114,
+        help="Seed for the samples drawn behind the corner plots and bands",
+    )
+    return parser.parse_args(argv)
+
+
+def compare(options):
+    """Overlay saved forecasts on one corner. See ``--compare``."""
+    results = []
+    for entry in options.compare:
+        if "=" not in entry:
+            raise ValueError(
+                "--compare takes LABEL=FILE.npz entries; got {!r}".format(entry)
+            )
+        label, _, path = entry.partition("=")
+        results.append((label, PopulationFisherResult.from_npz(path)))
+        logging.info(
+            "%s: %d parameters from %d events",
+            label,
+            len(results[-1][1].parameter_names),
+            results[-1][1].n_events,
+        )
+
+    parameters = json.loads(options.parameters.replace("'", '"')) if options.parameters else None
+    output_file = options.output_file or "population_fisher_comparison.pdf"
+    directory = os.path.dirname(output_file)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    corner_plot(
+        results,
+        save=output_file,
+        seed=options.seed,
+        parameters=parameters,
+        palette_name=options.palette,
+    )
+
+    rule = "-" * 74
+    lines = [rule, "Forecast comparison", rule]
+    names = parameters or results[0][1].parameter_names
+    lines.append(
+        "  {:>18s}".format("Parameter")
+        + "".join("   {:>14s}".format(label) for label, _ in results)
+        + "   {:>9s}".format("ratio")
+    )
+    lines.append("  " + "-" * (18 + 17 * len(results) + 12))
+    for name in names:
+        sigmas = [result.sigma[name] for _, result in results]
+        ratio = sigmas[-1] / sigmas[0] if sigmas[0] > 0 else float("nan")
+        lines.append(
+            "  {:>18s}".format(name)
+            + "".join("   {:>14.5g}".format(value) for value in sigmas)
+            + "   {:>9.3g}".format(ratio)
+        )
+    lines.append(rule)
+    lines.append(
+        "  events: " + ", ".join("{} {}".format(label, result.n_events)
+                                 for label, result in results)
+    )
+    print("\n".join(lines))
+    logging.info("Wrote %s", output_file)
+
+
+def main(argv=None):
+    options = parse_arguments(argv)
+    if options.compare:
+        return compare(options)
+    if not options.config_file:
+        raise ValueError("Either --config-file or --compare is required.")
+    config = configparser.ConfigParser()
+    if not config.read(options.config_file):
+        raise FileNotFoundError("Could not read {}".format(options.config_file))
+
+    catalogue_options = catalogue_settings(config)
+    model, blocks, sub_models, cosmology = build_model(config)
+    fits = fit_settings(config)
+    fisher_options = fisher_settings(config)
+    output = output_settings(config)
+    if options.output_directory:
+        output["output_directory"] = options.output_directory
+    os.makedirs(output["output_directory"], exist_ok=True)
+
+    report = ["Configuration : {}".format(options.config_file), "Blocks        : {}".format(", ".join(blocks)), ""]
+
+    # ---- fiducials -----------------------------------------------------
+    # Fitted to *every* injection, not to the detected ones: the population
+    # model describes the astrophysical population, and fitting to the detected
+    # subset would absorb the selection function into the hyper-parameters.
+    if any(fits.values()):
+        injections = load_injections(catalogue_options["population_file"])
+        for block, wanted in fits.items():
+            if not wanted or block not in sub_models:
+                continue
+            summary = compare_block(
+                sub_models[block],
+                block,
+                injections,
+                free_parameters=fisher_options["free_parameters"],
+            )
+            report.extend(summary)
+            report.append("")
+
+    # ---- catalogue and Fisher ------------------------------------------
+    results = {}
+    for threshold in catalogue_options["snr_thresholds"]:
+        catalogue = load_catalogue(
+            catalogue_options["population_file"],
+            catalogue_options["snr_file"],
+            snr_threshold=threshold,
+            detectors=catalogue_options["detectors"],
+        )
+        report.append("SNR >= {:g}".format(threshold))
+        report.append(catalogue.summary())
+        for name, extra in fisher_options["configurations"].items():
+            fixed = dict(fisher_options["fixed_parameters"])
+            fixed.update(extra)
+            free = fisher_options["free_parameters"]
+            if free is not None:
+                free = [entry for entry in free if entry not in fixed]
+            result = population_fisher(
+                model,
+                catalogue.events,
+                free_parameters=free,
+                fixed_parameters=fixed,
+                parameters=model.fiducial,
+                method=fisher_options["score_method"],
+                n_total=catalogue.n_total,
+            )
+            if name:
+                report.append("configuration: {}".format(name))
+            report.append(result.summary())
+            report.append("")
+            results.setdefault(name, []).append((threshold, catalogue, result))
+
+            stem = "_".join(part for part in (output["label"], name) if part)
+            numpy.savez(
+                os.path.join(
+                    output["output_directory"],
+                    "{}_snr{:g}.npz".format(stem, threshold),
+                ),
+                fisher=result.fisher,
+                covariance=result.covariance,
+                parameter_names=numpy.array(result.parameter_names, dtype=object),
+                fiducial=numpy.array(
+                    [result.fiducial[name_] for name_ in result.parameter_names]
+                ),
+                snr_threshold=threshold,
+                n_events=result.n_events,
+                n_total=result.n_total,
+                condition_number=result.condition_number,
+            )
+
+    # ---- figures -------------------------------------------------------
+    if output["plot_corner"]:
+        for name, entries in results.items():
+            stem = "_".join(part for part in (output["label"], name) if part)
+            wanted = output["plot_parameters"]
+            if wanted is not None:
+                # A configuration that pins a parameter has no contour for it;
+                # drop it rather than refusing to draw the rest.
+                available = entries[0][2].parameter_names
+                wanted = [entry for entry in wanted if entry in available]
+                if not wanted:
+                    wanted = None
+            corner_plot(
+                [("SNR $\\geq$ {:g}".format(t), r) for t, _, r in entries],
+                save=os.path.join(
+                    output["output_directory"], "{}_corner.pdf".format(stem)
+                ),
+                title=stem.replace("_", " "),
+                seed=options.seed,
+                parameters=wanted,
+                palette_name=options.palette,
+            )
+        logging.info("Wrote the corner plot(s)")
+
+    loudest = next(iter(results.values()))[0]
+    injections = load_injections(catalogue_options["population_file"])
+    if "mass" in sub_models and any(
+        name in loudest[2].parameter_names
+        for name in sub_models["mass"].parameter_names
+    ):
+        plot_mass_distribution(
+            sub_models["mass"],
+            loudest[2],
+            injections=injections.get("mass_1_source"),
+            save=os.path.join(
+                output["output_directory"], "{}_mass.pdf".format(output["label"])
+            ),
+            seed=options.seed,
+        )
+    if "redshift" in sub_models and any(
+        name in loudest[2].parameter_names
+        for name in sub_models["redshift"].parameter_names
+    ):
+        plot_redshift_distribution(
+            sub_models["redshift"],
+            loudest[2],
+            injections=injections.get("redshift"),
+            save=os.path.join(
+                output["output_directory"], "{}_redshift.pdf".format(output["label"])
+            ),
+            seed=options.seed,
+        )
+
+    text = "\n".join(report)
+    summary_file = os.path.join(
+        output["output_directory"], "{}_summary.txt".format(output["label"])
+    )
+    with open(summary_file, "w") as handle:
+        handle.write(text + "\n")
+    print(text)
+    logging.info("Wrote %s", summary_file)
+
+
+if __name__ == "__main__":
+    main()

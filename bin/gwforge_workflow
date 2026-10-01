@@ -15,85 +15,16 @@ logging.basicConfig(
 )
 from GWForge.utils import split_odd_even
 
-noise = """######################################################################
-# Submit Script for NOISE
+submit = """######################################################################
+# Submit Script for {source}
 ######################################################################
 universe = vanilla
-executable = {0}
-arguments = "--config-file {1} --output-directory {2} --gps-start-time {3} --gps-end-time {4}"
-log = {5}/noise-{6}.log
-error = {7}/noise-{8}.err
-output = {9}/noise-{10}.out
-accounting_group = {11}
-notification = NEVER
-request_cpus = 1
-getenv = True
-request_disk = 100MB
-priority = 1000
-machine_count = 1
-+InitialRequestMemory = 5000
-request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
-periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
-periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
-queue
-"""
-
-bbh = """######################################################################
-# Submit Script for BBH
-######################################################################
-universe = vanilla
-executable = {0}
-arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
-log = {5}/bbh-{6}.log
-error = {7}/bbh-{8}.err
-output = {9}/bbh-{10}.out
-accounting_group = {11}
-notification = NEVER
-request_cpus = 1
-getenv = True
-request_disk = 100MB
-priority = 1000
-machine_count = 1
-+InitialRequestMemory = 5000
-request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
-periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
-periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
-queue
-"""
-
-bns = """######################################################################
-# Submit Script for BNS
-######################################################################
-universe = vanilla
-executable = {0}
-arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
-log = {5}/bns-{6}.log
-error = {7}/bns-{8}.err
-output = {9}/bns-{10}.out
-accounting_group = {11}
-notification = NEVER
-request_cpus = 1
-getenv = True
-request_disk = 100MB
-priority = 1000
-machine_count = 1
-+InitialRequestMemory = 5000
-request_memory = ifthenelse( (LastHoldReasonCode=!=21 && LastHoldReasonCode=!=26 && LastHoldReasonCode=!=34), InitialRequestMemory, int(1.5 * MemoryUsage) )
-periodic_release = ((HoldReasonCode =?= 21) || (HoldReasonCode =?= 26) || (HoldReasonCode =?= 34))
-periodic_remove = (JobStatus == 5) && ((CurrentTime - EnteredCurrentStatus) > 43200)
-queue
-"""
-
-nsbh = """######################################################################
-# Submit Script for NSBH
-######################################################################
-universe = vanilla
-executable = {0}
-arguments = "--config-file {1} --data-directory {2} --gps-start-time {3} --gps-end-time {4}"
-log = {5}/nsbh-{6}.log
-error = {7}/nsbh-{8}.err
-output = {9}/nsbh-{10}.out
-accounting_group = {11}
+executable = {executable}
+arguments = "--config-file {configuration} {data_flag} {data_directory} --gps-start-time {start} --gps-end-time {end}"
+log = {log_directory}/{source}-{k}.log
+error = {log_directory}/{source}-{k}.err
+output = {log_directory}/{source}-{k}.out
+accounting_group = {accounting_group}
 notification = NEVER
 request_cpus = 1
 getenv = True
@@ -149,10 +80,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--bhns-configuration-file",
     "--nsbh-configuration-file",
+    dest="bhns_configuration_file",
     type=str,
     default=None,
-    help="Path to neutron star black hole binary configuration file.",
+    help="Path to black hole neutron star binary configuration file.",
 )
 
 parser.add_argument(
@@ -182,23 +115,16 @@ if os.path.exists(output_directory):
         i += 1
 else:
     os.makedirs(output_directory)
-try:
-    submit_directory = os.path.join(output_directory, "submit")
-    data_directory = os.path.join(output_directory, "data")
-    os.makedirs(submit_directory)
-    if not opts.log_directory:
-        log_directory = os.path.join(opts.output_directory, "logs")
-    else:
-        log_directory = opts.log_directory
-    os.makedirs(log_directory)
-
-except Exception:
-    logging.warning("Submit and log directory already exist")
+submit_directory = os.path.join(output_directory, "submit")
+data_directory = os.path.join(output_directory, "data")
+log_directory = opts.log_directory or os.path.join(output_directory, "logs")
+os.makedirs(submit_directory, exist_ok=True)
+os.makedirs(log_directory, exist_ok=True)
 
 logging.info(
     "Checking if jobs can be parallelised or not based on gps-start-time and gps-end-time"
 )
-# Parallelise only if duration > 40960
+# Parallelise only if duration > 24576
 minimum_duration = 4096 * 6
 if (opts.gps_end_time - opts.gps_start_time) <= minimum_duration:
     time = [opts.gps_start_time, opts.gps_end_time]
@@ -214,127 +140,44 @@ else:
     time = numpy.append(time, opts.gps_end_time)
 
 condor_dag_file = os.path.join(output_directory, "{}.condor".format(opts.workflow_name))
+stages = [("noise", opts.noise_configuration_file, "gwforge_noise", "--output-directory")]
+for source, configuration in (("bbh", opts.bbh_configuration_file), ("bhns", opts.bhns_configuration_file), ("bns", opts.bns_configuration_file)):
+    if configuration:
+        stages.append((source, configuration, "gwforge_inject", "--data-directory"))
+job_ids = {}
 with open(condor_dag_file, "w") as dag_file:
-    noise_job_ids = []
-    gwforge_noise = shutil.which("gwforge_noise")
-    if gwforge_noise is None:
-        raise ValueError("{} not found!".format(gwforge_noise))
-    for k in track(range(len(time) - 1), description="Writing noise submit files"):
-        noise_submit_file = os.path.join(submit_directory, "noise-{}.sub".format(k))
-        with open(noise_submit_file, "w") as f:
-            f.write(
-                noise.format(
-                    gwforge_noise,
-                    opts.noise_configuration_file,
-                    data_directory,
-                    time[k],
-                    time[k + 1],
-                    log_directory,
-                    k,
-                    log_directory,
-                    k,
-                    log_directory,
-                    k,
-                    opts.accounting_group,
-                )
-            )
-        noise_job_id = f"noise_{k}"
-        dag_file.write("JOB {} {}\n".format(noise_job_id, noise_submit_file))
-        dag_file.write("RETRY {} 3\n".format(noise_job_id))
-        noise_job_ids.append(noise_job_id)
-
-    bbh_job_ids = []
-    if opts.bbh_configuration_file:
-        gwforge_bbh = shutil.which("gwforge_inject")
-        if gwforge_bbh is None:
-            raise ValueError("{} not found!".format(gwforge_bbh))
-        for k in track(range(len(time) - 1), description="Writing BBH submit files"):
-            bbh_submit_file = os.path.join(submit_directory, "bbh-{}.sub".format(k))
-            with open(bbh_submit_file, "w") as f:
+    for source, configuration, script, data_flag in stages:
+        executable = shutil.which(script)
+        if executable is None:
+            raise ValueError("{} not found on PATH".format(script))
+        job_ids[source] = []
+        for k in track(range(len(time) - 1), description="Writing {} submit files".format(source)):
+            submit_file = os.path.join(submit_directory, "{}-{}.sub".format(source, k))
+            with open(submit_file, "w") as f:
                 f.write(
-                    bbh.format(
-                        gwforge_bbh,
-                        opts.bbh_configuration_file,
-                        data_directory,
-                        time[k],
-                        time[k + 1],
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        opts.accounting_group,
+                    submit.format(
+                        source=source,
+                        executable=executable,
+                        configuration=configuration,
+                        data_flag=data_flag,
+                        data_directory=data_directory,
+                        start=time[k],
+                        end=time[k + 1],
+                        log_directory=log_directory,
+                        k=k,
+                        accounting_group=opts.accounting_group,
                     )
                 )
-            bbh_job_id = f"bbh_{k}"
-            dag_file.write("JOB {} {}\n".format(bbh_job_id, bbh_submit_file))
-            dag_file.write("RETRY {} 3\n".format(bbh_job_id))
-            bbh_job_ids.append(bbh_job_id)
-
-    nsbh_job_ids = []
-    if opts.nsbh_configuration_file:
-        gwforge_nsbh = shutil.which("gwforge_inject")
-        if gwforge_nsbh is None:
-            raise ValueError("{} not found!".format(gwforge_nsbh))
-        for k in track(range(len(time) - 1), description="Writing NSBH submit files"):
-            nsbh_submit_file = os.path.join(submit_directory, "nsbh-{}.sub".format(k))
-            with open(nsbh_submit_file, "w") as f:
-                f.write(
-                    nsbh.format(
-                        gwforge_nsbh,
-                        opts.nsbh_configuration_file,
-                        data_directory,
-                        time[k],
-                        time[k + 1],
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        opts.accounting_group,
-                    )
-                )
-            nsbh_job_id = f"nsbh_{k}"
-            dag_file.write("JOB {} {}\n".format(nsbh_job_id, nsbh_submit_file))
-            dag_file.write("RETRY {} 3\n".format(nsbh_job_id))
-            nsbh_job_ids.append(nsbh_job_id)
-
-    bns_job_ids = []
-    if opts.bns_configuration_file:
-        gwforge_bns = shutil.which("gwforge_inject")
-        if gwforge_bns is None:
-            raise ValueError("{} not found!".format(gwforge_bns))
-        for k in track(range(len(time) - 1), description="Writing BNS submit files"):
-            bns_submit_file = os.path.join(submit_directory, "bns-{}.sub".format(k))
-            with open(bns_submit_file, "w") as f:
-                f.write(
-                    bns.format(
-                        gwforge_bns,
-                        opts.bns_configuration_file,
-                        data_directory,
-                        time[k],
-                        time[k + 1],
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        log_directory,
-                        k,
-                        opts.accounting_group,
-                    )
-                )
-            bns_job_id = f"bns_{k}"
-            dag_file.write("JOB {} {}\n".format(bns_job_id, bns_submit_file))
-            dag_file.write("RETRY {} 3\n".format(bns_job_id))
-            bns_job_ids.append(bns_job_id)
+            job_id = "{}_{}".format(source, k)
+            dag_file.write("JOB {} {}\n".format(job_id, submit_file))
+            dag_file.write("RETRY {} 3\n".format(job_id))
+            job_ids[source].append(job_id)
 
     # Build parent/child dependencies across whichever injection categories are
     # present. Within a category, odd-indexed segments run first and even-indexed
     # segments depend on them (adjacent segments share frame files, so they must
     # not be written concurrently). Across categories the chain is
-    # noise -> bbh -> nsbh -> bns, skipping any absent category. A PARENT line is
+    # noise -> bbh -> bhns -> bns, skipping any absent category. A PARENT line is
     # only written when the parent list is non-empty, so a single-interval run or a
     # missing middle category never produces an invalid "PARENT  CHILD x" line.
     def write_parent_child(parents, children):
@@ -344,8 +187,9 @@ with open(condor_dag_file, "w") as dag_file:
         for child in children:
             dag_file.write("PARENT {} CHILD {}\n".format(" ".join(parents), child))
 
-    previous_stage_jobs = noise_job_ids
-    for category_job_ids in (bbh_job_ids, nsbh_job_ids, bns_job_ids):
+    previous_stage_jobs = job_ids["noise"]
+    for source in ("bbh", "bhns", "bns"):
+        category_job_ids = job_ids.get(source, [])
         if not category_job_ids:
             continue
         odd, even = split_odd_even(category_job_ids)

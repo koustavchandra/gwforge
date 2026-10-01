@@ -7,9 +7,6 @@ from lal import YRJUL_SI, PC_SI
 from scipy.interpolate import interp1d
 from scipy.integrate import cumulative_trapezoid
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 # Supported time-delay models.
 TIME_DELAY_MODELS = ("inverse", "powerlaw")
@@ -371,7 +368,8 @@ class Redshift:
                 average_time_interval
             )
         )
-        number_of_samples = int(self.analysis_time / average_time_interval)
+        # The count is Poisson, like the gaps; a fixed int(T / mean) is not a realisation.
+        number_of_samples = int(numpy.random.poisson(self.analysis_time / average_time_interval))
         logging.info("Number of samples generated = {}".format(number_of_samples))
         z = prior.sample(number_of_samples)
 

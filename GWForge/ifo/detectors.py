@@ -5,9 +5,6 @@ import os
 from bilby.gw.detector.psd import PowerSpectralDensity as psd
 from bilby.gw.detector.networks import TriangularInterferometer
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 
 def load_xg_interferometer(filename, power_spectral_density):
@@ -121,6 +118,10 @@ class IFO:
                 "noise_curves",
                 "{}-{}.txt".format(self.name, file_type),
             )
+            if not os.path.isfile(noise_file):
+                raise ValueError(
+                    "{} has an .ifo file but no noise curve at {}".format(self.name, noise_file)
+                )
             temp = load_psd(noise_file)
             # Attach the PSD as the interferometer is built: bilby's
             # TriangularInterferometer rejects a None PSD (as ET's .ifo carries),

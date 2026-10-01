@@ -1,7 +1,7 @@
 import logging
 
 import numpy
-from bilby.core.utils import ra_dec_to_theta_phi
+from bilby.core.utils import infft, ra_dec_to_theta_phi
 from bilby_cython.geometry import greenwich_mean_sidereal_time
 from lal import C_SI, MTSUN_SI
 
@@ -419,7 +419,17 @@ def inject_signal_with_response(
             earth_rotation=earth_rotation,
             finite_size=finite_size,
         )
-        interferometer.strain_data.frequency_domain_strain += signal
+        # Add in the time domain. Writing to frequency_domain_strain would make
+        # bilby rebuild the time series from a windowed, band-masked transform,
+        # which re-tapers the segment edges and removes the noise below
+        # minimum_frequency every time a signal is injected.
+        strain_data = interferometer.strain_data
+        strain_data.set_from_time_domain_strain(
+            strain_data.time_domain_strain + infft(signal, strain_data.sampling_frequency),
+            sampling_frequency=strain_data.sampling_frequency,
+            duration=strain_data.duration,
+            start_time=strain_data.start_time,
+        )
 
         interferometer.meta_data["optimal_SNR"] = numpy.sqrt(
             interferometer.optimal_snr_squared(signal=signal)

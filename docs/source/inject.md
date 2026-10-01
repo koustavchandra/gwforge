@@ -10,7 +10,6 @@ sampling-frequency = 8192
 injection-file = bbh.h5
 injection-type = bbh
 waveform-approximant = IMRPhenomXO4a
-fft-scheme = numpy
 waveform-minimum-frequency = 3
 ```
 Similar to the [Noise](doc:noise), begin by defining the detector network. However, this time, provide the channel name of the Frame files and include the `sampling-frequency` (matching the detector data's sampling frequency) along with a `waveform-minimum-frequency` for the signals.
@@ -30,12 +29,10 @@ print(td_approximants())
 ```
 
 ```{warning}
-By default, GWForge uses Bilby's [`inject_signal`](https://lscsoft.docs.ligo.org/bilby/api/bilby.gw.detector.networks.InterferometerList.html#bilby.gw.detector.networks.InterferometerList.inject_signal) to add the signal in the data coherently. Alternatively, you can just specify `injection-method = pycbc` in `[Injections]` to use the PyCBC style of injecting signal. I have incorporated this from [`pycbc.inject`](https://github.com/gwastro/pycbc/blob/master/pycbc/inject/inject.py).
-
-Again, like before you can choose `fft-scheme` to be either `numpy`, `mkl` or `cuda`
+By default, GWForge adds the signal coherently in the frequency domain with its own detector response (see below). Alternatively, specify `injection-method = pycbc` in `[Injections]` to add a time-domain waveform through LAL's `SimAddInjection`, as in [`pycbc.inject`](https://github.com/gwastro/pycbc/blob/master/pycbc/inject/inject.py): a signal longer than the data is then cut at the segment edges rather than wrapped, and all signals that overlap the segment are added. The pycbc method reads `fft-scheme` (`numpy`, `mkl` or `cuda`) from the `[IFOS]` section.
 ```
 
-Available `injection-type` (for the moment) are `bbh, bns, nsbh, imbhb, imbbh, pbh`.
+Available `injection-type` (for the moment) are `bbh, bns, bhns, imbhb, imbbh, pbh`; `nsbh` is accepted as an alias of `bhns`.
 ## Detector response
 
 The `bilby` injection method projects signals onto the detectors using GWForge's

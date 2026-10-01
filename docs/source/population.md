@@ -329,11 +329,11 @@ inclination-distribution = schutz
 
 ## EOS (Equation of State)
 
-The `[EOS]` section allows specifying an `eos-file` that provides the mass and tidal parameters for a neutron star equation of state. By default, the SLy EOS (Skyrme-Lyon) is used, but you can override this by specifying a different `eos-file` in the following way:
+The `[EOS]` section allows specifying an `eos-file` that provides the mass and tidal parameters for a neutron star equation of state. By default, the packaged SLy EOS (Skyrme-Lyon) table is used, but you can override this by specifying a different `eos-file` in the following way:
 
 ```ini
 [EOS]
-eos-file = /ligo/home/ligo.org/koustav.chandra/projects/Cosmic-Explorer-MDC/gwforge/GWForge/inject/eos_tables/TOVSeq_SLy.dat
+eos-file = GWForge/inject/eos_tables/TOVSeq_APR4.dat
 ```
 provided it is consistent with how Rahul likes to define them. You can find examples of `eos-tables` in the [GWForge repository](https://github.com/koustavchandra/gwforge/tree/main/GWForge/inject/eos_tables).
 
@@ -358,7 +358,7 @@ To generate the binary parameters for the population, execute the following:
 ```bash
 gwforge_population --config-file bbh.ini --output-file bbh.h5
 ```
-It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH. For other options, please check `gwforge_population --help`. Please note that the waveform approximant that you use for your waveform generation supports tidal parameters if the source-type is bns or nsbh.
+It should take at most a minute to generate the output file. By default `gwforge_population` assumes your source type is BBH. For other options, please check `gwforge_population --help`. Please note that the waveform approximant that you use for your waveform generation supports tidal parameters if the source-type is bns or bhns (`nsbh` is accepted as an alias).
 
 If you want the population to be reproducible, pass a `--seed`:
 ```bash

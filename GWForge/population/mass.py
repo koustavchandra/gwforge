@@ -4,9 +4,6 @@ import bilby
 from .. import utils
 from .. import conversion
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 
 def notch_filter(val, parameters):
@@ -312,7 +309,7 @@ class Mass:
             maximum_mass = (
                 self.parameters.get("maximum_mass", 200)
                 if "bgp" in self.mass_model
-                else 100
+                else max(100, self.parameters.get("mmax", 0))
             )
             minimum_mass = self.parameters.get("mmin", 2)
             # Enough nodes to resolve the narrowest peak, for the same reason.

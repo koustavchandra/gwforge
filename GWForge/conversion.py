@@ -56,7 +56,11 @@ def get_lambda(file, source_mass):
     mass_new = mass[:index_maximum_mass]
     lambda_new = lambda_data[:index_maximum_mass]
 
-    mass_to_lambda = interp1d(mass_new, lambda_new, kind="cubic")
+    # Above the table's maximum mass the star has collapsed: no tides. Below
+    # its minimum, hold the last tabulated value rather than extrapolate.
+    mass_to_lambda = interp1d(
+        mass_new, lambda_new, kind="cubic", bounds_error=False, fill_value=(lambda_new[0], 0.0)
+    )
 
     return mass_to_lambda(source_mass)
 
@@ -106,24 +110,12 @@ def get_safe_signal_durations(
     import lalsimulation
     import lal
 
-    # Ensure that input parameters are float arrays
-    for param_name, param in [
-        ("mass_1", mass_1),
-        ("mass_2", mass_2),
-        ("spin_1z", spin_1z),
-        ("spin_2z", spin_2z),
-    ]:
-        if not isinstance(param, (float, numpy.ndarray, list)) or not numpy.issubdtype(
-            numpy.asarray(param).dtype, numpy.floating
-        ):
-            raise ValueError(f"{param_name} must be a float or a float array")
-
     # Convert input parameters to appropriate units
     mass_1, mass_2, spin_1z, spin_2z = (
-        numpy.atleast_1d(numpy.asarray(mass_1)) * lal.MSUN_SI,
-        numpy.atleast_1d(numpy.asarray(mass_2)) * lal.MSUN_SI,
-        numpy.atleast_1d(numpy.asarray(spin_1z)),
-        numpy.atleast_1d(numpy.asarray(spin_2z)),
+        numpy.atleast_1d(numpy.asarray(mass_1, dtype=float)) * lal.MSUN_SI,
+        numpy.atleast_1d(numpy.asarray(mass_2, dtype=float)) * lal.MSUN_SI,
+        numpy.atleast_1d(numpy.asarray(spin_1z, dtype=float)),
+        numpy.atleast_1d(numpy.asarray(spin_2z, dtype=float)),
     )
 
     waveform_minimum_frequency = float(waveform_minimum_frequency)
@@ -141,7 +133,7 @@ def get_safe_signal_durations(
         durations = [
             safety
             * lalsimulation.SimIMRSEOBNRv5ROMTimeOfFrequency(
-                m1, m2, s1z, s2z, waveform_minimum_frequency
+                waveform_minimum_frequency, m1, m2, s1z, s2z
             )
             for m1, m2, s1z, s2z in zip(mass_1, mass_2, spin_1z, spin_2z)
         ]

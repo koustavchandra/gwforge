@@ -2,9 +2,9 @@
 ~~It can be useful~~It is definitely useful to use `gwforge_workflow` to generate long data periods with/without signals rather than manually generating them individually.
 
 Here is the page devoted to step-wise:
-1. Generate the source population by following the instructions in [population](doc:population)
-2. Define your noise-configuration file by following the instructions in [noise](doc:noise)
-3. Define the injection-configuration file(s) by following the instructions in [inject](doc:inject).
+1. Generate the source population by following the instructions in {doc}`population`
+2. Define your noise-configuration file by following the instructions in {doc}`noise`
+3. Define the injection-configuration file(s) by following the instructions in {doc}`inject`.
 
 Once you have defined them, you simply run:
 ```bash
@@ -43,7 +43,7 @@ output/
 and submit all the jobs in the submit directory to HTCondor. HTCondor will store the resulting log files in logs and frame files in the respective IFO directory. [I love to call this a donkey-sus.]
 
 
-In case you want to add BNS and/or NSBH, pass the options:
+In case you want to add BNS and/or BHNS, pass the options:
 ```
---bns-configuration-file <bns-file.ini> --nsbh-configuration-file <nsbh-file.ini>
+--bns-configuration-file <bns-file.ini> --bhns-configuration-file <bhns-file.ini>
 ```

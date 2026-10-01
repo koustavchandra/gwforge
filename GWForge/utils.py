@@ -1,30 +1,8 @@
 import numpy
-import pylab
-import h5py
 import logging
 import os
 import fnmatch
 import bilby
-import seaborn as sns
-
-sns.set_context("talk")
-sns.set(font_scale=1.7)
-sns.set_palette("colorblind")
-sns.set_style("ticks")
-
-pylab.rcParams.update(
-    {
-        "text.usetex": False,
-        "font.family": "stixgeneral",
-        "mathtext.fontset": "stix",
-    }
-)
-
-pylab.rcParams["axes.linewidth"] = 1
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 
 def remove_special_characters(
@@ -130,70 +108,6 @@ GWLATEX_LABELS = {
 }
 
 
-def cornerplot(file, parameters=None, save=None):
-    """
-    Create a corner plot from samples stored in an HDF5 file.
-
-    Parameters
-    ----------
-    file : str
-        The path to the HDF5 file containing samples.
-    parameters : list of str, optional
-        A list of parameters for which to create the corner plot. If not provided,
-        default parameters ['mass_1_source', 'mass_2_source', 'chi_eff', 'chi_p', 'theta_jn', 'redshift']
-        will be used.
-    save : str, optional
-        The path to save the generated corner plot. If not provided, the plot will be displayed.
-    """
-    logging.info("Making Corner Plot")
-
-    from corner import corner
-
-    samples = {}
-    with h5py.File(file, "r") as f:
-        for key in f.keys():
-            samples[key] = f[key][:]
-
-    labels = []
-    data = []
-    if parameters:
-        for parameter in parameters:
-            data.append(samples[parameter])
-            labels.append(GWLATEX_LABELS[parameter])
-    else:
-        parameters = [
-            "mass_1_source",
-            "mass_2_source",
-            "chi_eff",
-            "chi_p",
-            "theta_jn",
-            "redshift",
-        ]
-        for parameter in parameters:
-            data.append(samples[parameter])
-            labels.append(GWLATEX_LABELS[parameter])
-
-    figure = pylab.figure(figsize=(3 * len(parameters), 3 * len(parameters)))
-    defaults_kwargs = dict(
-        bins=50,
-        smooth=0.9,
-        title_kwargs=dict(fontsize=16),
-        color="#ca0020",
-        fig=figure,
-        quantiles=[0.16, 0.84],
-        levels=(1 - numpy.exp(-0.5), 1 - numpy.exp(-2), 1 - numpy.exp(-9 / 2.0)),
-        plot_density=False,
-        plot_datapoints=True,
-        fill_contours=True,
-        max_n_ticks=3,
-    )
-
-    corner(numpy.asarray(data).T, labels=labels, **defaults_kwargs)
-    if save:
-        figure.savefig(save, bbox_inches="tight", dpi=100)
-    logging.info("Done!")
-
-
 def split_duration(duration, size=4096.0):
     """
     Split a duration into chunks of a specified size.
@@ -255,30 +169,13 @@ def find_frame_files(directory, filePattern="*gwf", start_time=None, end_time=No
     return filenames, filepaths
 
 
-def filter_times_by_frame_files(times, frame_files):
+def source_type(name):
+    """Canonical source-type token: ``bhns`` for a neutron-star--black-hole binary.
+
+    ``nsbh`` is accepted everywhere as an alias; everything else is lowercased.
     """
-    Filter a list of injections based on frame file availability
-
-    Parameters:
-    -----------
-    times: list
-        List of tc
-    frame_files:
-        List of frame files
-    """
-    filtered_times = []
-
-    for frame_file in frame_files:
-        parts = frame_file.split("-")
-        gps_start_time = int(parts[1])
-        duration = int(parts[-1].split(".")[0])
-        gps_end_time = gps_start_time + duration
-
-        for time in times:
-            if gps_start_time <= time <= gps_end_time:
-                filtered_times.append(time)
-
-    return filtered_times
+    name = name.lower()
+    return "bhns" if name == "nsbh" else name
 
 
 def split_odd_even(items):
@@ -380,11 +277,6 @@ def save_frame_files(ifo, start_time, duration, ifo_directory):
         del save_data
         # Update the start time for the next iteration
         start_time = end
-
-
-def custom_optionxform(option):
-    # Replace hyphens with underscores
-    return option.replace("_", "-")
 
 
 pycbc_labels = {

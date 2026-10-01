@@ -5,7 +5,10 @@ import logging
 import json
 import h5py
 import numpy
-from GWForge.conversion import *
+import os
+import GWForge
+from bilby.gw.conversion import generate_spin_parameters
+from GWForge.conversion import generate_detector_frame_parameters, get_lambda
 from GWForge import utils
 from GWForge.population.mass import Mass
 from GWForge.population.spin import Spin
@@ -37,10 +40,10 @@ parser.add_argument(
 )
 parser.add_argument(
     "--source-type",
-    type=str.lower,
-    choices=["bbh", "bns", "nsbh", "pbh", "imbhb", "imbbh"],
+    type=utils.source_type,
+    choices=["bbh", "bns", "bhns", "nsbh", "pbh", "imbhb", "imbbh"],
     default="bbh",
-    help="Signal source type",
+    help="Signal source type (nsbh is an alias of bhns)",
 )
 parser.add_argument(
     "--reference-frequency", type=float, default=5.0, help="Reference frequency (in Hz)"
@@ -66,7 +69,6 @@ if opts.seed is not None:
 
 # Read configuration file
 config.read(opts.config_file)
-config.optionxform = utils.custom_optionxform
 # Initialise samples dictionary
 samples = {}
 
@@ -77,7 +79,7 @@ logging.info("Generating redshift samples")
 redshift_model = config.get("Redshift", "redshift-model")
 local_merger_rate_density = config.getfloat("Redshift", "local-merger-rate-density")
 maximum_redshift = config.getfloat("Redshift", "maximum-redshift")
-gps_start_time = config.getfloat("Redshift", "gps_start-time")
+gps_start_time = config.getfloat("Redshift", "gps-start-time")
 analysis_time = config.getfloat("Redshift", "duration", fallback=YRJUL_SI)
 cosmology = config.get("Redshift", "cosmology", fallback="Planck18")
 redshift_parameters = config.get(
@@ -93,7 +95,7 @@ time_delay_slope = config.getfloat("Redshift", "time-delay-slope", fallback=1.0)
 H0 = config.getfloat("Redshift", "H0", fallback=70)
 Om0 = config.getfloat("Redshift", "Om0", fallback=0.3)
 Ode0 = config.getfloat("Redshift", "Ode0", fallback=0.7)
-Tcmb0 = config.getfloat("Redshift", "Tcmb0", fallback=2.735)
+Tcmb0 = config.getfloat("Redshift", "Tcmb0", fallback=2.725)
 
 # Create Redshift object and generate samples
 z = Redshift(
@@ -109,6 +111,7 @@ z = Redshift(
     H0=H0,
     Om0=Om0,
     Ode0=Ode0,
+    Tcmb0=Tcmb0,
 )
 
 redshift_samples = z.sample()
@@ -196,10 +199,14 @@ extrinsic_samples = e.sample()
 for key in extrinsic_samples.keys():
     samples[key] = extrinsic_samples[key]
 
-# Handle additional calculations for specific source types (e.g., BNS, NSBH)
-if opts.source_type == "bns" or opts.source_type == "nsbh":
+# Tidal deformabilities for the neutron stars of a BNS or BHNS
+if opts.source_type in ("bns", "bhns"):
     try:
-        eos_file = config.get("EOS", "eos_file")
+        eos_file = config.get(
+            "EOS",
+            "eos-file",
+            fallback=os.path.join(os.path.dirname(GWForge.__file__), "inject", "eos_tables", "TOVSeq_SLy.dat"),
+        )
         logging.info(
             "Trying {} file to estimate tidal deformability parameter of components".format(
                 eos_file
@@ -213,7 +220,7 @@ if opts.source_type == "bns" or opts.source_type == "nsbh":
                 file=eos_file, source_mass=samples["mass_1_source"]
             )
     except Exception:
-        logging.warning("Failed to estimate tidal parameters.")
+        logging.exception("Failed to estimate tidal parameters; none are written")
 
 
 # Generate all possible parameters of the specified source type

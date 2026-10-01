@@ -5,7 +5,7 @@ Estimates power spectrum for data segments
 import logging
 import argparse
 from rich.progress import track
-from pycbc.frame import read_frame
+from gwpy.timeseries import TimeSeries
 from pycbc.psd import welch, interpolate, inverse_spectrum_truncation
 import pandas as pd
 
@@ -68,12 +68,8 @@ logging.info(
 )
 number_of_windows = int(opts.duration / opts.stride)
 for k in track(range(number_of_windows)):
-    ts = read_frame(
-        location=opts.frame_file,
-        channels=opts.channel,
-        start_time=gps_start_time,
-        end_time=gps_end_time,
-    )
+    # gwpy reads the HDF5 frames gwforge_noise writes (and gwf); pycbc's read_frame does not.
+    ts = TimeSeries.read(opts.frame_file, opts.channel, start=gps_start_time, end=gps_end_time).to_pycbc()
     segment_length = int(opts.psd_segment_length * ts.sample_rate)
     segment_stride = int(opts.psd_segment_stride * ts.sample_rate)
     # estimate psd using welch method
@@ -101,7 +97,7 @@ if estimated_psd is None:
     raise RuntimeError("No PSDs were estimated; check the frame file and time range.")
 
 df = pd.DataFrame()
-df["frequency_array"] = estimated_psd.sample_frequencies
+df["frequency_array"] = estimated_psd.sample_frequencies.numpy()
 for k in range(len(psds)):
     df["psd_{}".format(k)] = psds[k]
 df.to_csv("{}.csv".format(opts.output_file), index=False)

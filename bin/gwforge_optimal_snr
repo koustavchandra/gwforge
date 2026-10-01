@@ -61,23 +61,30 @@ def get_optimal_snr(
     ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
     duration = numpy.ceil(injection_parameters["duration"] + 5)
     merger_time = coalescence_time(injection_parameters)
-    gps_start_time = merger_time - duration
+    # Two seconds of segment after the merger so the ringdown does not wrap.
+    gps_start_time = merger_time - duration + 2
     ifos.set_strain_data_from_power_spectral_densities(
         sampling_frequency=sampling_frequency,
         duration=duration,
         start_time=gps_start_time,
     )
 
+    # A file with tidal deformabilities is a BNS or BHNS; the BH gets lambda_1 = 0.
+    tidal = "lambda_2" in parameters
     waveform_generator = bilby.gw.WaveformGenerator(
         duration=duration,
         sampling_frequency=sampling_frequency,
-        frequency_domain_source_model=bilby.gw.source.lal_binary_black_hole,
-        parameter_conversion=bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
+        frequency_domain_source_model=bilby.gw.source.lal_binary_neutron_star if tidal else bilby.gw.source.lal_binary_black_hole,
+        parameter_conversion=bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
+        if tidal
+        else bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
         waveform_arguments=waveform_arguments,
     )
     signal_parameters = {}
     for parameter in parameters:
         signal_parameters[parameter] = injection_parameters[parameter]
+    if tidal:
+        signal_parameters.setdefault("lambda_1", 0.0)
     signal_parameters["geocent_time"] = merger_time
     # bilby's inject_signal hard-codes the long-wavelength, static-pattern
     # response; use GWForge's frequency-dependent one instead.
@@ -215,9 +222,12 @@ def main():
 
     opts = parser.parse_args()
 
+    with h5py.File(opts.injection_file, "r") as f:
+        # The spins were drawn at the population's reference frequency; keep it.
+        reference_frequency = float(f["reference_frequency"][0]) if "reference_frequency" in f else opts.minimum_frequency
     waveform_arguments = {
         "waveform_approximant": opts.waveform_approximant,
-        "reference_frequency": opts.minimum_frequency,
+        "reference_frequency": reference_frequency,
         "minimum_frequency": opts.minimum_frequency,
     }
 
@@ -251,9 +261,10 @@ def main():
             # is not a per-injection array; skip anything that is not a dataset.
             if not isinstance(f[key], h5py.Dataset):
                 continue
-            if len(f[key]) != 1:
+            # Aligned-spin files store the x and y spin components as a single 0.
+            if len(f[key]) != 1 or len(f["mass_1"]) == 1:
                 samples[key] = f[key][:]
-        if len(f["spin_1x"][:]) != 1:
+        if numpy.any(f["spin_1x"][:]):
             parameters = [
                 "mass_1",
                 "mass_2",
@@ -283,6 +294,7 @@ def main():
                 "chi_1",
                 "chi_2",
             ]
+        parameters.extend(key for key in ("lambda_1", "lambda_2") if key in f)
         if not opts.end_index:
             opts.end_index = len(f["mass_1"])
 
@@ -293,6 +305,7 @@ def main():
         spin_1z=samples["spin_1z"],
         spin_2z=samples["spin_2z"],
         waveform_minimum_frequency=waveform_arguments["minimum_frequency"],
+        approximant=opts.waveform_approximant,
     )
 
     # Row index into the injection file, carried through to the output.

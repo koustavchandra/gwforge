@@ -1,7 +1,7 @@
 from ..ifo.detectors import Network
 from ..ifo.antenna import inject_signal_with_response
+from ..utils import source_type
 import bilby
-from ..conversion import *
 
 bilby.core.utils.setup_logger(log_level="warning")
 
@@ -51,15 +51,16 @@ class BilbyInject:
             ifo.strain_data.set_from_gwpy_timeseries(data[ifo.name])
 
         self.injection_parameters = injection_parameters
-        self.injection_type = injection_type.lower()
+        self.injection_type = source_type(injection_type)
 
-        if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
+        if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh"]:
             self.injection_type = "bbh"
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_black_hole
             self.parameter_conversion = (
                 bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
             )
-        elif self.injection_type == "bns":
+        elif self.injection_type in ["bns", "bhns"]:
+            # BHNS carries lambda_2 only; the caller sets lambda_1 = 0.
             self.frequency_domain_source_model = bilby.gw.source.lal_binary_neutron_star
             self.parameter_conversion = (
                 bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters

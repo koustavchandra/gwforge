@@ -3,7 +3,6 @@ import bilby
 import numpy
 import logging
 from rich.progress import track
-from ..conversion import *
 from pycbc.detector import add_detector_on_earth, Detector
 from pycbc.waveform import get_td_waveform
 from pycbc.types import float64, float32
@@ -18,9 +17,6 @@ injection_func_map = {
         *args
     ),
 }
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 bilby.core.utils.setup_logger(log_level="warning")
 
@@ -72,24 +68,10 @@ class PyCBCInject:
                 latitude=ifo.latitude_radians,
                 yangle=numpy.deg2rad(360 - ifo.xarm_azimuth),
                 xangle=numpy.deg2rad(360 - ifo.yarm_azimuth),
-                height=0,
+                height=ifo.elevation,
                 xlength=ifo.length * 1e3,
                 ylength=ifo.length * 1e3,
             )
-
-        if self.injection_type in ["bbh", "imbhb", "pbh", "imbbh", "nsbh"]:
-            self.injection_type = "bbh"
-            self.frequency_domain_source_model = bilby.gw.source.lal_binary_black_hole
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters
-            )
-        elif self.injection_type == "bns":
-            self.frequency_domain_source_model = bilby.gw.source.lal_binary_neutron_star
-            self.parameter_conversion = (
-                bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters
-            )
-        else:
-            raise ValueError("Currently supports only CBC sources")
 
         self.waveform_arguments = waveform_arguments
 

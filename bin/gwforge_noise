@@ -17,7 +17,7 @@ from GWForge.ifo.reproducible_noise import (
     DEFAULT_FILTER_DURATION,
     noise_from_interferometer,
 )
-from GWForge.utils import *
+from GWForge.utils import remove_special_characters, split_duration
 from gwpy.timeseries import TimeSeries
 
 logging.basicConfig(
@@ -52,11 +52,11 @@ config.read(opts.config_file)
 logging.info("Initialising detector network")
 detectors = json.loads(config.get("IFOS", "detectors").replace("'", '"'))
 
-try:
+# A malformed psd-dict is an error, not a silent fall-back to the design curves.
+psd_files = None
+if config.has_option("IFOS", "psd-dict"):
     psd_files = json.loads(config.get("IFOS", "psd-dict").replace("'", '"'))
-    ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
-except Exception:
-    ifos = Network(ifos=detectors).initialise_ifos()
+ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
 
 ifo_directory = {}
 for ifo in ifos:

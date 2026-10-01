@@ -2,9 +2,6 @@ import numpy
 import bilby
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-)
 
 
 class Extrinsic:
@@ -34,6 +31,8 @@ class Extrinsic:
     def sample(self):
         samples = {}
         if self.prior_file:
+            if self.inclination_distribution is not None:
+                logging.warning("inclination-distribution is ignored when a prior file is given")
             prior = bilby.gw.prior.PriorDict(filename=self.prior_file)
         else:
             logging.warning("Using default priors")

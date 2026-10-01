@@ -1,0 +1,8 @@
+# run products: regenerate with the commands in README.md
+*.h5
+*.log
+*.pdf
+population_check/
+detection_fraction_*/
+pf_*/
+delay/

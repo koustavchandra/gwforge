@@ -116,6 +116,13 @@ except Exception:
 injection_method = config.get(
     "Injections", "injection-method", fallback="bilby"
 ).lower()
+if injection_method == "pycbc":
+    # SimAddInjection adds only the samples that overlap the data, so a signal is
+    # truncated at the segment edges rather than wrapped, and the whole request
+    # is one window: no 2- or 3-file rule, and no file before the start time.
+    # ponytail: the span is held in memory (0.5 GB per detector per 8192 s at
+    # 8192 Hz); chunk the window if that bites.
+    window_size = 1
 
 # Detector-response options (bilby injection method only; the pycbc method uses
 # LAL's own projection). Both default to True: XG detectors see hour-long
@@ -154,8 +161,10 @@ for ifo in detectors:
     )
     # is there a better way?
     sorted_file_paths = sorted(file_paths, key=lambda x: int(x.split("-")[-2]))
-    frame_files[ifo] = utils.generate_frame_file_sublists(
-        sorted_file_paths, window_size=window_size
+    frame_files[ifo] = (
+        [sorted_file_paths]
+        if injection_method == "pycbc"
+        else utils.generate_frame_file_sublists(sorted_file_paths, window_size=window_size)
     )
 
 # Directories for each detector
@@ -349,10 +358,25 @@ with h5py.File(injection_file, "r") as f:
                     for ifo in detectors
                 }
                 read = False
-                # # select all injections that lie between the start and end time
+                # Select every signal that overlaps the data: it merges inside
+                # the segment, or after it with the inspiral already in band.
                 end = data[detectors[0]].epoch.value + data[detectors[0]].duration.value
+                merger_time = f["geocent_time"][:]
+                signal_duration = numpy.atleast_1d(
+                    get_safe_signal_durations(
+                        mass_1=f["mass_1"][:],
+                        mass_2=f["mass_2"][:],
+                        spin_1z=f["spin_1z"][:],
+                        spin_2z=f["spin_2z"][:],
+                        waveform_minimum_frequency=minimum_frequency,
+                        approximant=waveform_approximant,
+                    )
+                )
                 indices = numpy.where(
-                    (start <= f["geocent_time"][:]) & (end >= f["geocent_time"][:])
+                    (start <= merger_time) & (merger_time - signal_duration <= end)
+                )
+                logging.info(
+                    "{} signals overlap the data between {} and {}".format(len(indices[0]), start, end)
                 )
                 # # set the start to end for next iteration
                 start = end
@@ -377,6 +401,7 @@ with h5py.File(injection_file, "r") as f:
                     read = True
                 l += 1
             except Exception:
+                logging.exception("Injection into window {} failed; skipping it".format(l))
                 l += 1
 
         logging.info("Saving meta data")

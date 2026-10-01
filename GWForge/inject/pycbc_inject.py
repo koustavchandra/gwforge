@@ -6,7 +6,6 @@ from rich.progress import track
 from ..conversion import *
 from pycbc.detector import add_detector_on_earth, Detector
 from pycbc.waveform import get_td_waveform
-from pycbc.waveform import utils as wfutils
 from pycbc.types import float64, float32
 from gwpy.timeseries import TimeSeries
 import lalsimulation
@@ -105,8 +104,8 @@ class PyCBCInject:
         )
         hplus.start_time = hplus.start_time + signal_parameters["tc"]
         hcross.start_time = hcross.start_time + signal_parameters["tc"]
-        hplus = wfutils.taper_timeseries(hplus, "startend")
-        hcross = wfutils.taper_timeseries(hcross, "startend")
+        hplus = hplus.taper_timeseries("startend")
+        hcross = hcross.taper_timeseries("startend")
         detector = Detector(ifo.name)
         signal = detector.project_wave(
             hplus,

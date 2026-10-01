@@ -21,10 +21,14 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinx_math_dollar",
 ]
 extensions.append("autoapi.extension")
 autoapi_dirs = ["../../GWForge"]
+# The pages are MyST Markdown: `$...$` and `$$...$$` are parsed as maths here,
+# before the Markdown parser can touch the LaTeX inside them.
+myst_enable_extensions = ["dollarmath", "amsmath"]
+myst_heading_anchors = 3
+autosectionlabel_prefix_document = True
 exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------

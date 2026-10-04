@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/johann.fernandes/.conda/envs/pyefpe_plus_hm/bin/python3.11
 """
 Forecast parameter-estimation uncertainties with the Fisher matrix, optionally
 with the second-order DALI correction.
@@ -54,6 +54,7 @@ def forecast(injection_parameters, index, config_settings):
         waveform["minimum_frequency"],
         waveform["waveform_arguments"]["waveform_approximant"],
         maximum=config_settings["maximum_duration"],
+        minimum=config_settings["minimum_duration"],
     )
     logging.info(
         "Source %d: using a %.0f s segment at %.0f Hz",
@@ -78,7 +79,7 @@ def forecast(injection_parameters, index, config_settings):
         parameter_conversion=waveform["parameter_conversion"],
         waveform_arguments=waveform["waveform_arguments"],
     )
-
+    logging.info(f'Parameters are {injection_parameters}')
     fisher = FisherMatrix(
         ifos,
         waveform_generator,
@@ -105,6 +106,7 @@ def forecast(injection_parameters, index, config_settings):
         "optimal_snrs": fisher.optimal_snrs,
         "duration": duration,
         "steps": dict(fisher.derivatives.steps),
+        "waveform_arguments": waveform_generator.waveform_arguments,
         # Per-parameter derivative error from the waveform model's own noise;
         # travels with the forecast so the caveat is not lost with the log.
         "noise_ratios": dict(fisher.derivatives.noise_ratios),
@@ -200,6 +202,7 @@ def main():
         "psd_files": parse_collection(config, "IFOS", "psd-dict"),
         "sampling_frequency": config.getfloat("IFOS", "sampling-frequency", fallback=4096),
         "maximum_duration": config.getfloat("IFOS", "maximum-duration", fallback=None),
+        "minimum_duration": config.getfloat("IFOS", "minimum-duration", fallback=None),
         "waveform": waveform_settings(config),
         "fisher": fisher_options,
         "priors": prior_settings(config, fisher_options["order"]),
@@ -235,13 +238,13 @@ def main():
         pickle.dump(results, handle)
 
     if config.getboolean("Output", "plot-corner", fallback=True):
-        _plot(results, output_directory)
+        _plot(results, output_directory, fisher_options)
 
     _summarise(results)
     logging.info("Done!")
 
 
-def _plot(results, output_directory):
+def _plot(results, output_directory, fisher_options):
     """Write one corner plot per successful source."""
     from GWForge.fisher.plot import overlay_corner, samples_from_covariance
 

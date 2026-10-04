@@ -37,8 +37,11 @@ SOURCE_MODELS = {
         bilby.gw.source, "gwsignal_binary_black_hole", None
     ),
     "lal_eccentric_binary_black_hole_no_spins": bilby.gw.source.lal_eccentric_binary_black_hole_no_spins,
-    "EFPE_binary_black_hole": _optional_source_model(
+    "EFPEHM_binary_black_hole": _optional_source_model(
         "pyEFPEHM", "EFPE_binary_black_hole"
+    ),
+    "EFPE_binary_black_hole": _optional_source_model(
+        "pyEFPE", "EFPE_binary_black_hole"
     ),
 }
 
@@ -47,8 +50,9 @@ PARAMETER_CONVERSIONS = {
     "gwsignal_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "lal_eccentric_binary_black_hole_no_spins": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "lal_binary_neutron_star": bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters,
+    "EFPEHM_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "EFPE_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
-}
+    }
 
 
 def parse_collection(config, section, option, fallback=None):
@@ -168,6 +172,7 @@ def waveform_settings(config, section="Waveform_Generator"):
     reference_frequency = config.getfloat(
         section, "waveform-reference-frequency", fallback=minimum_frequency
     )
+    f22_start = config.getfloat(section, "waveform-f22-start", fallback=None)
     approximant = config.get(section, "waveform-approximant", fallback="IMRPhenomXPHM")
     name = config.get(
         section, "frequency-domain-source-model", fallback="lal_binary_black_hole"
@@ -186,12 +191,17 @@ def waveform_settings(config, section="Waveform_Generator"):
             "installation of bilby ({})".format(name, bilby.__version__)
         )
 
-    return {
-        "waveform_arguments": {
+    waveform_arguments = {
             "waveform_approximant": approximant,
             "reference_frequency": reference_frequency,
             "minimum_frequency": minimum_frequency,
-        },
+            "f22_start": f22_start,
+        }
+    custom_args = parse_collection(config, section, "waveform-arguments-extra")
+    if custom_args:
+        waveform_arguments.update(custom_args)
+    return {
+        "waveform_arguments": waveform_arguments,
         "frequency_domain_source_model": model,
         "parameter_conversion": PARAMETER_CONVERSIONS[name],
         "minimum_frequency": minimum_frequency,
@@ -290,7 +300,7 @@ def _aligned_spin(parameters, component):
     return float(magnitude) * float(cosine)
 
 
-def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
+def segment_duration(parameters, minimum_frequency, approximant, maximum=None, minimum=None):
     """Segment length long enough to hold the signal.
 
     Getting this wrong is not a subtle error: a segment shorter than the inspiral wraps it, and the
@@ -315,6 +325,7 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
     converted, _ = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters(
         dict(parameters)
     )
+    approximant = 'IMRPhenomXAS' if approximant is None else approximant
     try:
         duration = get_safe_signal_durations(
             mass_1=numpy.atleast_1d(float(converted["mass_1"])),
@@ -348,4 +359,6 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
     duration = 2.0 ** numpy.ceil(numpy.log2(max(duration, 4.0)))
     if maximum is not None:
         duration = min(duration, maximum)
+    if minimum is not None:
+        duration = max(duration, minimum)
     return float(duration)

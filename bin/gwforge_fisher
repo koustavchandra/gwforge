@@ -5,6 +5,7 @@ with the second-order DALI correction.
 
 Usage:
     gwforge_fisher --config-file path/to/config.ini
+    gwforge_fisher --config-file path/to/config.ini --parallel --num-workers 4
 """
 import argparse
 import configparser
@@ -12,6 +13,7 @@ import logging
 import os
 import pickle
 import warnings
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import numpy
 from rich.progress import track
@@ -154,6 +156,73 @@ def _sample(fisher, config_settings, index):
     return result.posterior[names].to_numpy(), names
 
 
+def _forecast_wrapper(task):
+    """Wrapper for multiprocessing-safe execution of a single forecast."""
+    injection_parameters, index, config_settings = task
+    try:
+        return forecast(injection_parameters, index, config_settings)
+    except Exception as error:
+        logging.error("Source %d failed: %s", index, error)
+        return {
+            "index": index,
+            "parameters": dict(injection_parameters),
+            "error": str(error),
+        }
+
+
+def _forecast_serial(injections, config_settings, start_index):
+    """Run all forecasts serially."""
+    results = []
+    for position, injection_parameters in enumerate(
+        track(injections, description="Forecasting")
+    ):
+        index = (start_index or 0) + position
+        try:
+            results.append(forecast(injection_parameters, index, config_settings))
+        except Exception as error:
+            logging.error("Source %d failed: %s", index, error)
+            results.append(
+                {"index": index, "parameters": dict(injection_parameters), "error": str(error)}
+            )
+    return results
+
+
+def _forecast_parallel(injections, config_settings, start_index, num_workers):
+    """Run forecasts in parallel with a process pool."""
+    if num_workers is None:
+        num_workers = os.cpu_count() or 1
+    if num_workers <= 1:
+        return _forecast_serial(injections, config_settings, start_index)
+
+    tasks = [
+        (injection_parameters, (start_index or 0) + position, config_settings)
+        for position, injection_parameters in enumerate(injections)
+    ]
+
+    logging.info("Using %d worker processes for parallel execution", num_workers)
+    results = [None] * len(tasks)
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        future_to_position = {
+            executor.submit(_forecast_wrapper, task): position
+            for position, task in enumerate(tasks)
+        }
+        for future in track(
+            as_completed(future_to_position), total=len(tasks), description="Forecasting"
+        ):
+            position = future_to_position[future]
+            try:
+                results[position] = future.result()
+            except Exception as error:
+                index = (start_index or 0) + position
+                logging.error("Source %d failed with exception: %s", index, error)
+                results[position] = {
+                    "index": index,
+                    "parameters": dict(injections[position]),
+                    "error": str(error),
+                }
+    return results
+
+
 def main():
     from GWForge.fisher.config import (
         fisher_settings,
@@ -177,6 +246,17 @@ def main():
     )
     parser.add_argument(
         "--end-index", type=int, default=None, help="Stop before this injection"
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Run each injection in parallel using multiprocessing",
+    )
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=None,
+        help="Number of worker processes for parallel mode (default: CPU count)",
     )
     opts = parser.parse_args()
 
@@ -217,21 +297,12 @@ def main():
         detectors,
     )
 
-    results = []
-    for position, injection_parameters in enumerate(
-        track(injections, description="Forecasting")
-    ):
-        index = (opts.start_index or 0) + position
-        try:
-            results.append(forecast(injection_parameters, index, config_settings))
-        except Exception as error:
-            # One pathological source should not lose the whole population; the
-            # failure is recorded so it is visible in the output rather than
-            # silently missing.
-            logging.error("Source %d failed: %s", index, error)
-            results.append(
-                {"index": index, "parameters": dict(injection_parameters), "error": str(error)}
-            )
+    if opts.parallel:
+        results = _forecast_parallel(
+            injections, config_settings, opts.start_index, opts.num_workers
+        )
+    else:
+        results = _forecast_serial(injections, config_settings, opts.start_index)
 
     logging.info("Saving results to %s", output_file)
     with open(output_file, "wb") as handle:

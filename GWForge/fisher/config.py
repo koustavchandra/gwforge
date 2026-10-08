@@ -159,7 +159,7 @@ def waveform_settings(config, section="Waveform_Generator"):
     -------
     dict
         With keys ``waveform_arguments``, ``frequency_domain_source_model``,
-        ``parameter_conversion`` and ``minimum_frequency``.
+        ``parameter_conversion``, ``minimum_frequency`` and ``f22_start``.
 
     Raises
     ------
@@ -205,6 +205,7 @@ def waveform_settings(config, section="Waveform_Generator"):
         "frequency_domain_source_model": model,
         "parameter_conversion": PARAMETER_CONVERSIONS[name],
         "minimum_frequency": minimum_frequency,
+        "f22_start": f22_start,
     }
 
 
@@ -300,7 +301,7 @@ def _aligned_spin(parameters, component):
     return float(magnitude) * float(cosine)
 
 
-def segment_duration(parameters, minimum_frequency, approximant, maximum=None, minimum=None):
+def segment_duration(parameters, minimum_frequency, approximant, f22_start=None, maximum=None, minimum=None):
     """Segment length long enough to hold the signal.
 
     Getting this wrong is not a subtle error: a segment shorter than the inspiral wraps it, and the
@@ -312,10 +313,16 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None, m
         Source parameters; needs component masses and aligned spins, which are
         derived from whatever mass parametrisation is present.
     minimum_frequency : float
-        Waveform starting frequency in Hz.
+        Waveform starting frequency in Hz (used for non-EFPE waveforms).
     approximant : str
+    f22_start : float or None
+        For pyEFPE and pyEFPEHM waveforms, the frequency where the quadrupole
+        mode begins. When provided, used instead of minimum_frequency for
+        duration calculation. Default: None.
     maximum : float or None
         Cap on the returned duration, in seconds.
+    minimum : float or None
+        Floor on the returned duration, in seconds.
 
     Returns
     -------
@@ -326,13 +333,17 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None, m
         dict(parameters)
     )
     approximant = 'IMRPhenomXAS' if approximant is None else approximant
+    
+    # For EFPE/EFPEHM waveforms, use f22_start if available; otherwise use minimum_frequency
+    duration_frequency = f22_start if f22_start is not None else minimum_frequency
+    
     try:
         duration = get_safe_signal_durations(
             mass_1=numpy.atleast_1d(float(converted["mass_1"])),
             mass_2=numpy.atleast_1d(float(converted["mass_2"])),
             spin_1z=numpy.atleast_1d(_aligned_spin(converted, 1)),
             spin_2z=numpy.atleast_1d(_aligned_spin(converted, 2)),
-            waveform_minimum_frequency=minimum_frequency,
+            waveform_minimum_frequency=duration_frequency,
             approximant=approximant,
         )
         duration = float(numpy.atleast_1d(duration)[0])
@@ -346,7 +357,7 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None, m
                 )
             ) from error
         duration = float(
-            numpy.atleast_1d(time_to_coalescence(minimum_frequency, *masses))[0]
+            numpy.atleast_1d(time_to_coalescence(duration_frequency, *masses))[0]
         )
         logging.debug(
             "%s could not size %s (%s); using the 3.5PN estimate of %.1f s",

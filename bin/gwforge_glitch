@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+"""
+Add incoherent sine-Gaussian glitches to the detector data gwforge_noise wrote.
+Every section of the ini other than [IFOS] is one glitch class (Blip, Tomte, ...)
+with its own rate, frequency, Q, SNR and phase ranges. Every detector draws its
+own glitches, keyed on (seed, class, detector, file start), so the per-chunk
+jobs the workflow submits produce the same glitches as one long job.
+
+Usage:
+    gwforge_glitch --config-file blip_tomte.ini --data-directory data --gps-start-time 1893024018 --gps-end-time 1893187858
+"""
+import argparse
+import configparser
+import json
+import logging
+import os
+
+import h5py
+import numpy
+from gwpy.timeseries import TimeSeries
+
+from GWForge import utils
+from GWForge.glitch.sine_gaussian import add_glitches, draw_glitches
+from GWForge.ifo.detectors import Network
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+config = configparser.ConfigParser()
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--config-file", required=True, help="Path to the configuration ini file")
+parser.add_argument("--data-directory", help="Parent directory containing frame files")
+parser.add_argument("--gps-start-time", type=float, default=None, help="GPS start time of data (default: None) (float seconds)")
+parser.add_argument("--gps-end-time", type=float, default=None, help="GPS end time of data (default: None) (float seconds)")
+opts = parser.parse_args()
+config.read(opts.config_file)
+
+detectors = json.loads(config.get("IFOS", "detectors").replace("'", '"'))
+psd_files = json.loads(config.get("IFOS", "psd-dict").replace("'", '"')) if config.has_option("IFOS", "psd-dict") else None
+logging.info("Initialising detector network with ifos {}".format(detectors))
+ifos = Network(ifos=detectors, psd_files=psd_files).initialise_ifos()
+data_directory = config.get("IFOS", "data-directory", fallback=opts.data_directory)
+
+# The command line wins over the ini: the workflow runs one job per chunk with
+# the same ini and different --gps-* values.
+gps_start_time = opts.gps_start_time if opts.gps_start_time is not None else config.getfloat("IFOS", "gps-start-time", fallback=None)
+gps_end_time = opts.gps_end_time if opts.gps_end_time is not None else config.getfloat("IFOS", "gps-end-time", fallback=None)
+if gps_start_time is None or gps_end_time is None:
+    raise ValueError("Both gps-start-time and gps-end-time are required, in [IFOS] or via --gps-start-time / --gps-end-time.")
+
+classes = [section for section in config.sections() if section != "IFOS"]
+if not classes:
+    raise ValueError("No glitch class found: every section other than [IFOS] is one class, e.g. [Blip].")
+
+
+def read_class(section):
+    """One glitch class: rate (per hour, a float or a per-detector dict) and the draw ranges."""
+    rate = json.loads(config.get(section, "rate", fallback="1").replace("'", '"'))
+    phases = json.loads(config.get(section, "phases")) if config.has_option(section, "phases") else None
+    return {
+        "rate": rate if isinstance(rate, dict) else float(rate),
+        "seed": config.getint(section, "seed", fallback=0),
+        "draw": {
+            "snr_range": json.loads(config.get(section, "snr-range", fallback="[5, 200]")),
+            "frequency_range": json.loads(config.get(section, "frequency-range", fallback="[20, 1000]")),
+            "q_range": json.loads(config.get(section, "q-range", fallback="[2, 40]")),
+            "snr_index": config.getfloat(section, "snr-index", fallback=1.0),
+            "phases": phases,
+        },
+    }
+
+
+settings = {name: read_class(name) for name in classes}
+for name, setting in settings.items():
+    logging.info("%s: %s per hour, %s", name, setting["rate"], setting["draw"])
+
+recorded = {}
+for k, ifo in enumerate(ifos):
+    _, paths = utils.find_frame_files(directory=data_directory, filePattern="{}*h5".format(ifo.name), start_time=gps_start_time, end_time=gps_end_time)
+    for path in sorted(paths, key=lambda x: int(x.split("-")[-2])):
+        data = TimeSeries.read(path, "{}:INJ".format(ifo.name))
+        start, end = data.t0.value, data.t0.value + data.duration.value
+        # A file belongs to the job whose range holds its start, so two chunk jobs never both glitch the same file.
+        if not gps_start_time <= start < gps_end_time:
+            continue
+        for c, name in enumerate(classes):
+            setting = settings[name]
+            rate = setting["rate"][ifo.name] if isinstance(setting["rate"], dict) else setting["rate"]
+            rng = numpy.random.default_rng([setting["seed"], c, k, int(start)])
+            glitches = draw_glitches(rng, start, end, rate, **setting["draw"])
+            glitches["amplitude"] = add_glitches(data.value, start, data.sample_rate.value, glitches, ifo)
+            glitches["class"] = numpy.array([name] * len(glitches["time"]), dtype="S")
+            logging.info("%s: added %d %s glitches between %d and %d s", ifo.name, len(glitches["time"]), name, start, end)
+            for key, values in glitches.items():
+                recorded.setdefault(ifo.name, {}).setdefault(key, []).append(values)
+        # The path must be positional and the format explicit: gwpy >=4 infers
+        # the format from *args, so passing it as target= makes identification
+        # fail with an IndexError.
+        data.write(path, format="hdf5", overwrite=True)
+
+logging.info("Saving meta data")
+meta_data_file = os.path.join(data_directory, "glitches-{}.h5".format(int(gps_start_time)))
+with h5py.File(meta_data_file, "w") as f:
+    for name, table in recorded.items():
+        group = f.create_group(name)
+        for key, values in table.items():
+            utils.hdf_append(group, key, numpy.concatenate(values))
+logging.info("Done!")

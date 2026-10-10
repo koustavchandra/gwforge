@@ -89,6 +89,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--glitch-configuration-file",
+    type=str,
+    default=None,
+    help="Path to glitch configuration file (sine-Gaussian glitches added after the injections).",
+)
+
+parser.add_argument(
     "--accounting-group",
     type=str,
     default="ligo.dev.o4.cbc.pe.lalinference",
@@ -144,6 +151,8 @@ stages = [("noise", opts.noise_configuration_file, "gwforge_noise", "--output-di
 for source, configuration in (("bbh", opts.bbh_configuration_file), ("bhns", opts.bhns_configuration_file), ("bns", opts.bns_configuration_file)):
     if configuration:
         stages.append((source, configuration, "gwforge_inject", "--data-directory"))
+if opts.glitch_configuration_file:
+    stages.append(("glitch", opts.glitch_configuration_file, "gwforge_glitch", "--data-directory"))
 job_ids = {}
 with open(condor_dag_file, "w") as dag_file:
     for source, configuration, script, data_flag in stages:
@@ -177,7 +186,7 @@ with open(condor_dag_file, "w") as dag_file:
     # present. Within a category, odd-indexed segments run first and even-indexed
     # segments depend on them (adjacent segments share frame files, so they must
     # not be written concurrently). Across categories the chain is
-    # noise -> bbh -> bhns -> bns, skipping any absent category. A PARENT line is
+    # noise -> bbh -> bhns -> bns -> glitch, skipping any absent category. A PARENT line is
     # only written when the parent list is non-empty, so a single-interval run or a
     # missing middle category never produces an invalid "PARENT  CHILD x" line.
     def write_parent_child(parents, children):
@@ -188,7 +197,7 @@ with open(condor_dag_file, "w") as dag_file:
             dag_file.write("PARENT {} CHILD {}\n".format(" ".join(parents), child))
 
     previous_stage_jobs = job_ids["noise"]
-    for source in ("bbh", "bhns", "bns"):
+    for source in ("bbh", "bhns", "bns", "glitch"):
         category_job_ids = job_ids.get(source, [])
         if not category_job_ids:
             continue

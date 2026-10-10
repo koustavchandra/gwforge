@@ -19,6 +19,7 @@ SCRIPTS = [
     "gwforge_optimal_snr",
     "gwforge_estimate_psd",
     "gwforge_fisher",
+    "gwforge_glitch",
 ]
 
 

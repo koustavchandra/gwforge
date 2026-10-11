@@ -1,85 +1,29 @@
-# Population Fisher Forecasts
+# Population Fisher forecasts
 
-`gwforge_fisher` asks how well a network measures **one source**.
-`gwforge_population_fisher` asks how well it measures **the population**: the
-shape of the mass function, the history of the merger rate, the spin
-distribution, and — through spectral sirens — the cosmology.
+Whereas `gwforge_fisher` forecasts how precisely a detector network can measure the parameters of an individual source, `gwforge_population_fisher` forecasts how precisely it can constrain the hyper-parameters describing an astrophysical population, such as the mass function, merger-rate history, and spin distribution.
 
-The estimator is the first term of the hyper-parameter Fisher expansion of
-[Gair, Antonelli & Barbieri (2022)](https://arxiv.org/abs/2205.07893), Eq. 21. For
-$N_{\rm det}$ detected events $\theta_k$ and hyper-parameters $\Lambda$,
+The implementation computes Term I of the population hyper-parameter Fisher matrix derived by [Gair, Antonelli & Barbieri (2022)](https://arxiv.org/abs/2205.07893), Eq. 21. For a catalogue of $N_{\rm det}$ detected events with parameters $\theta_k$, and population hyper-parameters $\Lambda$, the score for event $k$ is
 
-$$s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}{\partial \Lambda^i},
+$$
+s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}
+{\partial \Lambda^i},
+$$
+
+and the Fisher matrix, together with its inverse covariance matrix, is
+
+$$
+\Gamma^{ij} = \sum_{k=1}^{N_{\rm det}}
+\big(s_k^i-\langle s\rangle^i\big)
+\big(s_k^j-\langle s\rangle^j\big),
 \qquad
-\langle s\rangle^i = \frac{1}{N_{\rm det}}\sum_k s_k^i,
-\qquad
-\Gamma^{ij} = \sum_k \big(s_k^i - \langle s\rangle^i\big)
-                     \big(s_k^j - \langle s\rangle^j\big),$$
+\Sigma = \Gamma^{-1}.
+$$
 
-and $\Sigma = \Gamma^{-1}$.
+Here, $\langle s\rangle^i$ denotes the sample mean of the scores over the detected catalogue. The selection function is not evaluated explicitly: the detected catalogue itself provides the Monte Carlo sample used to estimate the Fisher matrix. Consequently, the SNR threshold is an input to the forecast, not a separate selection-correction step. For a fixed population and detection threshold, the forecast uncertainties scale as $T_{\rm obs}^{-1/2}$, where $T_{\rm obs}$ is the observing time.
 
-## Where the selection function went
+## Configuration
 
-Not away — it is never *evaluated*, which is a different thing. Term I is an
-expectation under the **detected** density,
-
-$$\Gamma_1^{ab} = -\int \frac{\partial^2}{\partial\Lambda^a \partial\Lambda^b}
-  \ln\frac{p(\theta|\Lambda)}{\alpha(\Lambda)}\;
-  p_{\rm det}(\theta|\Lambda)\,\mathrm{d}\theta,$$
-
-so the selection appears twice: as the measure, and through the detectable
-fraction $\alpha(\Lambda)$. Two facts collapse both into the centred sum.
-First, $p_{\rm det}(\theta)$ carries no hyper-parameter, so it drops from the
-score. Second, the detected catalogue is itself a fair Monte-Carlo draw from
-$p_{\rm det}(\theta)\,p(\theta|\Lambda)/\alpha(\Lambda)$, so
-
-$$\frac{\partial \ln \alpha}{\partial \Lambda^i}
-  = \int p_{\rm det}(\theta)\frac{p(\theta|\Lambda)}{\alpha(\Lambda)}
-    \frac{\partial \ln p}{\partial \Lambda^i}\,\mathrm{d}\theta
-  = \mathbb{E}_{\rm det}\!\left[s^i\right],$$
-
-which the sample mean estimates. So there is no separate detection integral to
-evaluate, no injection reweighting, and no rate normalisation — but the
-selection is still doing work, carried entirely by **which events are in the
-sum**. The SNR threshold is an input to the forecast, not a preprocessing step:
-change it and $\Gamma$ changes. The scale of the forecast is set by how many
-events were detected, so every $\sigma$ scales as $1/\sqrt{T_{\rm obs}}$.
-
-`validation/population_detection_fraction.py` reports what a given threshold
-removes, overall and binned in redshift and primary mass:
-
-```bash
-python validation/population_detection_fraction.py \
-    --population bbh_population.h5 --snr bbh_snr.h5 \
-    --detectors CE40 CE20 ET --snr-thresholds 10 20
-```
-
-$p_{\rm det}$ reappears *explicitly* at higher order — as
-$\partial_\theta \ln p_{\rm det}$ in Gair's $\Gamma_4$ — which is one reason
-this package stops at Term I.
-
-```{note}
-The identity is exact only if $p_{\rm det}$ carries no hyper-parameter. That is
-why the spectral-siren model builds its density in the **detector frame** rather
-than pushing events to the source frame at a trial cosmology, as described under
-Spectral sirens below.
-```
-
-## Quick start
-
-Three commands: generate a population, compute its SNRs, forecast.
-
-```bash
-gwforge_population --config-file GWForge/population/population_configuration_files/bgp-gwtc5.ini \
-                   --output-file bbh_population.h5 --source-type bbh \
-                   --reference-frequency 5 --seed 250114 --save-config
-
-gwforge_optimal_snr --injection-file bbh_population.h5 --output-file bbh_snr.h5 \
-                    --ifos CE40 CE20 ET --waveform-approximant IMRPhenomXPHM \
-                    --minimum-frequency 5 --sampling-frequency 2048 --cores 10
-
-gwforge_population_fisher --config-file mass_redshift_spin.ini
-```
+A representative configuration for a joint mass, redshift, and spin forecast is shown below.
 
 ```ini
 [Catalogue]
@@ -90,17 +34,11 @@ snr-thresholds = [10, 20]
 
 [Model]
 blocks = ['mass', 'redshift', 'spin']
-; Must match the generation config: a different support is a different model.
 maximum-redshift = 10
 cosmology = Planck18
-; Omit these five and they fall back to the GWTC-5.0 medians in
-; GWForge.population.mass.BGP_PARAMETERS, which is also what
-; bgp-gwtc5.ini generates.
 mmin = 4.489078237
 m-high = 300.0
 maximum-mass = 300.0
-mmin-2 = 3.487749145
-delta-m-2 = 5.60056759
 mass-parameters = {'alpha_1': 1.456442737, 'alpha_2': 5.100400428, 'm_break': 37.9806382, 'lam_0': 0.4206178692, 'lam_1': 0.5228817702, 'mpp_1': 9.989384122, 'sigpp_1': 0.6601839103, 'mpp_2': 33.2656028, 'sigpp_2': 4.582221363, 'delta_m': 3.123416382, 'beta': 0.8049660633}
 redshift-parameters = {'gamma': 2.7, 'kappa': 5.6, 'z_peak': 1.9}
 spin-parameters = {'mu_chi': 0.0751318233, 'sigma_chi': 0.3667469243, 'mu_t': 0.2788662234, 'sigma_t': 0.9661688072, 'xi_spin': 0.6650168221}
@@ -111,7 +49,6 @@ fit-mass = True
 fit-spin = True
 
 [Fisher]
-; delta_m is held at its generation value; see "Which mass parameters are free".
 free-parameters = ['alpha_1', 'alpha_2', 'm_break', 'lam_0', 'lam_1', 'mpp_1', 'sigpp_1', 'mpp_2', 'sigpp_2', 'beta', 'gamma', 'kappa', 'z_peak', 'mu_chi', 'sigma_chi', 'mu_t', 'sigma_t', 'xi_spin']
 score-method = analytic
 
@@ -122,335 +59,100 @@ plot-corner = True
 plot-parameters = ['beta', 'gamma', 'kappa', 'z_peak', 'mu_chi']
 ```
 
-Ready-made configs ship in `GWForge/population_fisher/configuration_files/`:
-`redshift.ini`, `mass.ini`, `mass_redshift.ini`, `mass_redshift_spin.ini`,
-`spectral_siren.ini`, and two that point the same analyses at 2G networks,
-`mass_lvk.ini` (H1 + L1 + V1) and `spectral_siren_aplus.ini` (H1 + L1 + A1 at
-A+). The catalogue they all read comes from `bgp-gwtc5.ini`, which lives with the
-other population configs in `GWForge/population/population_configuration_files/`.
+### `[Catalogue]`: population and detector network
 
-## The models
+`population-file` specifies the catalogue generated by `gwforge_population`, while `snr-file` points to the corresponding SNRs computed by `gwforge_optimal_snr`. The `detectors` entry specifies the detector network used to calculate the network SNR, and `snr-thresholds` defines the detection thresholds to consider. A separate forecast is produced for each threshold.
 
-The densities are **GWForge's own, called directly rather than reimplemented**,
-so a forecast and the catalogue it runs on describe the same population by
-construction.
+### `[Model]`: population model and fiducial parameters
 
-| block | hyper-parameters | density |
-| --- | --- | --- |
-| `mass` | `alpha_1, alpha_2, m_break, lam_0, lam_1, mpp_1, sigpp_1, mpp_2, sigpp_2, delta_m, beta` | {mod}`GWForge.population._smoothed_mass` — the BGP model, GWTC-5.0 Eqs. B10–B14 |
-| `redshift` | `gamma, kappa, z_peak` | {func}`GWForge.population.redshift.madau_dickinson_psi_of_z` |
-| `spin` | `mu_chi, sigma_chi, mu_t, sigma_t, xi_spin` | {func}`GWForge.population.spin.default_spin_magnitude_density` and {func}`GWForge.population.spin.default_spin_tilt_density`, both built on {func}`GWForge.population.spin.truncated_normal` |
-| `cosmology` | `H0, Om0, w0` | {class}`GWForge.cosmology.FlatwCDM` |
+The `blocks` entry selects the population components to include: `mass`, `redshift`, and `spin`. For a detector-frame spectral-siren forecast, include the `cosmology` block to constrain $H_0$, $\Omega_{\rm m}$, and $w_0$.
 
-The names are the ones the generation config uses, so the two files read the
-same. Every fiducial above may be omitted, in which case it falls back to the
-GWTC-5.0 median in {data}`GWForge.population.mass.BGP_PARAMETERS` or
-{data}`GWForge.population.spin.DEFAULT_BBH_SPIN_PARAMETERS` — the single place
-those numbers are written down.
+The population densities are those implemented in `GWForge.population`, from which `gwforge_population` draws its injections. Thus, the forecast model and the generated catalogue describe the same population by construction. The parameter names in the configuration are the names used by the population-generation code.
 
-```{warning}
-`sigma_chi` is a **standard deviation**. The Beta spin models take a variance
-under the name `sigma_squared_chi`, and a config carrying the old name is
-rejected rather than silently reinterpreted.
-```
+Fiducial parameters can be supplied explicitly through `mass-parameters`, `redshift-parameters`, and `spin-parameters`. Any omitted fiducials fall back to the GWTC-5.0 median values in `GWForge.population.mass.BGP_PARAMETERS` or the defaults in `GWForge.population.spin.DEFAULT_BBH_SPIN_PARAMETERS`, as appropriate.
 
-### Which mass parameters are free, and why the rest are not
+The parameters `mmin`, `m-high`, and `maximum-mass` define hard mass cutoffs rather than population hyper-parameters. Their centred scores vanish identically, so these cutoffs are fixed by construction and must match those used to generate the catalogue.
 
-`mmin`, `m_high` and `maximum_mass` are **constructor arguments, not
-hyper-parameters**, for two independent reasons.
+> **Note:** `sigma_chi` denotes a standard deviation. The Beta spin models instead use a variance, named `sigma_squared_chi`. Configurations using the old name are rejected rather than silently reinterpreted.
 
-*Statistically*, they are hard cutoffs. Inside the power-law interior their
-scores are the same number for every event, so the centred score
-$s_k - \langle s\rangle$ vanishes identically and the Fisher acquires a zero
-row. Within Term I such a parameter is simply unmeasurable.
+### `[Fit]`: fitting the fiducial population
 
-*Numerically*, they are the endpoints of the normalisation integrals, so their
-derivatives carry Leibniz boundary terms and cannot be checked against a finite
-difference on a fixed grid — as `m_high` crosses a node, the trapezoid jumps by
-the integrand times the node spacing, so the finite difference is a staircase
-rather than a derivative.
+The `fit-redshift`, `fit-mass`, and `fit-spin` flags control the population-fit checks.
 
-To study sensitivity to them, build a second model with different values. A
-different support is a different model, not a different point in one.
+`GWForge.population.redshift.Redshift` models the merger-rate history by convolving the Madau–Dickinson star-formation rate with a time-delay distribution. Accordingly, `fit-redshift = True` fits the direct parameters of this model to the population, rather than fitting the distribution of detected events. This distinction is essential: fitting the detected distribution directly would absorb selection effects into the inferred population hyper-parameters.
 
-`delta_m` is smooth — the Planck taper drives the integrand continuously to
-zero at $m_{\min}$, so there is no edge for a boundary term to sit on — and it
-*can* be freed. Every shipped config nevertheless holds it at its generation
-value: it is the width of a sharp feature at a fixed source-frame mass, so it is
-a standard scale, and it is the mass parameter that feeds $H_0$ most directly.
-Freeing it lets the taper absorb the cosmology. Scan it by running the forecast
-at several values instead.
+The mass and spin fits serve as consistency checks rather than corrections to the fiducial model. They should recover the parameter values used to generate the catalogue; both the generation and fitted values are reported in the summary.
 
-## Derivatives
+### `[Fisher]`: free parameters and score calculation
 
-Two tiers, in strict order of preference.
+`free-parameters` specifies the hyper-parameters included in the Fisher matrix. Any parameter omitted from this list is held fixed at its configured fiducial value. Fixing parameters can be particularly useful when the likelihood or population model contains sharp features or discontinuities that complicate local derivative estimates.
 
-| tier | used for | notes |
-| --- | --- | --- |
-| **analytic** | every model GWForge ships, cosmology included | the production path |
-| **finite difference** | the test oracle, and a model added later whose score nobody has written out | never a production path |
+In particular, all shipped configurations hold `delta_m` fixed. This parameter controls the low-mass taper, a sharp feature at a fixed source-frame mass. Since it also couples strongly to $H_0$, its influence should be explored by rerunning the forecast with different fixed values rather than including it in the standard Fisher matrix.
 
-There is deliberately no autodiff tier. Every model here has closed-form scores,
-so JAX would have been a dependency the production path never executed.
+`score-method = analytic` selects the production implementation. The `finite-difference` option is also available and can be helpful where I or Claudio haven't implemented the analytical forms.
 
-Tier one covers everything in scope, **including the cosmology columns**. The
-comoving distance is a quadrature,
+### `[Output]`: results and plots
 
-$$D_C(z) = D_H \int_0^z \frac{\mathrm{d}z'}{E(z')},$$
+`output-directory` sets the destination for the results, and `label` supplies the common filename prefix. If `plot-corner = True`, a corner plot is generated for the parameters listed in `plot-parameters`. This allows the full Fisher matrix to include many hyper-parameters while restricting the corner plot to a smaller, more interpretable subset.
 
-so differentiating the *result* means finite-differencing an integral. But
-differentiating *under* the integral leaves a closed-form integrand on the very
-same nodes,
+## Running a forecast
 
-$$\frac{\partial}{\partial\Omega_{m,0}}\frac{1}{E}
-   = -\frac{(1+z)^3 - (1+z)^{3(1+w_0)}}{2E^3},
-\qquad
-\frac{\partial}{\partial w_0}\frac{1}{E}
-   = -\frac{3(1-\Omega_{m,0})(1+z)^{3(1+w_0)}\ln(1+z)}{2E^3},$$
-
-which costs one extra weighted sum and is exact to the quadrature's accuracy.
-
-```{note}
-This is not a stylistic preference. Finite-differencing a quantity that is
-itself a quadrature has an error floor set by the quadrature, not by the step,
-so the error can *grow* as the step shrinks. Every derivative here is checked
-against a finite difference in `tests/test_cosmology.py` and
-`tests/test_population_fisher.py`, and the finite difference converges onto the
-analytic value at the expected $O(h^2)$ — it is the approximation, not the
-reference.
-```
-
-## Fiducials: the one place a fit is needed
-
-`gwforge_population` samples masses and spins **directly from the same densities
-this module evaluates**, so for those the fiducials are exactly the config
-values.
-
-Redshift is different. {class}`GWForge.population.redshift.Redshift` always
-convolves $\psi_{\rm MD}$ with a formation-to-merger time-delay distribution, so
-a generated catalogue is *not* distributed as
-$\psi_{\rm MD}(z)\,\mathrm{d}V_c/\mathrm{d}z/(1+z)$. Running a forecast for the
-direct Madau–Dickinson form at the generation $(\gamma, \kappa, z_p)$ would be a
-forecast about the wrong point. `fit-redshift = True` therefore fits the direct
-form to the **injected** redshifts — all of them, not just the detected ones,
-because the population model describes the astrophysical population and fitting
-to the detected subset would absorb the selection function into the
-hyper-parameters.
-
-With the `inverse` time delay the fit lands well away from the generation
-values — the delay pushes the effective low-redshift slope $\gamma$ down by
-about a third — and the summary prints both columns so you can see by how much.
-
-`fit-mass` and `fit-spin` are **checks, not corrections**: they must return the
-generation values to within Monte-Carlo error, and a ratio far from one there is
-a bug rather than a result. The summary table prints both columns so the
-distinction is visible.
-
-## Spectral sirens
-
-Adding `cosmology` to `blocks` switches the model from a source-frame product to
-{class}`GWForge.population_fisher.model.SpectralSirenModel`, whose
-density is over the **detector-frame observables**
-$(m_1^{\rm det}, m_2^{\rm det}, d_L)$:
-
-$$\ln p = \ln p_{\rm mass}(m_1^{\rm src}, m_2^{\rm src}) + \ln p(z)
-  - 2\ln(1+z) - \ln\frac{\mathrm{d}d_L}{\mathrm{d}z}
-  \;[+\ \ln p_{\rm spin}],$$
-
-with $z = z(d_L; H_0, \Omega_{m,0}, w_0)$ and
-$m^{\rm src} = m^{\rm det}/(1+z)$. The detector measures redshifted masses, so a
-feature at a fixed *source-frame* mass appears at a detector-frame mass that
-grows with $z$; combined with the measured $d_L$, that pins the
-distance–redshift relation.
-
-Working in the detector frame is the choice that has to be right. $P_{\rm det}$
-is a threshold on an SNR computed from detector-frame quantities alone, so it
-carries no hyper-parameter and the centred-score identity above holds exactly.
-
-`configurations` runs a degeneracy ladder from one config file:
-
-```ini
-configurations = {'joint': {}, 'lcdm': {'w0': -1.0}, 'h0_only': {'Om0': 0.3111, 'w0': -1.0}}
-```
-
-What separates two published $\sigma(H_0)$ values is usually which rung they
-quoted, not the physics, so it is worth reporting rather than choosing one
-silently.
-
-## Validation
-
-Three checks establish that the forecast is right rather than merely
-self-consistent. The first two are in `tests/test_population_fisher.py`; the
-third compares against a different code entirely.
-
-**Against the actual spread of maximum-likelihood estimates.** With no selection
-applied, Term I is the plain asymptotic MLE covariance. The test draws many
-independent catalogues from the Madau–Dickinson model, fits each, and checks
-that the scatter of the estimates matches the forecast $\sigma$ to the
-precision that many realisations can resolve.
-
-**Against the sampler, end to end.** Independent one-year catalogues are drawn
-through {class}`GWForge.population.mass.Mass` and fitted with this package's own
-log density; every BGP and Default-spin parameter must come back unbiased to
-within the realisation scatter, and that scatter must track the Fisher $\sigma$.
-Individual parameters still fluctuate — one in eleven at $2\sigma$ is what one
-in eleven at $2\sigma$ looks like.
-
-**Against an independent implementation.** `population_fisher_seminumeric` is a
-separate code for the same estimator, written before this one, with its
-forecasts checked in. `validation/population_fisher_vs_seminumeric.py` runs
-GWForge's models on *that code's own catalogue*, so the detected events are
-identical and any difference in $\sigma$ is a difference in the code rather than
-Monte-Carlo scatter. Two conventions have to be reconciled first, and the script
-does both: the reference's Madau–Dickinson denominator exponent is
-$\alpha + \beta$ where GWForge's is $\kappa$, so $\kappa = \alpha + \beta$ is a
-change of variables needing a Jacobian rather than a rename; and the reference
-tapers both component masses with one $(m_{\min}, \delta_m)$, so GWForge's
-independent secondary taper has to be collapsed onto the primary's or the two
-are simply different densities. The spin sector has no counterpart — the
-reference defines no spin model, only a sampler — so it keeps the
-finite-difference oracle above. The script writes an overlay corner per
-comparison, drawn in **GWForge's** parameterisation so the parameters carry
-their proper labels and `alpha`/`beta` — which mean different things in the two
-codes — cannot be confused.
+First generate the population catalogue and calculate its network SNRs. Then run the population Fisher forecast:
 
 ```bash
-python validation/population_fisher_vs_seminumeric.py \
-    --output-directory population_fisher_comparison
+gwforge_population \
+    --config-file GWForge/population/population_configuration_files/bgp-gwtc5.ini \
+    --output-file bbh_population.h5 \
+    --source-type bbh \
+    --reference-frequency 5 \
+    --seed 250114 \
+    --save-config
+
+gwforge_optimal_snr \
+    --injection-file bbh_population.h5 \
+    --output-file bbh_snr.h5 \
+    --ifos CE40 CE20 ET \
+    --waveform-approximant IMRPhenomXPHM \
+    --minimum-frequency 5 \
+    --sampling-frequency 2048 \
+    --cores 10
+
+gwforge_population_fisher \
+    --config-file mass_redshift_spin.ini
 ```
 
-## Figures
+The first command generates the population using the specified configuration and saves the generation configuration alongside the catalogue. The second computes the optimal network SNRs. The final command evaluates the population Fisher forecast using `mass_redshift_spin.ini`.
 
-The figures come from {mod}`GWForge.plotting`, an in-house corner rather than
-{mod}`corner`. The reason is one requirement `corner` cannot meet: the
-off-diagonal panels must be able to carry a **scatter coloured by a third
-quantity** — events coloured by redshift or network SNR, the way pycbc's
-posterior pages draw them. `corner`'s `plot_datapoints` colours every point the
-same. The layout follows
-[zeus's `cornerplot`](https://github.com/minaskar/zeus/blob/main/zeus/plotting.py):
-marginals on the diagonal, contours in the lower triangle, upper triangle off.
+Ready-made configurations are available in `GWForge/population_fisher/configuration_files/`:
 
-```python
-from GWForge.plotting import corner_plot, labels_for, XG_COLOUR, LVK_COLOUR
+- `redshift.ini`: redshift-only forecast.
+- `mass.ini`: mass-only forecast.
+- `mass_redshift.ini`: joint mass and redshift forecast.
+- `mass_redshift_spin.ini`: joint mass, redshift, and spin forecast.
+- `spectral_siren.ini`: detector-frame spectral-siren forecast.
+- `mass_lvk.ini`: mass forecast for a second-generation detector network.
+- `spectral_siren_aplus.ini`: spectral-siren forecast for an A+ network.
 
-figure = corner_plot(samples, labels=labels_for(names), levels=(0.67, 0.90),
-                     truths=fiducial, colour=XG_COLOUR, label="CE40+CE20+ET")
-figure = corner_plot(other, labels=labels_for(names), colour=LVK_COLOUR,
-                     label="H1+L1+V1", show_titles=False, fig=figure)
-```
+## Outputs and comparison between detector networks
 
-Two things differ from zeus, deliberately. Densities come from a **smoothed 2-D
-histogram** rather than `seaborn.kdeplot` — fast enough to call in a loop, and
-it lets the contour levels be *enclosed probabilities* computed from the sorted
-histogram, so a "90% contour" contains 90% of the samples. The test suite checks
-that by counting samples inside the drawn path, not by asserting a contour
-exists. And the style is applied through `matplotlib.rc_context`, so drawing a
-corner does not restyle everything the caller draws afterwards.
+For each SNR threshold, the forecast is saved as `{label}_snr{threshold}.npz` in the configured output directory. The file contains the Fisher matrix, covariance matrix, parameter names, fiducial values, and detected-event counts.
 
-### Palettes
+The run also produces:
 
-Two, selected with `--palette` or `palette_name=`:
+- A corner plot for the parameters specified by `plot-parameters`.
+- Reconstructions of the primary-mass distribution $\pi(m_1)$ and redshift distribution $p(z)$, with 90% uncertainty bands evaluated over the injections.
+- A `{label}_summary.txt` file containing the fit and forecast tables. The summary is also printed to standard output.
 
-| palette | kind | first two colours | notes |
-| --- | --- | --- | --- |
-| `tealrose` *(default)* | CARTOColors, diverging | `#009392`, `#d0587e` | the cycle walks inward from the ends, so the first two datasets get maximum separation |
-| `okabe-ito` | Okabe & Ito, qualitative | `#e69f00`, `#56b4e9` | black moved last; its continuous map is a ramp built from palette members, not a published sequential scheme |
-
-`XG_COLOUR` and `LVK_COLOUR` are the two ends of TealRose, so the discrete
-comparison colours and the continuous scatter map are the same family by
-construction. The hex values are stored in the module — `palettable` would be a
-runtime dependency for fifteen strings.
-
-### Colouring by a third quantity
-
-```python
-corner_plot(numpy.column_stack([m1, m2, z]),
-            labels=labels_for(["mass_1_source", "mass_2_source", "redshift"]),
-            colour_by=numpy.log10(catalogue.network_snr),
-            colour_label=r"$\log_{10}\rho_{\rm net}$")
-```
-
-Each lower-triangle panel scatters the points on the palette's continuous map
-with one shared colourbar, and the contour fill switches off by default — a
-filled contour drawn over a scatter hides exactly the points the scatter exists
-to show.
-
-## Comparing networks
-
-A saved forecast can be reloaded and overlaid without recomputing anything:
+Previously saved forecasts can be compared without recomputing the Fisher matrices, provided the forecasts share the same free parameters. For example:
 
 ```bash
 gwforge_population_fisher \
-  --compare "CE40+CE20+ET=population_fisher_output/mass_snr10.npz" \
-            "H1+L1+V1=population_fisher_output/mass_lvk_snr10.npz" \
-  --parameters "['alpha_1', 'alpha_2', 'm_break', 'lam_0', 'beta']" \
-  --output-file mass_xg_vs_lvk.pdf
+    --compare "CE40+CE20+ET=population_fisher_output/mass_snr10.npz" \
+              "H1+L1+V1=population_fisher_output/mass_lvk_snr10.npz" \
+    --parameters "['alpha_1', 'alpha_2', 'm_break']" \
+    --output-file mass_xg_vs_lvk.pdf
 ```
 
-It prints a table of $\sigma$ per parameter and network, with the ratio of the
-last to the first, and draws the overlay corner. The forecasts must share their
-free parameters; `mass_lvk.ini` ships alongside `mass.ini` and frees the same
-ten against H1 + L1 + V1, with `delta_m` fixed in both. bilby supplies those
-detectors with `minimum_frequency = 20` already set, so the SNR pass is the
-same command with `--ifos H1 L1 V1 --minimum-frequency 20`. Because the
-fiducials are fitted to **all injections** rather than to detections, they come
-out identical for both networks and the comparison is like-for-like.
+This compares the selected mass hyper-parameters for the XG and LVK networks at an SNR threshold of 10 and saves the comparison to `mass_xg_vs_lvk.pdf`.
 
-## Caveats worth quoting with any result
-
-**Term I is the small-measurement-error limit.** It is valid when per-event
-uncertainties are much smaller than the width of the population distribution.
-For CE and ET that holds for most sources, but it fails where the mass function
-has a sharp feature, and there Term I is *optimistic*. Terms II–V are not
-implemented.
-
-That validity is measurable rather than assumed, and
-`validation/population_higher_order.py` measures it. Terms II–V are all built
-from $A_k = F_k - H_k$, where $F_k = C_k^{-1}$ is the per-event measurement
-Fisher and $H_k$ the Hessian of $\ln p(\theta \mid \Lambda)$ in the
-*observables*, so they are small exactly when the spectral radius
-$\rho(H_k C_k)$ is small. That single dimensionless number is the expansion
-parameter, and it is far cheaper and far more robust than the corrections
-themselves — which is also why the seminumeric reference computes
-$\Gamma_{\rm II}$–$\Gamma_{\rm V}$ and then declines to use them for a
-spectral-siren forecast: by nested finite differences the correction sits below
-the noise floor and the raw sum returns non-positive-definite matrices.
-
-The script needs per-event covariances, which means a `gwforge_fisher` pass over
-the detected catalogue. Two things it is careful about, both easy to get wrong:
-$C_k$ must be a slice of the **covariance** (marginal), not of the single-event
-Fisher (conditional, smaller by orders of magnitude); and the diagnostic is the
-spectral radius, not $\max_a |H_{aa}| C_{aa}$, because correlations between the
-mass and distance directions make the true parameter larger than any diagonal
-entry.
-
-**`delta_m` is a standard scale, and it dominates $\sigma(H_0)$.** The taper at
-$m_{\min}$ is a sharp feature at a fixed source-frame mass, so it feeds $H_0$
-directly. The previous generation of this code measured $\sigma(H_0)$ swinging
-by a factor of 77 across $\delta_m \in [0, 4]\,M_\odot$. Because GWForge *generates* the catalogue at a
-known `delta_m`, that number is under control here rather than being set by
-whatever a maximum-likelihood fit does against a hard injection cutoff — but the
-sensitivity is real, and a spectral-siren forecast should scan it rather than
-assume it.
-
-**The condition number is part of the answer.** An 18-parameter forecast has
-strongly correlated directions; a marginal $\sigma$ quoted without looking at
-the correlation matrix can be dominated by a degeneracy rather than by the data.
-`PopulationFisherResult.correlation_matrix()` is there for that.
-
-## Output
-
-Per SNR threshold and configuration, `gwforge_population_fisher` writes
-
-* `{label}[_{configuration}]_snr{threshold}.npz` — the Fisher matrix, its
-  covariance, the parameter names, the fiducial values, the SNR threshold and
-  the event counts, which is everything `--compare` needs to reload it;
-* `{label}[_{configuration}]_corner.pdf` — thresholds overlaid, restricted to
-  `plot-parameters` if given (an 18-parameter corner is 324 panels and legible in
-  none of them). Subsets are drawn from the **marginal** of the full covariance;
-* `{label}_mass.pdf` and `{label}_redshift.pdf` — the reconstructed
-  $\pi(m_1)$ and $p(z)$ with 90% credible bands, over a histogram of the
-  injections. These are the quickest way to see what a table of $\sigma$s means,
-  and to catch a fiducial that was fitted badly;
-* `{label}_summary.txt` — the fit comparison, the catalogue cuts and the
-  forecast tables, also echoed to stdout.
+> **Limitations and interpretation:** Term I corresponds to the small-measurement-error limit, in which the uncertainty on each event's parameters is much narrower than the underlying population distribution. It can therefore be optimistic near sharp features of the mass function. Terms II–V of the full population Fisher matrix are not yet implemented. Moreover, an 18-parameter forecast can contain strongly correlated directions, so marginal uncertainties should be interpreted alongside the correlation structure. Use `PopulationFisherResult.correlation_matrix()` to inspect these correlations before quoting marginal $\sigma$ values.

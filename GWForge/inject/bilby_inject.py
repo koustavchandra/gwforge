@@ -18,8 +18,8 @@ class BilbyInject:
         finite_size=True,
     ):
         """
-        Parameters:
-        --------------
+        Parameters
+        ----------
         ifos: list
             List of interferometers
         data: dict
@@ -76,7 +76,7 @@ class BilbyInject:
         """
         Inject a gravitational wave signal into the interferometer network.
         using bilby methods
-        Returns:
+        Returns
         -------
         Network: bilby.gw.detectors.InterferometerList
             Injected interferometer network

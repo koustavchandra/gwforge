@@ -24,6 +24,12 @@ extensions = [
 ]
 extensions.append("autoapi.extension")
 autoapi_dirs = ["../../GWForge"]
+# Render numpydoc Attributes as :ivar: fields; autoapi already documents the
+# attributes themselves, and the two together are "duplicate object" warnings.
+napoleon_use_ivar = True
+# Document each object where it is defined, as sphinx-apidoc would; the
+# package pages keep their summary tables and link down.
+autoapi_options = ["members", "undoc-members", "show-inheritance", "show-module-summary"]
 # The pages are MyST Markdown: `$...$` and `$$...$$` are parsed as maths here,
 # before the Markdown parser can touch the LaTeX inside them.
 myst_enable_extensions = ["dollarmath", "amsmath"]

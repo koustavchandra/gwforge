@@ -33,7 +33,7 @@ def hdf_append(f, key, value):
     """
     Append a value to an HDF5 dataset or create a new dataset if the key does not exist.
 
-    Parameters:
+    Parameters
     ----------
     f : (h5py.File)
         An HDF5 file object.
@@ -112,8 +112,8 @@ def split_duration(duration, size=4096.0):
     """
     Split a duration into chunks of a specified size.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     - duration: int
         The total duration to split
     - size: int
@@ -133,12 +133,12 @@ def split_duration(duration, size=4096.0):
 def find_frame_files(directory, filePattern="*gwf", start_time=None, end_time=None):
     """
     Get a list of frame files within a given directory optionally filtered by time range
-    Parameters:
-    -----------
+    Parameters
+    ----------
     directory : str
         Path to frames directory
     filepattern : str
-        A Unix shell-style wildcard pattern to match files. [Default *gwf]
+        A Unix shell-style wildcard pattern to match files. [Default ``*gwf``]
     start_time : float
         GPS start time for time range filter
     end_time : float
@@ -187,17 +187,17 @@ def split_odd_even(items):
     frame files (window overlap), the even-indexed segments are made to depend on
     the odd-indexed ones so that no two adjacent segments are written concurrently.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     items: list
         The list to split.
 
-    Returns:
-    --------
+    Returns
+    -------
     tuple(list, list): (odd-indexed items, even-indexed items)
 
-    Example:
-    --------
+    Example
+    -------
     >>> split_odd_even(['a', 'b', 'c', 'd', 'e'])
     (['b', 'd'], ['a', 'c', 'e'])
     """
@@ -208,19 +208,19 @@ def generate_frame_file_sublists(frame_files, window_size=3):
     """
     Generate sublists of frame files with a specified window size.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     frame_files: list
         A list of file paths representing frame files.
     window_size: int, optional
         The size of the sliding window to create sublists. [Defaults: 3]
 
-    Returns:
-    --------
+    Returns
+    -------
     list: A list of sublists containing frame file paths.
 
-    Example:
-    --------
+    Example
+    -------
     >>> frame_files = ['file1.gwf', 'file2.gwf', 'file3.gwf', 'file4.gwf']
     >>> generate_frame_file_sublists(frame_files, window_size=2)
     [['file1.gwf', 'file2.gwf'], ['file2.gwf', 'file3.gwf'], ['file3.gwf', 'file4.gwf']]

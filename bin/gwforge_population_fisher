@@ -13,6 +13,7 @@ import configparser
 import json
 import logging
 import os
+import pickle
 
 import matplotlib
 
@@ -52,10 +53,10 @@ def parse_arguments(argv=None):
     parser.add_argument(
         "--compare",
         nargs="+",
-        metavar="LABEL=FILE.npz",
+        metavar="LABEL=FILE.pkl",
         help="Overlay previously computed forecasts, e.g. "
-        "--compare 'CE40+CE20+ET=mass_snr10.npz' 'H1+L1+V1=mass_lvk_snr10.npz'. "
-        "Reads the saved .npz archives, so comparing two networks does not mean "
+        "--compare 'CE40+CE20+ET=mass_snr10.pkl' 'H1+L1+V1=mass_lvk_snr10.pkl'. "
+        "Reads the saved pickles, so comparing two networks does not mean "
         "recomputing either",
     )
     parser.add_argument(
@@ -92,10 +93,10 @@ def compare(options):
     for entry in options.compare:
         if "=" not in entry:
             raise ValueError(
-                "--compare takes LABEL=FILE.npz entries; got {!r}".format(entry)
+                "--compare takes LABEL=FILE.pkl entries; got {!r}".format(entry)
             )
         label, _, path = entry.partition("=")
-        results.append((label, PopulationFisherResult.from_npz(path)))
+        results.append((label, PopulationFisherResult.from_pickle(path)))
         logging.info(
             "%s: %d parameters from %d events",
             label,
@@ -214,14 +215,10 @@ def main(argv=None):
             results.setdefault(name, []).append((threshold, catalogue, result))
 
             stem = "_".join(part for part in (output["label"], name) if part)
-            numpy.savez(
-                os.path.join(
-                    output["output_directory"],
-                    "{}_snr{:g}.npz".format(stem, threshold),
-                ),
+            archive = dict(
                 fisher=result.fisher,
                 covariance=result.covariance,
-                parameter_names=numpy.array(result.parameter_names, dtype=object),
+                parameter_names=list(result.parameter_names),
                 fiducial=numpy.array(
                     [result.fiducial[name_] for name_ in result.parameter_names]
                 ),
@@ -230,6 +227,11 @@ def main(argv=None):
                 n_total=result.n_total,
                 condition_number=result.condition_number,
             )
+            path = os.path.join(
+                output["output_directory"], "{}_snr{:g}.pkl".format(stem, threshold)
+            )
+            with open(path, "wb") as handle:
+                pickle.dump(archive, handle)
 
     # ---- figures -------------------------------------------------------
     if output["plot_corner"]:

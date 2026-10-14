@@ -94,8 +94,8 @@ class FlatwCDM:
        E(z)^2 = \Omega_{m,0}(1 + z)^3
                 + (1 - \Omega_{m,0})(1 + z)^{3(1 + w_0)}
 
-    Usage
-    -----
+    Examples
+    --------
     >>> cosmology = FlatwCDM(H0=67.66, Om0=0.3111)
     >>> cosmology.luminosity_distance(1.0)            # Mpc
     >>> cosmology.derivatives(1.0)["Om0"]["luminosity_distance"]

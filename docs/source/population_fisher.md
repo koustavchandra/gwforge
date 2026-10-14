@@ -135,7 +135,7 @@ Ready-made configurations are available in `GWForge/population_fisher/configurat
 
 ## Outputs and comparison between detector networks
 
-For each SNR threshold, the forecast is saved as `{label}_snr{threshold}.npz` in the configured output directory. The file contains the Fisher matrix, covariance matrix, parameter names, fiducial values, and detected-event counts.
+For each SNR threshold, the forecast is saved as a pickle, `{label}_snr{threshold}.pkl`, in the configured output directory. It holds a dictionary with the Fisher matrix, covariance matrix, parameter names, fiducial values, and detected-event counts.
 
 The run also produces:
 
@@ -147,8 +147,8 @@ Previously saved forecasts can be compared without recomputing the Fisher matric
 
 ```bash
 gwforge_population_fisher \
-    --compare "CE40+CE20+ET=population_fisher_output/mass_snr10.npz" \
-              "H1+L1+V1=population_fisher_output/mass_lvk_snr10.npz" \
+    --compare "CE40+CE20+ET=population_fisher_output/mass_snr10.pkl" \
+              "H1+L1+V1=population_fisher_output/mass_lvk_snr10.pkl" \
     --parameters "['alpha_1', 'alpha_2', 'm_break']" \
     --output-file mass_xg_vs_lvk.pdf
 ```

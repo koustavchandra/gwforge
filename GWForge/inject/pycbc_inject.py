@@ -31,8 +31,8 @@ class PyCBCInject:
         injection_type="bbh",
     ):
         """
-        Parameters:
-        --------------
+        Parameters
+        ----------
         ifos: list
             List of interferometers
         data: dict
@@ -114,7 +114,7 @@ class PyCBCInject:
         """
         Inject a gravitational wave signal into the ifo network using
         pycbc methods
-        Returns:
+        Returns
         -------
         """
         for ifo in self.ifos:

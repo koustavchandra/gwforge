@@ -53,8 +53,8 @@ def load_xg_interferometer(filename, power_spectral_density):
 
 class IFO:
     """
-    Usage:
-    -----
+    Examples
+    --------
     >>> ifo = IFO(name='H1', asharp=True)
     >>> ifo.initialise_ifo(seed=42)
 
@@ -64,7 +64,7 @@ class IFO:
 
     def __init__(self, name, psd_file=None, asharp=None):
         """
-        Parameters:
+        Parameters
         ----------
         name : str
            Name of interferometer
@@ -85,17 +85,17 @@ class IFO:
         """
         Initialise the interferometer with optional random seed.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         seed : int (optional)
            The random seed for initialisation. [Default: None]
 
-        Returns:
-        --------
+        Returns
+        -------
           ifo: bilby.gw.detector.Intereferometer
 
-        Raises:
-        -------
+        Raises
+        ------
           ValueError: If the interferometer is not implemented.
         """
         if seed is not None:
@@ -163,15 +163,15 @@ class IFO:
 
 class Network(IFO):
     """
-    Usage:
-    ------
+    Examples
+    --------
     >>> ifos = Network(ifos = ['ET', 'CE20', 'CE40'])
     >>> ifos.initialise_network()
     """
 
     def __init__(self, ifos, psd_files=None):
         """
-        Parameters:
+        Parameters
         ----------
         ifos: str list
            A list of interferometers to include in the network
@@ -200,8 +200,8 @@ class Network(IFO):
 
     def initialise_network(self):
         """
-        Returns:
-        --------
+        Returns
+        -------
         ifos: bilby.gw.detector.InterferometerList
         """
         return self.ifos

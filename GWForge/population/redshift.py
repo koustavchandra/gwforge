@@ -89,7 +89,7 @@ class Redshift:
         """
         Initialise the Redshift class
 
-        Parameters:
+        Parameters
         ----------
         redshift_model : str
             Redshift evolution model to use ("MadauDickinson" or "PowerLaw")
@@ -251,7 +251,7 @@ class Redshift:
         :math:`z_m = 0`. Replaces the previous pycbc + sympy implementation with
         direct vectorised numerical integration.
 
-        Return:
+        Returns
         -------
         merger rate density : scipy.interpolate.interp1d
             Callable over ``[0, maximum_redshift]``, in Mpc^-3 yr^-1.
@@ -335,7 +335,7 @@ class Redshift:
 
     def sample(self):
         """
-        Return:
+        Returns
         -------
         parameters : dict
             dictionary of redshift, time_interval, tc

@@ -233,30 +233,3 @@ closed-form marginals. A corner plot *is* a set of marginals, so GWForge samples
 `log L_DALI` with emcee through `bilby.run_sampler`. All the waveform
 evaluations happen while building the tensors; evaluating the DALI likelihood
 afterwards is pure tensor contraction.
-
-## Two waveforms, one binary
-
-`validation/compare_waveforms.py` forecasts the same aligned-spin binary with
-`IMRPhenomXHM` and `SEOBNRv5HM` and overlays the two error ellipses. Both models
-describe the source equally well, so the difference between them is a lower
-bound on the waveform systematic in any Fisher forecast.
-
-```bash
-python validation/compare_waveforms.py --outdir waveform_comparison
-```
-
-For a 28 M☉ chirp mass source at network SNR 329 on CE40+CE20+ET:
-
-| quantity | agreement |
-|---|---|
-| network SNR | **0.07%** |
-| `luminosity_distance`, `ra`, `dec`, `theta_jn`, `psi` | 0.6 – 1.6% |
-| `chirp_mass` | 35% |
-| `geocent_time`, `phase` | factor 1.8 – 2.4 |
-| `chi_1`, `chi_2` | factor 4 – 5 |
-
-The SNRs agree almost exactly and the distance/orientation block overlays
-closely; the mass–spin–time–phase block, which is where the two models actually
-differ, does not. This is a genuine waveform systematic, not a numerical
-artefact — the measured noise in both models is three orders of magnitude too
-small to explain it.

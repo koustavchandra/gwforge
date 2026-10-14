@@ -113,7 +113,8 @@ POPULATION_LATEX_LABELS.update(
 
 
 def new_rcParams(width="column", aspect_ratio=PHI):
-    """Publication ready plot
+    """Publication ready plot.
+
     Parameters
     ----------
     width : str

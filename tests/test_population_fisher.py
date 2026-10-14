@@ -25,6 +25,7 @@ subtly wrong.
 import configparser
 import json
 import os
+import pickle
 import subprocess
 import sys
 from pathlib import Path
@@ -848,19 +849,18 @@ def test_conditional_sampling_stays_reproducible():
     numpy.testing.assert_array_equal(draws[0][1], draws[1][1])
 
 
-def test_result_round_trips_through_npz(redshift_model, events, tmp_path):
+def test_result_round_trips_through_pickle(redshift_model, events, tmp_path):
     """A saved forecast must be re-plottable without recomputing it.
 
     Comparing two networks means loading two archives; if this drifts, the
     comparison silently plots stale or wrong numbers.
     """
     result = population_fisher(redshift_model, events)
-    path = tmp_path / "forecast.npz"
-    numpy.savez(
-        path,
+    path = tmp_path / "forecast.pkl"
+    archive = dict(
         fisher=result.fisher,
         covariance=result.covariance,
-        parameter_names=numpy.array(result.parameter_names, dtype=object),
+        parameter_names=list(result.parameter_names),
         fiducial=numpy.array(
             [result.fiducial[name] for name in result.parameter_names]
         ),
@@ -869,7 +869,9 @@ def test_result_round_trips_through_npz(redshift_model, events, tmp_path):
         n_total=result.n_total,
         condition_number=result.condition_number,
     )
-    reloaded = PopulationFisherResult.from_npz(str(path))
+    with open(path, "wb") as handle:
+        pickle.dump(archive, handle)
+    reloaded = PopulationFisherResult.from_pickle(str(path))
 
     assert reloaded.parameter_names == result.parameter_names
     numpy.testing.assert_allclose(reloaded.fisher, result.fisher)
@@ -1129,21 +1131,21 @@ def test_population_fisher_compare_writes_a_figure(tmp_path):
     """
     import numpy
 
-    names = numpy.array(["gamma", "kappa"], dtype=object)
     paths = []
     for index, scale in enumerate((1.0, 4.0)):
-        path = tmp_path / "forecast_{}.npz".format(index)
-        numpy.savez(
-            path,
+        path = tmp_path / "forecast_{}.pkl".format(index)
+        archive = dict(
             fisher=numpy.eye(2) / scale**2,
             covariance=numpy.eye(2) * scale**2,
-            parameter_names=names,
+            parameter_names=["gamma", "kappa"],
             fiducial=numpy.array([2.7, 5.6]),
             snr_threshold=10.0,
             n_events=100,
             n_total=1000,
             condition_number=1.0,
         )
+        with open(path, "wb") as handle:
+            pickle.dump(archive, handle)
         paths.append(path)
 
     output = tmp_path / "comparison.pdf"

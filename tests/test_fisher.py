@@ -24,6 +24,7 @@ from GWForge.fisher.antenna_derivatives import AntennaDerivatives
 from GWForge.fisher.derivatives import WaveformDerivatives
 from GWForge.fisher.parameters import bounded_step, strip_shadowed_parameters
 from GWForge.fisher.matrix import check_order
+from GWForge import conversion
 from GWForge.ifo import antenna
 from GWForge.ifo.detectors import Network
 
@@ -138,7 +139,7 @@ def test_antenna_derivative_values_match_the_response(
     """The derivative class must rebuild the response it differentiates."""
     interferometer = network[0]
     frequencies = numpy.array([21.0, 55.0, 213.0, 400.0])
-    times_to_coalescence = antenna.time_to_coalescence(frequencies, 28.0, 0.24)
+    times_to_coalescence = conversion.time_to_coalescence(frequencies, 28.0, 0.24)
     options = dict(earth_rotation=earth_rotation, finite_size=finite_size)
 
     expected = antenna.antenna_response(

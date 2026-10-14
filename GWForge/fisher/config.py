@@ -12,8 +12,11 @@ import bilby
 import h5py
 import numpy
 
-from ..conversion import get_safe_signal_durations
-from ..ifo import antenna
+from ..conversion import (
+    chirp_mass_and_symmetric_mass_ratio,
+    get_safe_signal_durations,
+    time_to_coalescence,
+)
 from .parameters import DEFAULT_PARAMETERS
 from .stepsize import TARGET_FRACTIONAL_CHANGE
 
@@ -323,7 +326,7 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
         )
         duration = float(numpy.atleast_1d(duration)[0])
     except Exception as error:
-        masses = antenna.chirp_mass_and_symmetric_mass_ratio(converted)
+        masses = chirp_mass_and_symmetric_mass_ratio(converted)
         if masses is None:
             raise ValueError(
                 "Cannot size a segment for {}: {} rejected it and the masses "
@@ -332,7 +335,7 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
                 )
             ) from error
         duration = float(
-            numpy.atleast_1d(antenna.time_to_coalescence(minimum_frequency, *masses))[0]
+            numpy.atleast_1d(time_to_coalescence(minimum_frequency, *masses))[0]
         )
         logging.debug(
             "%s could not size %s (%s); using the 3.5PN estimate of %.1f s",

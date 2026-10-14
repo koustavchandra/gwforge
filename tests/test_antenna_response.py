@@ -23,6 +23,7 @@ import pytest
 import bilby
 from lal import C_SI, DAYJUL_SI, DAYSID_SI
 
+from GWForge import conversion
 from GWForge.ifo import antenna
 from GWForge.ifo.detectors import Network
 
@@ -269,13 +270,13 @@ def test_earth_rotation_uses_the_sidereal_rate():
 def test_time_to_coalescence_mode_scaling():
     """Mode ``m`` reaches frequency ``f`` when the quadrupole is at ``2f/m``."""
     frequencies = numpy.array([20.0, 100.0])
-    quadrupole = antenna.time_to_coalescence(
+    quadrupole = conversion.time_to_coalescence(
         frequencies, CHIRP_MASS, SYMMETRIC_MASS_RATIO, mode=2
     )
-    fourth = antenna.time_to_coalescence(
+    fourth = conversion.time_to_coalescence(
         frequencies, CHIRP_MASS, SYMMETRIC_MASS_RATIO, mode=4
     )
-    expected = antenna.time_to_coalescence(
+    expected = conversion.time_to_coalescence(
         frequencies / 2.0, CHIRP_MASS, SYMMETRIC_MASS_RATIO, mode=2
     )
     numpy.testing.assert_allclose(fourth, expected, rtol=1e-13)
@@ -285,7 +286,7 @@ def test_earth_rotation_changes_the_response_over_a_long_signal(network):
     """A BNS spans enough Earth rotation to move the pattern measurably."""
     interferometer = network[0]
     frequencies = numpy.array([7.0, 1000.0])
-    times_to_coalescence = antenna.time_to_coalescence(
+    times_to_coalescence = conversion.time_to_coalescence(
         frequencies, CHIRP_MASS, SYMMETRIC_MASS_RATIO
     )
     rotating = antenna.antenna_response(
@@ -351,14 +352,14 @@ def test_falls_back_to_static_without_masses(network, caplog):
     ],
 )
 def test_mass_resolver(parameters, expected_chirp_mass):
-    resolved = antenna.chirp_mass_and_symmetric_mass_ratio(parameters)
+    resolved = conversion.chirp_mass_and_symmetric_mass_ratio(parameters)
     assert resolved is not None
     assert resolved[0] == pytest.approx(expected_chirp_mass, rel=1e-12)
     assert 0 < resolved[1] <= 0.25
 
 
 def test_mass_resolver_returns_none_when_unavailable():
-    assert antenna.chirp_mass_and_symmetric_mass_ratio({"ra": 1.0}) is None
+    assert conversion.chirp_mass_and_symmetric_mass_ratio({"ra": 1.0}) is None
 
 
 def test_inject_signal_with_response_populates_meta_data():

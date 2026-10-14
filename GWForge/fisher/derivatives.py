@@ -23,7 +23,7 @@ import logging
 
 import numpy
 
-from ..ifo import antenna
+from ..conversion import chirp_mass_and_symmetric_mass_ratio, time_to_coalescence
 from .antenna_derivatives import AntennaDerivatives
 from .inner_product import inner_product
 from .parameters import (
@@ -51,7 +51,7 @@ def _times_to_coalescence(parameters, frequencies, earth_rotation, interferomete
     """:math:`\\tau(f)` for the rotating response, or None if not needed."""
     if not earth_rotation:
         return None
-    masses = antenna.chirp_mass_and_symmetric_mass_ratio(parameters)
+    masses = chirp_mass_and_symmetric_mass_ratio(parameters)
     if masses is None:
         logging.warning(
             "%s: cannot determine the masses from the source parameters, so the "
@@ -60,7 +60,7 @@ def _times_to_coalescence(parameters, frequencies, earth_rotation, interferomete
             interferometer.name,
         )
         return None
-    return antenna.time_to_coalescence(frequencies, *masses)
+    return time_to_coalescence(frequencies, *masses)
 
 
 def analytic_derivatives(

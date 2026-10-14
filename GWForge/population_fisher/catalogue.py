@@ -1,35 +1,4 @@
-r"""Assemble a detected catalogue from GWForge population and SNR files.
-
-The pipeline this consumes is the ordinary GWForge one:
-
-.. code-block:: bash
-
-   gwforge_population   --config-file bgp.ini --output-file population.h5
-   gwforge_optimal_snr  --injection-file population.h5 --output-file snr.h5 \
-                        --ifos CE40 CE20 ET
-
-``gwforge_population`` writes the source parameters, ``gwforge_optimal_snr``
-writes one ``{IFO}_optimal_snr`` column per detector plus the ``index`` of the
-injection it came from. This module joins the two on that index, forms the
-network SNR in quadrature, applies a threshold, and hands back the events dict
-the population models expect.
-
-Joining on ``index`` rather than on row order matters as soon as the SNR stage
-is split across jobs with ``--start-index``/``--end-index``, which is the normal
-way to run 30,000 sources. Older SNR files predate the column; those are joined
-positionally and the overlap is checked against the injection file, which will
-notice a misalignment rather than silently forecasting for the wrong sources.
-
-What ``n_total`` is for
------------------------
-
-The Term-I Fisher is a sum over *detected* events, so its scale is
-:math:`N_{\rm det}` and nothing else -- the total number of injections never
-enters the matrix. It is carried anyway, because the detected fraction is the
-first thing to look at when a forecast comes out surprising: a threshold that
-admits 99% of a population is telling you something different from one that
-admits 3%.
-"""
+r"""Assemble a detected catalogue from GWForge population and SNR files."""
 
 import logging
 
@@ -142,9 +111,6 @@ class Catalogue:
 def expand_detectors(detectors):
     """Expand triangular detectors into the arm names the SNR file uses.
 
-    ``["CE40", "ET"]`` becomes ``["CE40", "ET1", "ET2", "ET3"]``, matching what
-    ``gwforge_optimal_snr`` writes.
-
     Parameters
     ----------
     detectors : sequence of str
@@ -222,9 +188,6 @@ def network_snr_from(snr_data, detectors=None):
 
 def derive_event_keys(events):
     """Add the parameters the population models want but the file does not store.
-
-    ``mass_ratio`` from the component masses, and ``cos_tilt_i`` from the tilts.
-    Both are cheap and both are what a model would otherwise recompute per call.
 
     Parameters
     ----------
@@ -345,11 +308,6 @@ def load_catalogue(
 
 def load_injections(population_file, keys=CATALOGUE_KEYS):
     """Every injection, detected or not, as an events dict.
-
-    This is what the maximum-likelihood fits in
-    :mod:`GWForge.population_fisher.fit` run on: the fiducial hyper-parameters
-    describe the *astrophysical* population, so they are fitted to what was
-    drawn, not to what was detected.
 
     Parameters
     ----------

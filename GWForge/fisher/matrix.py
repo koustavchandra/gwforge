@@ -102,8 +102,8 @@ class FisherMatrix:
     eq. 13). ET contributes as three separate interferometers, which is how
     :class:`GWForge.ifo.detectors.Network` already presents it.
 
-    Usage
-    -----
+    Examples
+    --------
     >>> fisher = FisherMatrix(ifos, waveform_generator, injection_parameters)
     >>> sigmas = numpy.sqrt(numpy.diag(fisher.covariance))
 

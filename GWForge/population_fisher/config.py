@@ -1,12 +1,4 @@
-"""Configuration handling for ``gwforge_population_fisher``.
-
-Kept out of the executable so the parsing is importable and testable, and so the
-CLI stays a thin driver -- the same split :mod:`GWForge.fisher.config` uses.
-
-The five analyses differ only in ``[Model] blocks`` and ``[Fisher]
-free-parameters``, so one config reader covers redshift-only through spectral
-sirens without branching in the driver.
-"""
+"""Configuration handling for ``gwforge_population_fisher``."""
 
 import logging
 
@@ -67,12 +59,6 @@ def catalogue_settings(config, section="Catalogue"):
 
 def cosmology_settings(config, section="Model"):
     """Build the fiducial :class:`GWForge.cosmology.FlatwCDM`.
-
-    ``cosmology = <name>`` seeds it from an ``astropy`` realization, folding
-    massive neutrinos into the matter density -- this background has only matter
-    and dark energy, and at the redshifts a gravitational-wave catalogue reaches
-    that is a far smaller error than pretending the neutrinos are not there.
-    Explicit ``H0``/``Om0``/``w0`` override whatever the name supplied.
 
     Returns
     -------
@@ -186,12 +172,7 @@ def build_model(config, section="Model"):
 
 
 def _fiducial(config, section, block, model_class):
-    """Fiducial hyper-parameters for one block, defaults filled in.
-
-    A config may set only the values it cares about; anything omitted falls back
-    to the class default, so a config need not restate all eleven BGP numbers to
-    change one.
-    """
+    """Fiducial hyper-parameters for one block, defaults filled in."""
     supplied = parse_collection(
         config, section, "{}-parameters".format(block), None
     )
@@ -212,18 +193,6 @@ def _fiducial(config, section, block, model_class):
 def fit_settings(config, section="Fit"):
     """Which blocks to refit to the injections, and which to only check.
 
-    ``redshift`` defaults to ``True`` and should stay that way:
-    :class:`GWForge.population.redshift.Redshift` convolves the star-formation
-    rate with a time-delay distribution, so the generated redshifts are not
-    distributed as the direct Madau-Dickinson form and the config's
-    ``(gamma, kappa, z_peak)`` are not the fiducials of the model being
-    forecast.
-
-    ``mass`` and ``spin`` default to ``False``, because ``gwforge_population``
-    draws those straight from the same densities this package evaluates. Turning
-    them on is a consistency check, not a correction -- the fit must return the
-    generation values.
-
     Returns
     -------
     dict
@@ -238,12 +207,6 @@ def fit_settings(config, section="Fit"):
 
 def fisher_settings(config, section="Fisher"):
     """Read the ``[Fisher]`` section.
-
-    ``configurations`` maps a name to *extra* parameters pinned on top of
-    ``fixed-parameters``, so one config file can produce a degeneracy ladder --
-    the joint fit, then LCDM with ``w0`` pinned, then ``H_0`` alone. That ladder
-    is usually what separates two published forecasts, far more than the physics
-    does, so it is worth reporting rather than choosing one rung silently.
 
     Returns
     -------

@@ -1,36 +1,4 @@
-r"""Maximum-likelihood fits of a population model to a set of samples.
-
-This exists for one necessary reason and one useful one.
-
-**Necessary.** :class:`GWForge.population.redshift.Redshift` always convolves
-the Madau-Dickinson star-formation rate with a formation-to-merger time-delay
-distribution, so a population it generates is *not* distributed as
-:math:`\psi_{\rm MD}(z)\,dV_c/dz/(1+z)`. Running a Fisher forecast for the
-direct Madau-Dickinson form on such a catalogue at the generation
-:math:`(\gamma, \kappa, z_p)` would be a forecast about the wrong fiducial
-point. Fitting the direct form to the injected redshifts gives the *effective*
-parameters that population actually corresponds to, and those are what the
-Fisher should be evaluated at.
-
-**Useful.** The mass and spin blocks need no such fit: ``gwforge_population``
-draws them straight from the BGP and ``Default`` densities, so the fiducials are
-the config values. Running the fit on them anyway is therefore a test with
-teeth -- it must return the config values to within Monte-Carlo error, and if it
-does not, the log density here disagrees with the sampler over there.
-
-Both use the analytic gradient, so an eleven-parameter BGP fit to 30,000 samples
-is seconds rather than minutes.
-
-Simplex parameters
-------------------
-
-``lam_0`` and ``lam_1`` are mixture weights and must satisfy
-:math:`\lambda_0, \lambda_1 \ge 0` and :math:`\lambda_0 + \lambda_1 \le 1`; a
-box constraint cannot express the last one. They are therefore fitted through a
-softmax of two unconstrained logits, which stays in the simplex by construction
-and has no boundary for the optimiser to stick to. The chain rule for the
-gradient is in :class:`_SimplexReparameterisation`.
-"""
+r"""Maximum-likelihood fits of a population model to a set of samples."""
 
 import logging
 
@@ -91,18 +59,7 @@ DEFAULT_BOUNDS = {
 
 
 class _SimplexReparameterisation:
-    r"""Softmax map from two logits to ``(lam_0, lam_1)``.
-
-    With :math:`w = (v_0, v_1, 0)` and :math:`\lambda_i = e^{w_i}/\sum_j e^{w_j}`,
-
-    .. math::
-
-       \frac{\partial \lambda_i}{\partial v_j}
-         = \lambda_i(\delta_{ij} - \lambda_j),
-
-    which is the standard softmax Jacobian restricted to the two free logits.
-    Fixing the third logit at zero removes the map's one redundant direction.
-    """
+    r"""Softmax map from two logits to ``(lam_0, lam_1)``."""
 
     names = SIMPLEX_PARAMETERS
 

@@ -262,7 +262,7 @@ class Mass:
         full_pop_sampler="importance_m1_m2",
     ):
         """
-        Parameters:
+        Parameters
         ----------
         mass_model : str
             The parameterized mass model. [Options: {}] [Default: BGP, the
@@ -290,8 +290,8 @@ class Mass:
         """
         Generate mass distribution samples based on the chosen parameterised model and its parameters.
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: A dictionary containing source frame mass distribution samples.
         """
         samples = {}

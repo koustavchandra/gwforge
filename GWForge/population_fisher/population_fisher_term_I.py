@@ -1,77 +1,7 @@
-r"""The Term-I population Fisher matrix.
-
-Gair, Antonelli & Barbieri (`arXiv:2205.07893 <https://arxiv.org/abs/2205.07893>`_)
-expand the hyper-parameter Fisher into five terms. This module implements the
-first, which dominates whenever per-event measurement uncertainties are small
-compared with the width of the population distribution -- the regime XG
-detectors put most sources in.
-
-For :math:`N_{\rm det}` detected events :math:`\theta_k`,
-
-.. math::
-
-   s_k^i = \frac{\partial \ln p(\theta_k \mid \Lambda)}{\partial \Lambda^i},
-   \qquad
-   \langle s \rangle^i = \frac{1}{N_{\rm det}}\sum_k s_k^i,
-   \qquad
-   \Gamma^{ij} = \sum_k \big(s_k^i - \langle s\rangle^i\big)
-                        \big(s_k^j - \langle s\rangle^j\big),
-
-and :math:`\Sigma = \Gamma^{-1}`.
-
-Where the selection function went
----------------------------------
-
-Not away -- it is never *evaluated*, which is a different thing. Term I is an
-expectation under the **detected** density, so :math:`p_{\rm det}` is in it
-twice over: as the measure, and through the detectable fraction
-:math:`\alpha(\Lambda)`. Two facts collapse both into the centred sum above.
-
-First, :math:`p_{\rm det}(\theta)` carries no hyper-parameter, so it drops from
-the score. Second, the detected catalogue is itself a fair Monte-Carlo draw from
-:math:`p_{\rm det}(\theta) p(\theta|\Lambda)/\alpha(\Lambda)`, so
-
-.. math::
-
-   \frac{\partial \ln \alpha}{\partial \Lambda^i}
-     = \int p_{\rm det}(\theta)\,\frac{p(\theta|\Lambda)}{\alpha(\Lambda)}\,
-       \frac{\partial \ln p}{\partial \Lambda^i}\,d\theta
-     = \mathbb{E}_{\rm det}\!\left[s^i\right],
-
-which the sample mean estimates. So there is no separate selection integral to
-evaluate, no injection reweighting and no rate normalisation -- but the
-selection is still doing work, carried entirely by *which events are in the
-sum*. The SNR threshold is an input to the forecast, not a preprocessing step:
-change it and :math:`\Gamma` changes. The absolute scale is set by how many
-events were detected, and every :math:`\sigma` therefore scales as
-:math:`1/\sqrt{T_{\rm obs}}`.
-
-``validation/population_detection_fraction.py`` reports what a given threshold
-removes. :math:`p_{\rm det}` reappears explicitly at higher order -- as
-:math:`\partial_\theta \ln p_{\rm det}` in Gair's :math:`\Gamma_4` -- which is
-one reason this module stops at Term I.
-
-Two consequences worth knowing. First, any :math:`\Lambda`-dependent but
-*event-independent* normalisation cancels identically under centring, so a model
-that forgets one still gives the right Fisher (it will not give the right
-``log_prob``, which is why the models here compute it anyway). Second, the
-identity is exact only if :math:`p_{\rm det}` carries no hyper-parameter -- the
-reason :mod:`GWForge.population_fisher.model` builds its density in the
-detector frame rather than pushing events to the source frame at a trial
-cosmology.
-
-Degenerate directions
----------------------
-
-A parameter whose score is the *same number* for every event -- a hard mass
-cutoff, in the interior of a power law -- has an identically zero centred score,
-so its Fisher row and column vanish and the matrix is singular. That is a
-statement about the model, not a numerical accident: within Term I such a
-parameter is unmeasurable. :func:`population_fisher` detects it, names it, and
-falls back to a pseudo-inverse rather than returning a plausible-looking number.
-"""
+r"""The Term-I population Fisher matrix."""
 
 import logging
+import pickle
 
 import numpy
 
@@ -151,29 +81,20 @@ class PopulationFisherResult:
         )
 
     @classmethod
-    def from_npz(cls, path):
+    def from_pickle(cls, path):
         """Reload a forecast that :file:`bin/gwforge_population_fisher` saved.
-
-        Comparing two networks, or redrawing a figure in a new style, should not
-        mean recomputing either forecast. The saved archive carries everything a
-        plot needs: the matrix, its covariance, the parameter names, the
-        fiducial values and the event counts.
-
-        The score matrix is *not* saved -- it is one row per detected event and
-        would dominate the file -- so the reloaded result has an empty
-        ``scores`` and ``mean_score``. Everything the plotting path touches is
-        present.
 
         Parameters
         ----------
         path : str
-            A ``.npz`` written by the CLI.
+            A pickle written by the CLI.
 
         Returns
         -------
         PopulationFisherResult
         """
-        with numpy.load(path, allow_pickle=True) as archive:
+        with open(path, "rb") as handle:
+            archive = pickle.load(handle)
             names = [str(name) for name in archive["parameter_names"]]
             fiducial = dict(zip(names, archive["fiducial"].astype(float)))
             return cls(
@@ -202,13 +123,6 @@ class PopulationFisherResult:
 
     def scaled_to(self, n_events):
         """This forecast rescaled to a different number of detected events.
-
-        The Term-I Fisher is a sum over events, so it is proportional to
-        :math:`N_{\\rm det}` in expectation and :math:`\\sigma \\propto
-        N_{\\rm det}^{-1/2}`. Use this to turn a one-month catalogue into a
-        ten-year forecast without regenerating anything -- or, more usefully, to
-        state plainly that a headline number is a pure :math:`\\sqrt{T}`
-        extrapolation rather than a computed one.
 
         Parameters
         ----------
@@ -287,12 +201,6 @@ class PopulationFisherResult:
 
 def covariance_from_fisher(fisher, names=None, rcond=DEFAULT_RCOND):
     """Invert a Fisher matrix, falling back to a pseudo-inverse when it is singular.
-
-    The matrix is normalised by its diagonal before inversion -- the same trick
-    :func:`GWForge.fisher.matrix.covariance` uses -- because hyper-parameters
-    differ by many orders of magnitude in scale (``H0`` near 68, ``lam_1`` near
-    0.05) and the raw condition number is then dominated by units rather than by
-    degeneracy.
 
     Parameters
     ----------

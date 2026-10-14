@@ -160,7 +160,7 @@ def test_beta_model_still_available_under_its_own_name():
 
 
 # ---------------------------------------------------------------------------
-# The densities the Fisher model and the validation script share
+# The densities the Fisher model and the catalogue share
 # ---------------------------------------------------------------------------
 
 
@@ -190,8 +190,7 @@ def test_tilt_marginal_is_not_the_joint():
     """The mixture is over the *binary*, so the pair does not factorise.
 
     Getting this wrong leaves both marginals untouched and silently sets
-    ``corr(cos t_1, cos t_2)`` to zero, which is the bug the catalogue check in
-    ``validation/`` exists to catch.
+    ``corr(cos t_1, cos t_2)`` to zero.
     """
     from GWForge.population.spin import (
         default_spin_tilt_density,

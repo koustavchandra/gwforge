@@ -77,8 +77,8 @@ def get_safe_signal_durations(
     """
     Calculate the safe signal durations for gravitational waveforms.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     mass_1: float or array-like
         The mass of the primary compact object(s) in solar masses.
     mass_2: float or array-like
@@ -94,13 +94,13 @@ def get_safe_signal_durations(
     approximant (str, optional):
         The waveform approximant to use. [Default: 'IMRPhenomXPHM']
 
-    Returns:
-    --------
+    Returns
+    -------
     float or array-like:
         The safe signal durations in seconds.
 
-    Raises:
-    -------
+    Raises
+    ------
     ValueError:
         If any of the input arrays (mass_1, mass_2, spin_1z, spin_2z) is not a float array.
     RuntimeError:

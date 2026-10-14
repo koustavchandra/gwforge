@@ -1,23 +1,4 @@
-r"""Figures for population Fisher forecasts.
-
-Two kinds.
-
-The **corner** is the covariance itself: a Fisher forecast is a Gaussian, so the
-way to draw it is to realise that Gaussian and hand the samples to
-:func:`GWForge.plotting.corner_plot`, which is where the style, the palettes and
-the contour machinery live.
-
-The **reconstruction** plots are the more useful ones. A table of sigmas says how
-well each hyper-parameter is pinned; a band on :math:`\pi(m_1)` or :math:`p(z)`
-says what that means for the distribution anyone actually cares about, and it is
-where a degeneracy shows up as a band that is narrow everywhere the parameters
-are correlated and wide where they are not. Both overlay the injected histogram,
-which is also the quickest way to catch a fiducial that was fitted badly.
-
-Everything here draws inside ``matplotlib.rc_context`` so that importing this
-module, or calling anything in it, leaves the caller's matplotlib configuration
-alone.
-"""
+r"""Figures for population Fisher forecasts."""
 
 import logging
 

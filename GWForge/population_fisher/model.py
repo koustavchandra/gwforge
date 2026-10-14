@@ -1,331 +1,4 @@
-r"""The population models GWForge forecasts on, with their analytic scores.
-
-Four sectors live here -- the BGP mass function, the Default BBH spin
-distribution, Madau-Dickinson redshift evolution, and the detector-frame
-spectral-siren composite that folds a cosmology into the first three. They share
-one module because they share one contract
-(:class:`GWForge.population_fisher.base.PopulationModel`) and because splitting
-them by sector bought nothing: every consumer wants the set, not one of them.
-
-The densities are **not** reimplemented here. The mass model calls
-:mod:`GWForge.population._smoothed_mass`, the redshift model calls
-:func:`GWForge.population.redshift.madau_dickinson_psi_of_z`, and the spin model
-calls :func:`GWForge.population.spin.truncated_normal` -- the kernel both halves
-of the ``Default`` model are built from, and the one the density checks in
-``validation/`` use. So a forecast and the catalogue it runs on cannot describe
-two different populations. What is new in every case is the *score*,
-:math:`\partial_\Lambda \ln p`, in closed form.
-
-The sections below are the four sectors' own documentation, unchanged from when
-they were separate modules.
-
-Mass: the BGP model
-===================
-
-The BGP mass model -- broken power law plus two peaks -- with analytic scores.
-
-This is the fiducial BBH mass model of the GWTC-4.0/5.0 population analyses
-(`arXiv:2605.27226 <https://arxiv.org/abs/2605.27226>`_ Eqs. B10-B14), and the
-one :class:`GWForge.population.mass.Mass` samples under ``mass-model = BGP``. The
-density is *not* reimplemented here: it is
-:mod:`GWForge.population._smoothed_mass`, called directly, so a Fisher forecast
-and the catalogue it is run on cannot describe two different populations. What
-is new is the score.
-
-.. math::
-
-   \pi(m_1) = \frac{1}{Z}\Big[\lambda_0\, p_{\rm BP}(m_1)
-        + \lambda_1\, N_{\rm lt}(m_1|\mu_1,\sigma_1)
-        + (1 - \lambda_0 - \lambda_1)\, N_{\rm lt}(m_1|\mu_2,\sigma_2)\Big]
-        S(m_1|m_{\min},\delta_m),
-
-.. math::
-
-   p(m_2 \mid m_1)
-     = \frac{m_2^{\beta}\, S(m_2 \mid m_{2,\rm low}, \delta_{m,2})}{G(m_1)},
-   \qquad
-   G(m_1) = \int_{m_{2,\rm low}}^{m_1} m_2^{\beta}\, S(m_2)\, dm_2.
-
-The primary and secondary tapers are **independent** (GWTC-5.0 Tab. 5): the
-secondary's prior is :math:`m_{2,\rm low} \sim U(3, m_{1,\rm low})`, so it turns
-on below the primary, and the O4b medians separate them clearly -- 4.49/3.12
-against 3.49/5.60. Both secondary parameters are constructor arguments here, for
-the same reason :math:`m_{\min}` is: they move the edge of the support.
-
-``log_prob`` returns the joint density in :math:`(m_1, m_2)`, not in
-:math:`(m_1, q)`. The two differ by the Jacobian :math:`m_1`, which carries no
-hyper-parameter and so cancels from every score -- but it does not cancel from
-``log_prob``, which the maximum-likelihood fits compare, and the detector-frame
-model in :mod:`GWForge.population_fisher.model` wants component masses
-anyway because that is where the :math:`(1+z)` factors live. Events may be given
-as ``mass_2_source`` or as ``mass_ratio``; both describe the same density.
-
-Which parameters are free, and why the rest are not
----------------------------------------------------
-
-:attr:`BrokenPowerLawTwoPeakMass.parameter_names` holds eleven names. The three
-that are missing -- ``mmin``, ``m_high`` and ``maximum_mass`` -- are
-**constructor arguments**, not hyper-parameters, for two independent reasons.
-
-*Statistically*, they are hard cutoffs. Inside the power-law interior their
-scores are the same number for every event, so the centred score
-:math:`s_k - \langle s \rangle` of the Term-I Fisher vanishes identically and
-the matrix acquires a zero row. The previous generation of this code discovered
-this the hard way and pinned exactly these parameters in every science run.
-
-*Numerically*, they are the endpoints of the normalisation integrals, so their
-derivatives carry Leibniz boundary terms and cannot be checked against a finite
-difference on a fixed grid -- as ``m_high`` crosses a node, the trapezoid jumps
-by the integrand times the node spacing, so the finite difference is a staircase
-rather than a derivative. Every score this module *does* expose is smooth in its
-parameter and is validated against a finite difference in the test suite.
-
-To study sensitivity to them, build a second model with different values. That
-is honest about what is happening -- a different support is a different model,
-not a different point in one.
-
-``delta_m`` is free and is smooth, because the Planck taper drives the integrand
-continuously to zero at :math:`m_{\min}`: there is no edge for a boundary term
-to sit on. It is also the parameter that most deserves watching. The taper is a
-sharp feature at a *fixed source-frame* mass, i.e. a standard scale, so it feeds
-:math:`H_0` directly in a spectral-siren forecast. The previous generation of
-this code measured :math:`\sigma(H_0)` swinging by a factor of 77 across
-:math:`\delta_m \in [0, 4]\,M_\odot`; that sensitivity should be scanned rather
-than assumed.
-
-Grids
------
-
-One fixed grid over :math:`[m_{\min}, m_{\rm max, grid}]` serves both
-normalisations: the primary-mass :math:`Z` and the cumulative mass-ratio norm
-:math:`G`.
-
-*Fixed*, because a grid that moved with the hyper-parameters would make
-``d/dLambda`` of the discretised integral differ from the discretised
-``d/dLambda``, and every score here is the latter.
-
-*Clustered towards* :math:`m_{\min}` rather than uniform -- see
-:func:`mass_grid` -- because :math:`G` is interpolated at each event's
-:math:`m_1`, and just above :math:`m_{\min}` it is a very small number rising
-very fast.
-
-Spin: the Default BBH model
-===========================
-
-The GWTC-5.0 **Default BBH** spin population, with analytic scores.
-
-This is Eqs. B15-B16 of `arXiv:2605.27226 <https://arxiv.org/abs/2605.27226>`_,
-the model :class:`GWForge.population.spin.Spin` samples under
-``spin-model = Default``. The sampler has no density attached to it, so unlike
-the mass and redshift blocks the density here is written out rather than reused;
-the tests check it against ``scipy.stats`` on the same parameters the sampler
-uses.
-
-Magnitudes are independent and identically distributed truncated Gaussians
-(Eq. B15),
-
-.. math::
-
-   \pi(\chi_1, \chi_2 \mid \mu_\chi, \sigma_\chi)
-     = N_{[0, a_{\max}]}(\chi_1 \mid \mu_\chi, \sigma_\chi)\,
-       N_{[0, a_{\max}]}(\chi_2 \mid \mu_\chi, \sigma_\chi),
-
-and the cosine tilts are identically but **not independently** distributed
-(Eq. B16),
-
-.. math::
-
-   \pi(\cos\theta_1, \cos\theta_2 \mid \mu_t, \sigma_t, \xi)
-     = \xi\, N_{[t_{\min}, 1]}(\cos\theta_1 \mid \mu_t, \sigma_t)\,
-             N_{[t_{\min}, 1]}(\cos\theta_2 \mid \mu_t, \sigma_t)
-     + \frac{1 - \xi}{(1 - t_{\min})^2}.
-
-Three things that are easy to get wrong
----------------------------------------
-
-**The magnitude is a truncated Gaussian, not a Beta**, and ``sigma_chi`` is a
-*standard deviation*. The GWTC-3-era model this package used to implement takes
-a Beta parameterised by a mean and a **variance**; the two are not
-interconvertible, and the Beta is forced to vanish or diverge at both endpoints
-where the truncated Gaussian is finite and generally nonzero.
-
-**The tilt Gaussian's mean is free.** :math:`\mu_t \sim U(-1, 1)`, with an O4b
-median of 0.279 -- the paper says outright that it "allow[s] for the location of
-the Gaussian subpopulation to vary". A model with :math:`\mu_t` pinned at 1
-cannot produce the peak away from alignment that the data prefer.
-
-**The tilt mixture is over the binary, not the component.** One Bernoulli draw
-decides whether *both* tilts come from the Gaussian, so the two are correlated.
-Factorising it into two per-component mixtures gives identical marginals and the
-wrong joint -- the difference is a genuine correlation between
-:math:`\cos\theta_1` and :math:`\cos\theta_2` that vanishes only at
-:math:`\xi \in \{0, 1\}`. Because this leaves the marginals untouched, only a
-joint statistic catches it; the test suite uses the correlation coefficient.
-
-Frames and Jacobians
---------------------
-
-The sampler returns ``tilt_1``/``tilt_2``, not their cosines. The Jacobian
-:math:`|\sin t|` relating the two carries no hyper-parameter, so it cancels from
-every score; ``log_prob`` is quoted in :math:`\cos t` and the model accepts
-either ``cos_tilt_i`` or ``tilt_i``.
-
-Redshift: Madau-Dickinson
-=========================
-
-Madau-Dickinson merger-rate density, with analytic scores.
-
-The observed rate per unit redshift is
-
-.. math::
-
-   \frac{dN}{dz} \propto \psi(z)\,\frac{dV_c}{dz}\,\frac{1}{1+z},
-
-so, normalised over :math:`[0, z_{\max}]`,
-
-.. math::
-
-   \ln p(z \mid \gamma, \kappa, z_p) = \ln\psi(z) + \ln\frac{dV_c}{dz}
-       - \ln(1 + z) - \ln Z(\gamma, \kappa, z_p),
-
-with :math:`\psi` the Madau-Dickinson shape that
-:func:`GWForge.population.redshift.madau_dickinson_psi_of_z` already implements
-and this module calls directly:
-
-.. math::
-
-   \psi(z) = \frac{(1+z)^\gamma}{1 + \left(\frac{1+z}{1+z_p}\right)^{\kappa}}
-             \left[1 + (1 + z_p)^{-\kappa}\right].
-
-Two simplifications fall out and are used below.
-
-* The :math:`dV_c/dz\,/(1+z)` measure carries no hyper-parameter, so it drops
-  out of every score exactly. It is *not* dropped from ``log_prob``, which the
-  maximum-likelihood fit in :mod:`GWForge.population_fisher.fit` needs whole.
-* The :math:`[1 + (1+z_p)^{-\kappa}]` factor -- there to make
-  :math:`\psi(0) = 1` -- is independent of :math:`z`, so it multiplies the
-  numerator and :math:`Z` alike and cancels from ``log_prob`` identically. The
-  scores below are therefore of the *shape* only.
-
-What is left is the same structure everywhere:
-
-.. math::
-
-   \frac{\partial \ln p}{\partial\Lambda} = g(z) - \mathbb{E}_p[g],
-
-where :math:`\mathbb{E}_p` is the expectation under :math:`p(z)` itself, coming
-from :math:`\partial_\Lambda \ln Z`. It is evaluated on the same trapezoidal
-grid that normalises ``log_prob``, so the density and its derivative cannot
-drift apart.
-
-Note on fiducials
------------------
-
-``GWForge.population.redshift.Redshift`` always convolves :math:`\psi` with a
-formation-to-merger time-delay distribution, so a population it generates is
-*not* distributed as :math:`\psi(z)\,dV_c/dz/(1+z)`. The fiducial
-:math:`(\gamma, \kappa, z_p)` for a Fisher forecast on such a catalogue must
-therefore be **fitted** to the injected redshifts rather than read off the
-generation config -- see :func:`GWForge.population_fisher.fit.fit_model`.
-
-Spectral sirens
-===============
-
-Spectral sirens: the population in the detector frame, with cosmology free.
-
-The detector measures redshifted masses, so a feature at a fixed *source-frame*
-mass -- the low-mass peak, the taper at :math:`m_{\min}` -- appears at a
-detector-frame mass that grows with redshift. Combined with the measured
-:math:`d_L`, that pins the distance-redshift relation and hence
-:math:`(H_0, \Omega_{m,0}, w_0)`.
-
-Why the detector frame
-----------------------
-
-This is the one structural choice that has to be right. Promoting the cosmology
-to hyper-parameters and building the density over the **observables**
-:math:`(m_1^{\rm det}, m_2^{\rm det}, d_L)` means :math:`P_{\rm det}` depends on
-no hyper-parameter -- it is a threshold on an SNR computed from detector-frame
-quantities alone. The centred-score identity
-:math:`\partial_\Lambda \ln\alpha = \mathbb{E}_{\rm det}[s]` that supplies the
-selection term in :mod:`GWForge.population_fisher.population_fisher_term_I` then holds *exactly*.
-
-Push the events to the source frame at a trial cosmology instead and both break:
-the detection probability acquires a cosmology dependence, and the per-event
-measurement uncertainties become functions of the hyper-parameters.
-
-The density
------------
-
-The source-frame model gives :math:`p(m_1^{\rm src}, m_2^{\rm src})` and
-:math:`p(z)`, both already normalised. Changing variables to the observables
-costs one Jacobian factor per mass and one for the distance,
-
-.. math::
-
-   \ln p(m_1^{\rm det}, m_2^{\rm det}, d_L)
-     = \ln p_{\rm mass}(m_1^{\rm src}, m_2^{\rm src})
-     + \ln p(z)
-     - 2\ln(1 + z)
-     - \ln\frac{dd_L}{dz}
-     \;[+ \ln p_{\rm spin}],
-
-with :math:`z = z(d_L; H_0, \Omega_{m,0}, w_0)` and
-:math:`m^{\rm src} = m^{\rm det}/(1+z)`. Spins are frame invariant and simply
-add.
-
-The redshift measure is rebuilt at the trial cosmology rather than taken from
-:class:`GWForge.population_fisher.model.MadauDickinsonRedshift`, whose
-:math:`dV_c/dz` is fixed: it is precisely the cosmology dependence of that
-measure that carries the information.
-
-The cosmology columns
----------------------
-
-Every one is closed form. Writing :math:`\Lambda` for a cosmology parameter,
-everything reaches it through :math:`z(d_L)` at fixed distance, plus an explicit
-dependence of the measure at fixed :math:`z`:
-
-.. math::
-
-   \frac{\partial \ln p}{\partial \Lambda}
-     = \left[
-        \frac{\partial \ln p_{\rm mass}}{\partial m_1^{\rm src}}
-        \left(\frac{-m_1^{\rm src}}{1+z}\right)
-      + \frac{\partial \ln p_{\rm mass}}{\partial m_2^{\rm src}}
-        \left(\frac{-m_2^{\rm src}}{1+z}\right)
-      + \frac{\partial \ln \psi}{\partial z}
-      + \frac{\partial}{\partial z}\ln\frac{dV_c}{dz}
-      - \frac{3}{1+z}
-      - \frac{\partial}{\partial z}\ln\frac{dd_L}{dz}
-     \right] \frac{\partial z}{\partial \Lambda}
-     + \left.\frac{\partial}{\partial\Lambda}\ln\frac{dV_c}{dz}\right|_z
-     - \left.\frac{\partial}{\partial\Lambda}\ln\frac{dd_L}{dz}\right|_z
-     - \frac{\partial \ln Z_z}{\partial \Lambda},
-
-with :math:`\partial z/\partial\Lambda` from implicit differentiation of
-:math:`d_L(z;\Lambda) = \text{const}` (see
-:meth:`GWForge.cosmology.FlatwCDM.dredshift_dparameter`) and every remaining
-piece from :meth:`GWForge.cosmology.FlatwCDM.derivatives`.
-
-Nothing here is finite-differenced. The previous generation of this code
-finite-differenced the :math:`\Omega_{m,0}` and :math:`w_0` columns and hit an
-error floor set by rebuilding a spline per trial cosmology, such that shrinking
-the step from 1e-4 to 1e-5 made them *two orders of magnitude worse*.
-
-A caveat that must be quoted with any result
----------------------------------------------
-
-The taper at :math:`m_{\min}` is a sharp feature at a fixed source-frame mass,
-i.e. a standard scale, and it feeds :math:`H_0` directly. How sharp it is --
-``delta_m`` -- therefore sets how much cosmological information the low-mass
-edge carries, and :math:`\sigma(H_0)` moves by nearly two orders of magnitude
-across :math:`\delta_m \in [0, 4]\,M_\odot`. Because GWForge *generates* the
-catalogue at a known ``delta_m``, that number is under control here rather than
-being set by whatever a maximum-likelihood fit does against a hard injection
-cutoff -- but the sensitivity is real and should be scanned, not assumed.
-
-"""
+r"""The population models GWForge forecasts on, with their analytic scores."""
 
 import numpy
 from scipy.integrate import cumulative_trapezoid
@@ -372,24 +45,6 @@ _INVERSE_ROOT_TWO_PI = 1.0 / numpy.sqrt(2.0 * numpy.pi)
 def mass_grid(mmin, maximum_mass, nodes=MASS_GRID_NODES):
     r"""The shared normalisation grid: quadratically clustered towards ``mmin``.
 
-    :math:`m = m_{\min} + (m_{\max} - m_{\min})\,s^2` for
-    :math:`s \in [0, 1]`.
-
-    Uniform spacing is the obvious choice and the wrong one. The mass-ratio
-    normalisation :math:`G(m_1) = \int_{m_{\min}}^{m_1} m_2^{\beta} S(m_2)dm_2`
-    is interpolated at each event's :math:`m_1`, and just above :math:`m_{\min}`
-    it is a very small number rising very fast, so an interpolant on a uniform
-    grid has a large *relative* error exactly there. Measured against a finite
-    difference at the same node count, ``d ln p / d m_1`` at
-    :math:`m_1 = m_{\min} + 0.73` was wrong by 3.6e-1 on a uniform grid and by
-    4.7e-2 on this one; the cubic-Hermite interpolation in
-    :meth:`BrokenPowerLawTwoPeakMass._cumulative_secondary` then takes it to
-    6.7e-5.
-
-    The grid is fixed -- it does not depend on any hyper-parameter -- which is
-    what lets ``d/dLambda`` of the discretised integral equal the discretised
-    ``d/dLambda`` exactly, with no Leibniz boundary terms.
-
     Parameters
     ----------
     mmin, maximum_mass : float
@@ -404,12 +59,7 @@ def mass_grid(mmin, maximum_mass, nodes=MASS_GRID_NODES):
 
 
 def _power_law_integral(ratio, alpha):
-    r""":math:`A(x, \alpha) = \int_x^1 t^{-\alpha} dt = (1 - x^{1-\alpha})/(1-\alpha)`.
-
-    Written with ``expm1`` so the :math:`\alpha \to 1` cancellation is exact
-    rather than catastrophic, with a series branch at the removable singularity
-    itself (where :math:`A \to -\ln x`).
-    """
+    r""":math:`A(x, \alpha) = \int_x^1 t^{-\alpha} dt = (1 - x^{1-\alpha})/(1-\alpha)`."""
     exponent = 1.0 - alpha
     logarithm = numpy.log(ratio)
     if abs(exponent) < POWER_LAW_SERIES_THRESHOLD:
@@ -422,16 +72,7 @@ def _power_law_integral(ratio, alpha):
 
 
 def _power_law_integral_dalpha(ratio, alpha):
-    r"""Derivative of :func:`_power_law_integral` with respect to the slope.
-
-    .. math::
-        \frac{\partial A}{\partial\alpha}
-          = \frac{u x^{u}\ln x + (1 - x^{u})}{u^2},
-        \qquad u = 1 - \alpha.
-
-    Series branch as :math:`u \to 0`, where the limit is
-    :math:`\tfrac{1}{2}\ln^2 x`.
-    """
+    r"""Derivative of :func:`_power_law_integral` with respect to the slope."""
     exponent = 1.0 - alpha
     logarithm = numpy.log(ratio)
     if abs(exponent) < POWER_LAW_SERIES_THRESHOLD:
@@ -445,10 +86,6 @@ def _power_law_integral_dalpha(ratio, alpha):
 def broken_power_law_norm(alpha_1, alpha_2, m_break, mmin, m_high):
     r"""Normalisation of :func:`GWForge.population._smoothed_mass.broken_power_law`.
 
-    .. math::
-
-       N = m_b\Big[A(m_{\min}/m_b, \alpha_1) - A(m_{\rm high}/m_b, \alpha_2)\Big].
-
     Returns
     -------
     float
@@ -461,16 +98,6 @@ def broken_power_law_norm(alpha_1, alpha_2, m_break, mmin, m_high):
 
 def broken_power_law_norm_derivatives(alpha_1, alpha_2, m_break, mmin, m_high):
     r"""``dN/dLambda`` for the broken power law, as a dict.
-
-    Only the three interior parameters are returned; ``mmin`` and ``m_high``
-    move the support and are constructor arguments here (see the module
-    docstring).
-
-    .. math::
-
-       \frac{\partial N}{\partial m_b}
-         = (A_{\rm lo} - A_{\rm hi})
-           + (m_{\min}/m_b)^{1-\alpha_1} - (m_{\rm high}/m_b)^{1-\alpha_2}.
 
     Returns
     -------
@@ -493,23 +120,6 @@ def broken_power_law_norm_derivatives(alpha_1, alpha_2, m_break, mmin, m_high):
 def left_truncated_normal_dlog(mass, mu, sigma, mmin):
     r"""``d ln N_lt / d(mu, sigma)`` for the left-truncated normal.
 
-    With :math:`z = (m - \mu)/\sigma`, :math:`t = (m_{\min} - \mu)/\sigma` and
-    :math:`D = 1 - \Phi(t)`,
-
-    .. math::
-
-       \frac{\partial \ln N_{\rm lt}}{\partial\mu} = \frac{z}{\sigma}
-           - \frac{\phi(t)}{\sigma D},
-       \qquad
-       \frac{\partial \ln N_{\rm lt}}{\partial\sigma} = \frac{z^2 - 1}{\sigma}
-           - \frac{t\,\phi(t)}{\sigma D}.
-
-    The :math:`\phi(t)/D` terms are the truncation edge responding to the peak
-    moving or widening. They are not small: at :math:`\mu = 10`,
-    :math:`\sigma = 1.5`, :math:`m_{\min} = 5` the truncation already removes
-    0.04% of the Gaussian, and the term grows fast as a peak approaches the
-    cutoff.
-
     Returns
     -------
     dict
@@ -529,17 +139,6 @@ def left_truncated_normal_dlog(mass, mu, sigma, mmin):
 
 def smoothing_ddelta_m(mass, mmin, mmax, delta_m):
     r"""``dS/d(delta_m)`` for the Planck taper.
-
-    With :math:`x = m - m_{\min}`, :math:`d = \delta_m` and
-    :math:`f = d/x + d/(x - d)` so that :math:`S = (1 + e^{f})^{-1}`,
-
-    .. math::
-
-       \frac{\partial f}{\partial d} = \frac{1}{x} + \frac{x}{(x - d)^2},
-       \qquad
-       \frac{\partial S}{\partial d} = -S(1 - S)\,\frac{\partial f}{\partial d}.
-
-    Zero outside the ramp, where :math:`S(1-S)` vanishes anyway.
 
     Returns
     -------
@@ -563,14 +162,6 @@ def smoothing_ddelta_m(mass, mmin, mmax, delta_m):
 def smoothing_dmass(mass, mmin, mmax, delta_m):
     r"""``dS/dm`` for the Planck taper, at fixed hyper-parameters.
 
-    Same window as :func:`smoothing_ddelta_m`, differentiated the other way:
-    :math:`\partial f/\partial m = -\big(d/x^2 + d/(x-d)^2\big)`, so
-
-    .. math::
-
-       \frac{\partial S}{\partial m}
-         = S(1-S)\left(\frac{d}{x^2} + \frac{d}{(x-d)^2}\right).
-
     Returns
     -------
     numpy.ndarray
@@ -593,12 +184,6 @@ def smoothing_dmass(mass, mmin, mmax, delta_m):
 class BrokenPowerLawTwoPeakMass(PopulationModel):
     r"""BGP primary mass and power-law mass ratio, with analytic scores.
 
-    Usage
-    -----
-    >>> model = BrokenPowerLawTwoPeakMass(mmin=5.0, m_high=100.0)
-    >>> model.log_prob({"mass_1_source": m1, "mass_ratio": q}, model.fiducial)
-    >>> model.score({"mass_1_source": m1, "mass_ratio": q})
-
     Attributes
     ----------
     parameter_names : list of str
@@ -606,7 +191,9 @@ class BrokenPowerLawTwoPeakMass(PopulationModel):
         :class:`GWForge.population.mass.Mass`'s spelling so that a generation
         config and a Fisher config read the same.
     mmin, m_high, maximum_mass : float
-        Support parameters, fixed by construction. See the module docstring.
+        Support parameters, fixed by construction: hard cutoffs have a
+        constant score, so their centred score vanishes and they are not
+        measurable within Term I.
     """
 
     parameter_names = [
@@ -777,15 +364,6 @@ class BrokenPowerLawTwoPeakMass(PopulationModel):
     def _cumulative_secondary(self, parameters):
         r"""The cumulative secondary-mass integral and its derivatives.
 
-        .. math::
-
-           G(M) = \int_{m_{\min}}^{M} m_2^{\beta}\, S(m_2)\, dm_2,
-
-        so that :math:`C(m_1) = m_1^{-(\beta+1)} G(m_1)` is the mass-ratio
-        normalisation. Substituting :math:`m_2 = m_1 q` turns one integral per
-        event into one cumulative integral on the shared grid, interpolated --
-        which is also how ``_smoothed_mass._norm_p_q`` does it, so the two agree.
-
         Returns
         -------
         dict
@@ -823,28 +401,6 @@ class BrokenPowerLawTwoPeakMass(PopulationModel):
 
     def dlog_prob_dmasses(self, events, parameters):
         r"""``(d ln p / d m_1, d ln p / d m_2)`` at fixed hyper-parameters.
-
-        Not needed by the Fisher itself -- these are derivatives with respect to
-        the *event* parameters, not the hyper-parameters. They are needed by
-        :mod:`GWForge.population_fisher.model`, where a trial cosmology
-        moves the redshift assigned to a measured distance and so moves the
-        source-frame masses:
-        :math:`\partial_\Lambda m^{\rm src} = -m^{\rm src}/(1+z)\cdot\partial_\Lambda z`.
-
-        .. math::
-
-           \frac{\partial \ln p}{\partial m_1}
-             = \frac{\partial \ln(\text{mixture})}{\partial m_1}
-             + \frac{\partial \ln S(m_1)}{\partial m_1}
-             - \frac{m_1^{\beta} S(m_1)}{G(m_1)},
-
-        the last term because :math:`m_1` is the upper limit of the mass-ratio
-        normalisation :math:`G`, and
-
-        .. math::
-
-           \frac{\partial \ln p}{\partial m_2}
-             = \frac{\beta}{m_2} + \frac{\partial \ln S(m_2)}{\partial m_2}.
 
         Returns
         -------
@@ -966,17 +522,7 @@ class BrokenPowerLawTwoPeakMass(PopulationModel):
         return numpy.where(inside & numpy.isfinite(value), value, -numpy.inf)
 
     def analytic_score(self, events, parameters):
-        r"""Closed-form score, ``(n_events, 11)``.
-
-        Each column is the log-derivative of the numerator minus that of the
-        normalisation,
-        :math:`\partial_\Lambda \ln(\text{numerator}) - \partial_\Lambda \ln Z`,
-        for the primary mass, plus the mass-ratio
-        contribution for the two parameters (``beta`` and ``delta_m``) that
-        appear in both. :math:`\partial_\Lambda Z` is the trapezoid of
-        :math:`\partial_\Lambda(\text{numerator})` on the *same* nodes that
-        normalise ``log_prob``, which is exact because the nodes do not move.
-        """
+        r"""Closed-form score, ``(n_events, 11)``."""
         self.check_events(events)
         primary = numpy.asarray(events["mass_1_source"], dtype=float)
         secondary = self._secondary_mass(events)
@@ -1031,11 +577,6 @@ DEFAULT_MINIMUM_COSINE_TILT = -1.0
 
 class DefaultSpin(PopulationModel):
     r"""GWTC-5.0 Default BBH spins: truncated-Gaussian magnitudes, mixture tilts.
-
-    Usage
-    -----
-    >>> model = DefaultSpin()
-    >>> model.log_prob({"a_1": a1, "a_2": a2, "tilt_1": t1, "tilt_2": t2}, model.fiducial)
 
     Attributes
     ----------
@@ -1150,7 +691,7 @@ class DefaultSpin(PopulationModel):
         tilts = self._tilt_terms(events, parameters)
 
         # The tilt term is the density of the *pair*, not a product of two
-        # per-component densities. See the module docstring.
+        # per-component densities.
         joint_tilt = (
             parameters["xi_spin"] * tilts[0]["density"] * tilts[1]["density"]
             + (1.0 - parameters["xi_spin"]) * self.isotropic_density
@@ -1169,22 +710,7 @@ class DefaultSpin(PopulationModel):
         return numpy.where(inside, total, -numpy.inf)
 
     def analytic_score(self, events, parameters):
-        r"""Closed-form score, ``(n_events, 5)``.
-
-        The magnitude columns are the sum of the two components'
-        :math:`\partial \ln N/\partial(\mu_\chi, \sigma_\chi)`. The tilt columns
-        differentiate the *joint* mixture, so each picks up both terms of the
-        product rule:
-
-        .. math::
-
-           \frac{\partial \ln \pi}{\partial \mu_t}
-             = \frac{\xi\,N_1 N_2\left(\partial_{\mu_t}\ln N_1
-                                     + \partial_{\mu_t}\ln N_2\right)}{\pi},
-           \qquad
-           \frac{\partial \ln \pi}{\partial \xi}
-             = \frac{N_1 N_2 - (1-t_{\min})^{-2}}{\pi}.
-        """
+        r"""Closed-form score, ``(n_events, 5)``."""
         self.check_events(events)
         magnitudes = self._magnitude_terms(events, parameters)
         tilts = self._tilt_terms(events, parameters)
@@ -1226,12 +752,6 @@ NORMALISATION_NODES = 4000
 
 class MadauDickinsonRedshift(PopulationModel):
     r"""Merger-rate density following the Madau-Dickinson shape.
-
-    Usage
-    -----
-    >>> model = MadauDickinsonRedshift(maximum_redshift=10.0)
-    >>> model.log_prob({"redshift": z}, model.fiducial)
-    >>> model.score({"redshift": z})
 
     Attributes
     ----------
@@ -1285,16 +805,7 @@ class MadauDickinsonRedshift(PopulationModel):
         ) - numpy.log1p(self.nodes)
 
     def log_shape(self, redshift, parameters):
-        r"""``ln psi(z)``: the Madau-Dickinson shape alone, without the measure.
-
-        Public because :mod:`GWForge.population_fisher.model` rebuilds
-        the measure at a trial cosmology and needs the shape on its own.
-
-        Includes the :math:`[1 + (1+z_p)^{-\kappa}]` factor that sets
-        :math:`\psi(0) = 1`. That factor is independent of :math:`z`, so it
-        multiplies the numerator and the normalisation alike and cancels from
-        ``log_prob`` identically -- which is why :meth:`shape_gradient` omits it.
-        """
+        r"""``ln psi(z)``: the Madau-Dickinson shape alone, without the measure."""
         return numpy.log(
             madau_dickinson_psi_of_z(
                 redshift,
@@ -1334,19 +845,7 @@ class MadauDickinsonRedshift(PopulationModel):
         return numpy.where(inside, value, -numpy.inf)
 
     def shape_gradient(self, redshift, parameters):
-        r"""``d ln psi / dLambda``, shape ``(n, 3)``.
-
-        Public for the same reason as :meth:`log_shape`.
-
-        With :math:`u = (1+z)/(1+z_p)` and :math:`r = u^\kappa`,
-        :math:`f = r/(1+r)`:
-
-        .. math::
-
-           \partial_\gamma = \ln(1+z), \quad
-           \partial_\kappa = -f \ln u, \quad
-           \partial_{z_p} = \frac{\kappa f}{1 + z_p}.
-        """
+        r"""``d ln psi / dLambda``, shape ``(n, 3)``."""
         redshift = numpy.asarray(redshift, dtype=float)
         z_peak = parameters["z_peak"]
         kappa = parameters["kappa"]
@@ -1362,11 +861,7 @@ class MadauDickinsonRedshift(PopulationModel):
         )
 
     def analytic_score(self, events, parameters):
-        r"""Closed-form score, ``(n_events, 3)``.
-
-        ``g(z) - E_p[g]``: the first term from the numerator, the second from
-        :math:`\partial_\Lambda \ln Z`, evaluated on the normalisation grid.
-        """
+        r"""Closed-form score, ``(n_events, 3)``."""
         self.check_events(events)
         redshift = numpy.asarray(events["redshift"], dtype=float)
         inside = (redshift >= 0.0) & (redshift <= self.maximum_redshift)
@@ -1397,12 +892,6 @@ OBSERVABLE_KEYS = ("mass_1", "mass_2", "luminosity_distance")
 
 class SpectralSirenModel(PopulationModel):
     r"""Source-frame population observed in the detector frame, cosmology free.
-
-    Usage
-    -----
-    >>> model = SpectralSirenModel(mass_model, redshift_model, spin_model)
-    >>> model.score({"mass_1": m1_det, "mass_2": m2_det,
-    ...              "luminosity_distance": distance})
 
     Attributes
     ----------
@@ -1471,13 +960,7 @@ class SpectralSirenModel(PopulationModel):
 
     @property
     def fiducial(self):
-        """Block fiducials plus the cosmology, merged live.
-
-        A property for the same reason as
-        :attr:`GWForge.population_fisher.base.JointPopulationModel.fiducial`:
-        the redshift block is always refitted after the model is built, and a
-        snapshot would send the Fisher back to the pre-fit point.
-        """
+        """Block fiducials plus the cosmology, merged live."""
         merged = {}
         for block in self.blocks:
             merged.update(block.fiducial)
@@ -1546,12 +1029,7 @@ class SpectralSirenModel(PopulationModel):
         return numpy.where(inside, total, -numpy.inf)
 
     def analytic_score(self, events, parameters):
-        """Closed-form score, ``(n_events, len(parameter_names))``.
-
-        The population columns are the source-frame scores evaluated at the
-        source-frame parameters the trial cosmology implies; the cosmology
-        columns are the chain rule in the module docstring.
-        """
+        """Closed-form score, ``(n_events, len(parameter_names))``."""
         self.check_events(events)
         cosmology = self._cosmology(parameters)
         redshift, primary, secondary = self._source_frame(events, cosmology)
@@ -1582,7 +1060,7 @@ class SpectralSirenModel(PopulationModel):
         return score
 
     def _cosmology_score(self, redshift, primary, secondary, parameters, cosmology):
-        """The ``(H0, Om0, w0)`` columns; see the chain rule in the module docstring."""
+        """The ``(H0, Om0, w0)`` columns, by the chain rule through ``z(d_L)``."""
         one_plus_z = 1.0 + redshift
         efunc = cosmology.efunc(redshift)
         comoving = cosmology.comoving_distance(redshift)
@@ -1642,10 +1120,7 @@ class SpectralSirenModel(PopulationModel):
 
     @staticmethod
     def _dlog_shape_dz(redshift, parameters):
-        r""":math:`\partial \ln\psi/\partial z = (\gamma - \kappa f)/(1+z)`.
-
-        With :math:`r = ((1+z)/(1+z_p))^{\kappa}` and :math:`f = r/(1+r)`.
-        """
+        r""":math:`\partial \ln\psi/\partial z = (\gamma - \kappa f)/(1+z)`."""
         ratio = (1.0 + redshift) / (1.0 + parameters["z_peak"])
         power = ratio ** parameters["kappa"]
         fraction = power / (1.0 + power)

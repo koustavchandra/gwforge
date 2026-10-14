@@ -1,21 +1,4 @@
-"""Fit a population block to the injections and report what came back.
-
-Two different jobs wear the same clothes here, and the difference matters when
-reading the output.
-
-For the **redshift** block the fit is load-bearing.
-:class:`GWForge.population.redshift.Redshift` convolves the star-formation rate
-with a formation-to-merger time-delay distribution, so a generated catalogue is
-not distributed as the direct Madau-Dickinson form. The fitted
-:math:`(\\gamma, \\kappa, z_p)` are the *effective* parameters of the model being
-forecast, and they will not equal the generation values -- that is expected, and
-the ratio column says how far the time delay moved them.
-
-For the **mass** and **spin** blocks the fit is a check.
-``gwforge_population`` draws those straight from the same densities this package
-evaluates, so the fit must return the generation values to within Monte-Carlo
-error. A ratio that is not close to one there is a bug, not a result.
-"""
+"""Fit a population block to the injections and report what came back."""
 
 import logging
 

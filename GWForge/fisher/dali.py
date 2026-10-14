@@ -52,8 +52,8 @@ PHYSICAL_RANGES = {
 class DALILikelihood(Likelihood):
     """Doublet-DALI log-likelihood as a bilby likelihood.
 
-    Usage
-    -----
+    Examples
+    --------
     >>> likelihood = DALILikelihood(fisher)
     >>> result = sample_posterior(likelihood, priors, outdir="out", label="src0")
 

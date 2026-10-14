@@ -143,7 +143,7 @@ DEFAULT_PARAMETERS = {
 class Spin:
     def __init__(self, spin_model, number_of_samples, parameters=None):
         """
-        Parameters:
+        Parameters
         ----------
         spin_model : str
             The parameterized spin model. [Options: {}]
@@ -221,8 +221,8 @@ class Spin:
         and ``t_min`` (default -1). The posterior files call ``mu_t`` and
         ``sigma_t`` ``mu_spin`` and ``sigma_spin``.
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: ``a_1``, ``a_2``, ``tilt_1``, ``tilt_2``, ``phi_12``, ``phi_jl``.
         """
         logging.info("Generating spins from the GWTC-5.0 Default BBH model")
@@ -285,8 +285,8 @@ class Spin:
         """
         Generate spin distribution samples based on the chosen parameterised model and its parameters.
 
-        Returns:
-        --------
+        Returns
+        -------
             dict: A dictionary containing spin distribution samples.
         """
 

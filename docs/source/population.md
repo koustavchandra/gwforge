@@ -396,18 +396,3 @@ with h5py.File('bbh.h5') as f:
 corner_plot(samples, labels=labels_for(parameters)).savefig('pop.png')
 ```
 This will create a plot called `pop.png` in the current working directory with the parameters. The list of parameters can be found by doing `h5ls -r bbh.h5`. It list all the keys of an HDF5 file.
-
-### Checking the population against the model
-
-That corner shows you *what was drawn*. To check it is what the model *says*, run
-
-```bash
-python validation/gwtc5_population_check.py --population bbh.h5 \
-    --config GWForge/population/population_configuration_files/bgp-gwtc5.ini \
-    --output-directory population_check
-```
-
-It draws an eleven-parameter corner with the analytic density overlaid on every diagonal, and behind each panel runs a numerical comparison: the histogram against the density integrated over each bin, in units of that bin's counting noise. Two of the checks cannot be seen in any one-dimensional histogram, and both are places this package has had bugs:
-
-* $p(q \mid m_1)$ is a **conditional**, so it is checked in bins of $m_1$. Drawing $q$ from the marginal instead reproduces the marginal perfectly and the conditional not at all.
-* the cos-tilt mixture is **joint** over the binary, so it is checked through the correlation between the two tilts. Factorising it leaves both marginals untouched and sets that correlation to zero.

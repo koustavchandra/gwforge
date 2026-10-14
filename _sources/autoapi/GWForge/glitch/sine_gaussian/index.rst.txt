@@ -1,0 +1,99 @@
+GWForge.glitch.sine_gaussian
+============================
+
+.. py:module:: GWForge.glitch.sine_gaussian
+
+.. autoapi-nested-parse::
+
+   Sine-Gaussian glitches, added incoherently: each detector gets its own.
+
+   A Morlet-Gabor wavelet is a Gaussian envelope times a complex exponential. Its
+   real part is the sine-Gaussian below with a phase offset, so one function covers
+   both choices of glitch model.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.glitch.sine_gaussian.EDGE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.glitch.sine_gaussian.envelope_width
+   GWForge.glitch.sine_gaussian.sine_gaussian
+   GWForge.glitch.sine_gaussian.optimal_snr
+   GWForge.glitch.sine_gaussian.draw_glitches
+   GWForge.glitch.sine_gaussian.add_glitches
+
+
+Module Contents
+---------------
+
+.. py:data:: EDGE
+   :value: 6
+
+
+.. py:function:: envelope_width(frequency, q)
+
+   Gaussian envelope width ``tau = Q / (sqrt(2) pi f0)`` in seconds.
+
+
+.. py:function:: sine_gaussian(times, time, frequency, q, amplitude=1.0, phase=0.0)
+
+   ``h(t) = A exp(-((t - t0) / tau)^2) cos(2 pi f0 (t - t0) + phi)``.
+
+   :param times: Sample times in seconds.
+   :type times: numpy.ndarray
+   :param time: Centre time (s), central frequency (Hz) and quality factor of the burst.
+   :type time: float
+   :param frequency: Centre time (s), central frequency (Hz) and quality factor of the burst.
+   :type frequency: float
+   :param q: Centre time (s), central frequency (Hz) and quality factor of the burst.
+   :type q: float
+   :param amplitude: Peak strain and phase at the centre; ``phase=-pi/2`` gives the sine quadrature.
+   :type amplitude: float, optional
+   :param phase: Peak strain and phase at the centre; ``phase=-pi/2`` gives the sine quadrature.
+   :type phase: float, optional
+
+
+.. py:function:: optimal_snr(samples, sample_rate, interferometer)
+
+   Optimal SNR ``sqrt(4 df sum |h(f)|^2 / S(f))`` of ``samples`` against the detector's PSD.
+
+   The transform is zero-padded to four times the input so a short burst is
+   resolved in frequency; the band below the detector's minimum frequency is dropped.
+
+
+.. py:function:: draw_glitches(rng, start, end, rate, snr_range, frequency_range, q_range, snr_index=1.0, phases=None)
+
+   Draw a glitch population for one detector over ``[start, end]``.
+
+   The number is Poisson with mean ``rate * (end - start) / 3600`` (``rate`` is per
+   hour), the frequency is log-uniform in ``frequency_range``, the SNR follows the
+   bounded power law ``p(snr) ~ snr**-snr_index`` on ``snr_range`` (``snr_index=1``
+   is log-uniform), Q is uniform in ``q_range``, the phase is drawn from ``phases``
+   when given (else uniform), and the time is uniform but kept ``EDGE`` envelope
+   widths inside the span so no burst is cut by a file edge.
+
+   The SNR is the optimal SNR against the detector's PSD. Omicron SNRs quoted in
+   glitch catalogues are lower than this for the same burst.
+
+   :returns: Keys ``time, frequency, q, snr, phase``, one entry per glitch.
+   :rtype: dict of numpy.ndarray
+
+
+.. py:function:: add_glitches(samples, epoch, sample_rate, glitches, interferometer)
+
+   Add every glitch in ``glitches`` to ``samples`` in place and return their peak strains.
+
+   Each unit burst is built on ``time +- EDGE tau`` only and scaled so its
+   optimal SNR against ``interferometer``'s PSD equals the requested ``snr``.
+
+

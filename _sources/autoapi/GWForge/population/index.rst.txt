@@ -1,0 +1,22 @@
+GWForge.population
+==================
+
+.. py:module:: GWForge.population
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/population/extrinsic/index
+   /autoapi/GWForge/population/mass/index
+   /autoapi/GWForge/population/pairing/index
+   /autoapi/GWForge/population/pdb_external/index
+   /autoapi/GWForge/population/pdb_mass_sampler/index
+   /autoapi/GWForge/population/redshift/index
+   /autoapi/GWForge/population/spin/index
+   /autoapi/GWForge/population/user_defined/index
+
+

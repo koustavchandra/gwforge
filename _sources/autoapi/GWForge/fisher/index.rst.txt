@@ -1,0 +1,28 @@
+GWForge.fisher
+==============
+
+.. py:module:: GWForge.fisher
+
+.. autoapi-nested-parse::
+
+   Fisher-matrix and DALI forecasting for GWForge.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/fisher/antenna_derivatives/index
+   /autoapi/GWForge/fisher/config/index
+   /autoapi/GWForge/fisher/dali/index
+   /autoapi/GWForge/fisher/derivatives/index
+   /autoapi/GWForge/fisher/inner_product/index
+   /autoapi/GWForge/fisher/matrix/index
+   /autoapi/GWForge/fisher/parameters/index
+   /autoapi/GWForge/fisher/plot/index
+   /autoapi/GWForge/fisher/stepsize/index
+
+

@@ -19,5 +19,14 @@ The code may be unstable and can break.
 :maxdepth: 2
 
 install
+citing
+code_overview
 usage
+```
+
+```{toctree}
+:caption: 'API:'
+:maxdepth: 1
+
+autoapi/GWForge/index
 ```

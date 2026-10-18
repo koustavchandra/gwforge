@@ -21,6 +21,8 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    # Draws the dependency flowchart on the code-overview page.
+    "sphinxcontrib.mermaid",
 ]
 extensions.append("autoapi.extension")
 autoapi_dirs = ["../../GWForge"]
@@ -29,6 +31,8 @@ autoapi_dirs = ["../../GWForge"]
 napoleon_use_ivar = True
 # Document each object where it is defined, as sphinx-apidoc would; the
 # package pages keep their summary tables and link down.
+# The API entry is placed by hand under its own caption in index.md.
+autoapi_add_toctree_entry = False
 autoapi_options = ["members", "undoc-members", "show-inheritance", "show-module-summary"]
 # The pages are MyST Markdown: `$...$` and `$$...$$` are parsed as maths here,
 # before the Markdown parser can touch the LaTeX inside them.

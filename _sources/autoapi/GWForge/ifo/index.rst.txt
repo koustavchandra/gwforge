@@ -1,0 +1,17 @@
+GWForge.ifo
+===========
+
+.. py:module:: GWForge.ifo
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/ifo/antenna/index
+   /autoapi/GWForge/ifo/detectors/index
+   /autoapi/GWForge/ifo/reproducible_noise/index
+
+

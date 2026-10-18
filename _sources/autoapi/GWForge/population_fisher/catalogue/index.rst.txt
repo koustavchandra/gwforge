@@ -1,0 +1,175 @@
+GWForge.population_fisher.catalogue
+===================================
+
+.. py:module:: GWForge.population_fisher.catalogue
+
+.. autoapi-nested-parse::
+
+   Assemble a detected catalogue from GWForge population and SNR files.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.catalogue.CATALOGUE_KEYS
+   GWForge.population_fisher.catalogue.TRIANGULAR_ARMS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.catalogue.Catalogue
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.catalogue.expand_detectors
+   GWForge.population_fisher.catalogue.network_snr_from
+   GWForge.population_fisher.catalogue.derive_event_keys
+   GWForge.population_fisher.catalogue.load_catalogue
+   GWForge.population_fisher.catalogue.load_injections
+
+
+Module Contents
+---------------
+
+.. py:data:: CATALOGUE_KEYS
+   :value: ('mass_1_source', 'mass_2_source', 'mass_1', 'mass_2', 'redshift', 'luminosity_distance', 'a_1',...
+
+
+.. py:data:: TRIANGULAR_ARMS
+
+.. py:class:: Catalogue(events, network_snr, detectors, snr_threshold, n_total, n_with_snr)
+
+   A detected catalogue, and the counts that describe how it was cut.
+
+   :ivar events: Source parameters of the detected events, plus derived ``mass_ratio``
+                 and ``cos_tilt_1``/``cos_tilt_2`` where the inputs allow.
+   :vartype events: dict
+   :ivar network_snr: Network optimal SNR of the detected events.
+   :vartype network_snr: numpy.ndarray
+   :ivar detectors: Detector columns that went into the network SNR.
+   :vartype detectors: list of str
+   :ivar snr_threshold:
+   :vartype snr_threshold: float
+   :ivar n_total: Injections in the population file.
+   :vartype n_total: int
+   :ivar n_with_snr: Injections the SNR stage actually covered.
+   :vartype n_with_snr: int
+   :ivar n_detected: Injections above threshold. GWForge applies no duty cycle, so this is
+                     also the analysis sample.
+
+   :vartype n_detected: int
+
+
+   .. py:attribute:: events
+
+
+   .. py:attribute:: network_snr
+
+
+   .. py:attribute:: detectors
+
+
+   .. py:attribute:: snr_threshold
+
+
+   .. py:attribute:: n_total
+
+
+   .. py:attribute:: n_with_snr
+
+
+   .. py:attribute:: n_detected
+
+
+   .. py:property:: detected_fraction
+
+      Fraction of the SNR-covered injections that passed the threshold.
+
+
+   .. py:method:: summary()
+
+      A plain-text description of the cuts.
+
+      :rtype: str
+
+
+
+.. py:function:: expand_detectors(detectors)
+
+   Expand triangular detectors into the arm names the SNR file uses.
+
+   :param detectors:
+   :type detectors: sequence of str
+
+   :rtype: list of str
+
+
+.. py:function:: network_snr_from(snr_data, detectors=None)
+
+   Quadrature sum of the per-detector optimal SNRs.
+
+   :param snr_data: As written by ``gwforge_optimal_snr``.
+   :type snr_data: dict
+   :param detectors: Detector names (triangles already expanded). Defaults to every
+                     ``*_optimal_snr`` column in the file.
+   :type detectors: sequence of str or None
+
+   :returns: ``(network_snr, detectors_used)``.
+   :rtype: tuple
+
+   :raises KeyError: If a requested detector has no column.
+
+
+.. py:function:: derive_event_keys(events)
+
+   Add the parameters the population models want but the file does not store.
+
+   :param events: Modified in place and returned.
+   :type events: dict
+
+   :rtype: dict
+
+
+.. py:function:: load_catalogue(population_file, snr_file, snr_threshold=10.0, detectors=None, keys=CATALOGUE_KEYS)
+
+   Join a population file to its SNR file and cut on network SNR.
+
+   :param population_file: HDF5 from ``gwforge_population``.
+   :type population_file: str
+   :param snr_file: HDF5 from ``gwforge_optimal_snr``.
+   :type snr_file: str
+   :param snr_threshold: Network optimal-SNR threshold for detection.
+   :type snr_threshold: float
+   :param detectors: Detectors to sum. ``"ET"`` is expanded to its three arms. Defaults to
+                     every detector in the SNR file.
+   :type detectors: sequence of str or None
+   :param keys: Source parameters to carry over.
+   :type keys: sequence of str
+
+   :rtype: Catalogue
+
+   :raises ValueError: If the two files cannot be aligned, or nothing passes the threshold.
+
+
+.. py:function:: load_injections(population_file, keys=CATALOGUE_KEYS)
+
+   Every injection, detected or not, as an events dict.
+
+   :param population_file:
+   :type population_file: str
+   :param keys:
+   :type keys: sequence of str
+
+   :rtype: dict
+
+

@@ -1,0 +1,176 @@
+GWForge.population_fisher.base
+==============================
+
+.. py:module:: GWForge.population_fisher.base
+
+.. autoapi-nested-parse::
+
+   Base class for population models, and how their scores get computed.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.base.SCORE_METHODS
+   GWForge.population_fisher.base.FD_RELATIVE_STEP
+   GWForge.population_fisher.base.FD_ABSOLUTE_STEP
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.base.PopulationModel
+   GWForge.population_fisher.base.JointPopulationModel
+
+
+Module Contents
+---------------
+
+.. py:data:: SCORE_METHODS
+   :value: ('auto', 'analytic', 'finite-difference')
+
+
+.. py:data:: FD_RELATIVE_STEP
+   :value: 0.0001
+
+
+.. py:data:: FD_ABSOLUTE_STEP
+   :value: 1e-08
+
+
+.. py:class:: PopulationModel
+
+   Base class: a normalised density over event parameters, given hyper-parameters.
+
+   :ivar parameter_names: Hyper-parameter names, in the order the score columns come out.
+   :vartype parameter_names: list of str
+   :ivar fiducial: Default hyper-parameter values.
+   :vartype fiducial: dict
+   :ivar event_keys: Keys the model requires in the ``events`` dict.
+
+   :vartype event_keys: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: event_keys
+      :value: []
+
+
+
+   .. py:method:: log_prob(events, parameters)
+      :abstractmethod:
+
+
+      Log density of each event.
+
+      :param events: Arrays of event parameters, all the same length.
+      :type events: dict
+      :param parameters: Hyper-parameter values; must cover :attr:`parameter_names`.
+      :type parameters: dict
+
+      :returns: Shape ``(n_events,)``. ``-inf`` outside the support.
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, or ``None`` if this model has none.
+
+      :returns: Shape ``(n_events, len(parameter_names))``, columns in
+                :attr:`parameter_names` order.
+      :rtype: numpy.ndarray or None
+
+
+
+   .. py:method:: score(events, parameters=None, method='auto')
+
+      Score of each event with respect to every hyper-parameter.
+
+      :param events:
+      :type events: dict
+      :param parameters: Defaults to :attr:`fiducial`.
+      :type parameters: dict or None
+      :param method: One of :data:`SCORE_METHODS`. ``"auto"`` tries analytic, then falls
+                     back to finite differences.
+      :type method: str
+
+      :returns: Shape ``(n_events, len(parameter_names))``.
+      :rtype: numpy.ndarray
+
+
+
+   .. py:method:: to_vector(parameters)
+
+      Hyper-parameter dict to array, in :attr:`parameter_names` order.
+
+
+
+   .. py:method:: from_vector(vector, parameters=None)
+
+      Array back to a hyper-parameter dict, merged onto ``parameters``.
+
+
+
+   .. py:method:: check_events(events)
+
+      Raise if ``events`` is missing a key this model needs.
+
+
+
+.. py:class:: JointPopulationModel(models)
+
+   Bases: :py:obj:`PopulationModel`
+
+
+   Product of independent sub-models over disjoint event parameters.
+
+
+   .. py:attribute:: models
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: event_keys
+      :value: []
+
+
+
+   .. py:property:: fiducial
+
+      Sub-model fiducials, merged live.
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      Sum of the sub-model log densities.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Horizontally stacked sub-model scores, ``None`` if any sub-model lacks one.
+
+
+
+   .. py:method:: score(events, parameters=None, method='auto')
+
+      Per-sub-model dispatch, so one analytic block is not lost to another's fallback.
+
+
+

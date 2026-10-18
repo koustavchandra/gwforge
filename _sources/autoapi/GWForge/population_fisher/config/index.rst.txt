@@ -1,0 +1,99 @@
+GWForge.population_fisher.config
+================================
+
+.. py:module:: GWForge.population_fisher.config
+
+.. autoapi-nested-parse::
+
+   Configuration handling for ``gwforge_population_fisher``.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.config.BLOCKS
+   GWForge.population_fisher.config.BLOCK_CLASSES
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.config.catalogue_settings
+   GWForge.population_fisher.config.cosmology_settings
+   GWForge.population_fisher.config.build_model
+   GWForge.population_fisher.config.fit_settings
+   GWForge.population_fisher.config.fisher_settings
+   GWForge.population_fisher.config.output_settings
+
+
+Module Contents
+---------------
+
+.. py:data:: BLOCKS
+   :value: ('mass', 'redshift', 'spin', 'cosmology')
+
+
+.. py:data:: BLOCK_CLASSES
+
+.. py:function:: catalogue_settings(config, section='Catalogue')
+
+   Read the ``[Catalogue]`` section.
+
+   :returns: ``population_file``, ``snr_file``, ``detectors``, ``snr_thresholds``.
+   :rtype: dict
+
+
+.. py:function:: cosmology_settings(config, section='Model')
+
+   Build the fiducial :class:`GWForge.cosmology.FlatwCDM`.
+
+   :rtype: GWForge.cosmology.FlatwCDM
+
+
+.. py:function:: build_model(config, section='Model')
+
+   Assemble the population model the config describes.
+
+   :param config:
+   :type config: configparser.ConfigParser
+   :param section:
+   :type section: str
+
+   :returns: ``(model, blocks, sub_models, cosmology)``. ``sub_models`` maps block
+             name to the source-frame model, which the fit stage needs even when the
+             Fisher runs on the detector-frame wrapper.
+   :rtype: tuple
+
+   :raises ValueError: For an unknown block, or ``cosmology`` without ``mass`` and ``redshift``.
+
+
+.. py:function:: fit_settings(config, section='Fit')
+
+   Which blocks to refit to the injections, and which to only check.
+
+   :returns: Block name to bool.
+   :rtype: dict
+
+
+.. py:function:: fisher_settings(config, section='Fisher')
+
+   Read the ``[Fisher]`` section.
+
+   :returns: ``free_parameters``, ``fixed_parameters``, ``configurations``,
+             ``score_method``.
+   :rtype: dict
+
+
+.. py:function:: output_settings(config, section='Output', label='population_fisher')
+
+   Read the ``[Output]`` section.
+
+   :returns: ``output_directory``, ``label``, ``plot_corner``.
+   :rtype: dict
+
+

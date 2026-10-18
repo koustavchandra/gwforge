@@ -1,0 +1,120 @@
+GWForge.population_fisher.plot
+==============================
+
+.. py:module:: GWForge.population_fisher.plot
+
+.. autoapi-nested-parse::
+
+   Figures for population Fisher forecasts.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.plot.CREDIBLE_LEVEL
+   GWForge.population_fisher.plot.CONTOUR_LEVELS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.plot.corner_plot
+   GWForge.population_fisher.plot.plot_mass_distribution
+   GWForge.population_fisher.plot.plot_redshift_distribution
+
+
+Module Contents
+---------------
+
+.. py:data:: CREDIBLE_LEVEL
+   :value: 0.9
+
+
+.. py:data:: CONTOUR_LEVELS
+   :value: (0.67, 0.9)
+
+
+.. py:function:: corner_plot(results, save=None, title=None, seed=None, parameters=None, colours=None, palette_name='tealrose')
+
+   Corner plot of one or more population Fisher forecasts, overlaid.
+
+   :param results: ``(label, PopulationFisherResult)`` pairs. Every result must expose the
+                   same free parameters, so that overlaying them compares like with like.
+   :type results: sequence of tuple
+   :param save: Path to write to. The figure is closed after saving.
+   :type save: str or None
+   :param title:
+   :type title: str or None
+   :param seed: Each dataset is drawn with a **freshly seeded** generator, so they share
+                the same underlying standard normals and the contours nest visually
+                instead of jittering independently against each other.
+   :type seed: int or None
+   :param parameters: Restrict the plot to these. Drawn from the *marginal* of the full
+                      covariance, so the contours are marginalised, not the conditional ones a
+                      re-fit over a subset would give. Defaults to all of them, which is
+                      unreadable beyond about eight.
+   :type parameters: sequence of str or None
+   :param colours: One per dataset. Defaults to the palette's cycle, which starts
+                   teal/rose.
+   :type colours: sequence of str or None
+   :param palette_name: ``"tealrose"`` or ``"okabe-ito"``.
+   :type palette_name: str
+
+   :rtype: matplotlib.figure.Figure
+
+   :raises ValueError: If the results do not share their parameter list, or a requested
+       parameter is not among them.
+
+
+.. py:function:: plot_mass_distribution(model, result, injections=None, save=None, size=BAND_DRAWS, seed=None, colour=XG_COLOUR)
+
+   Reconstructed primary-mass distribution with a credible band.
+
+   :param model:
+   :type model: GWForge.population_fisher.model.BrokenPowerLawTwoPeakMass
+   :param result:
+   :type result: GWForge.population_fisher.population_fisher_term_I.PopulationFisherResult
+   :param injections: ``mass_1_source`` of the injections, drawn as a histogram behind the
+                      band.
+   :type injections: array_like or None
+   :param save:
+   :type save: str or None
+   :param size:
+   :type size: int
+   :param seed:
+   :type seed: int or None
+   :param colour: Band and median colour. Defaults to the XG teal; pass
+                  :data:`GWForge.plotting.LVK_COLOUR` for a 2G network.
+   :type colour: str
+
+   :rtype: matplotlib.figure.Figure
+
+
+.. py:function:: plot_redshift_distribution(model, result, injections=None, save=None, size=BAND_DRAWS, seed=None, colour=XG_COLOUR)
+
+   Reconstructed merger-rate redshift distribution with a credible band.
+
+   :param model:
+   :type model: GWForge.population_fisher.model.MadauDickinsonRedshift
+   :param result:
+   :type result: GWForge.population_fisher.population_fisher_term_I.PopulationFisherResult
+   :param injections: Injected redshifts, drawn as a histogram behind the band.
+   :type injections: array_like or None
+   :param save:
+   :type save: str or None
+   :param size:
+   :type size: int
+   :param seed:
+   :type seed: int or None
+   :param colour: Band and median colour. Defaults to the XG teal; pass
+                  :data:`GWForge.plotting.LVK_COLOUR` for a 2G network.
+   :type colour: str
+
+   :rtype: matplotlib.figure.Figure
+
+

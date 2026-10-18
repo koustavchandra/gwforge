@@ -3,6 +3,8 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from importlib.metadata import version as _version
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -10,8 +12,6 @@ project = "GWForge"
 copyright = "2023, Koustav Chandra"
 author = "Koustav Chandra"
 # Single source of truth is setup.cfg; the Pages build installs the package first.
-from importlib.metadata import version as _version
-
 release = _version("gwforge")
 
 # -- General configuration ---------------------------------------------------

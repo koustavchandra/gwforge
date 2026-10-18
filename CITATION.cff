@@ -27,7 +27,7 @@ preferred-citation:
   journal: Classical and Quantum Gravity
   volume: 42
   issue: 2
-  start: 025003
+  start: "025003"
   year: 2025
   doi: 10.1088/1361-6382/ad9b68
   identifiers:

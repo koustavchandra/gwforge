@@ -14,6 +14,7 @@ The first step in generating a source population is to determine the distributio
 - A reference start time when you switch on your detector (`gps-start-time`, required).
 
 The cosmology is optional. If not provided, GWForge assumes [Planck18](https://docs.astropy.org/en/latest/api/astropy.cosmology.realizations.Planck18.html):
+
 $$
 H_0 = 67.66~km/s/Mpc,~O_{m0} = 0.30966,~T^{cmb}_0 = 2.7255 K
 $$
@@ -39,13 +40,17 @@ gps-start-time = 1893024018
 
 
 For reference, the Madau-Dickinson distribution function is:
+
 $$
 p(z | \gamma, \kappa, z_\mathrm{peak}) \propto \frac{1}{1+z} \frac{dV_c}{dz} \psi(z | \gamma, \kappa, z_\mathrm{peak})
 $$
+
 where
+
 $$
 \psi(z | \gamma, \kappa, z_\mathrm{peak}) \propto \frac{(1+z)^\gamma}{1+\big(\frac{1+z}{1+z_\mathrm{peak}}\big)^\kappa} M_\odot/\mathrm{year}/\mathrm{Mpc}^3
 $$
+
 and
 | parameter | descsription| 
 | --- | ---|
@@ -55,9 +60,11 @@ and
 | $z_\textrm{max}$ | The maximum redshift allowed. |
 
 It is important to note that $\psi(z)$ describes the progenitor *formation* rate distribution. To obtain the compact binary *merger* rate distribution, GWForge convolves it with a time-delay distribution $p(\tau)$ between the formation of the binary and its eventual merger:
+
 $$
 \mathcal{R}(z_m) \propto \int_{z_m}^{\infty} \psi(z_f)\, p\big(t(z_f) - t(z_m)\big)\, \frac{dt}{dz_f}\, dz_f,
 $$
+
 where $t(z)$ is the lookback time and the lower limit $z_f \geq z_m$ enforces that a binary must form before it merges.
 
 By default GWForge uses the `inverse` time-delay distribution, $p(\tau) \propto 1/\tau$ (i.e. flat-in-log), between a minimum delay of $20~\mathrm{Myr}$ and the age of the Universe. This is the canonical choice for compact binaries formed through [isolated binary evolution via the common-envelope phase](https://www.frontiersin.org/articles/10.3389/fspas.2020.00038/full). If you want a different slope, use the `powerlaw` model, $p(\tau) \propto \tau^{-\mathrm{slope}}$, and set `time-delay-slope`:
@@ -143,9 +150,11 @@ GWForge overlooks special characters and converts everything to lower cases. So 
 
 ### The BGP model
 `BGP` (Broken power law + Gaussian Peaks) is the fiducial BBH mass model used in the GWTC-4.0 and GWTC-5.0 population analyses. The primary mass is a mixture of a broken power law and two left-truncated Gaussian peaks, with a low-mass Planck taper $S$ applied to the whole distribution:
+
 $$
 \pi(m_1) \propto \Big[\lambda_0\, p_\mathrm{BP}(m_1) + \lambda_1\, N_\mathrm{lt}(m_1 | \mu_1, \sigma_1) + (1 - \lambda_0 - \lambda_1)\, N_\mathrm{lt}(m_1 | \mu_2, \sigma_2)\Big]\, S(m_1 | m_\mathrm{min}, \delta_m),
 $$
+
 where the broken power law switches from slope $-\alpha_1$ to $-\alpha_2$ at $m_\mathrm{break}$ over $[m_\mathrm{min}, m_\mathrm{high}]$, and $N_\mathrm{lt}$ is a normal distribution truncated below at $m_\mathrm{min}$. The mass ratio is a power law with its **own** low-mass taper on the secondary,
 
 $$p(m_2 \mid m_1) \propto m_2^{\beta}\, S(m_2 \mid m_\mathrm{min,2}, \delta_{m,2}),$$

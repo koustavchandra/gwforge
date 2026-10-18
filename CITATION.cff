@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use GWForge, please cite the paper in preferred-citation."
+type: software
+title: GWForge
+authors:
+  - family-names: Chandra
+    given-names: Koustav
+    orcid: https://orcid.org/0000-0003-4750-5551
+    email: koustav.chandra@aei.mpg.de
+version: 0.0.dev1
+license: MIT
+repository-code: https://github.com/koustavchandra/gwforge
+url: https://koustavchandra.github.io/gwforge/
+abstract: Tool for generating gravitational wave mock datasets and forecasting capabilities of gravitational wave detectors.
+keywords:
+  - gravitational waves
+  - mock data
+  - Fisher matrix
+  - next-generation detectors
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Chandra
+      given-names: Koustav
+      orcid: https://orcid.org/0000-0003-4750-5551
+  title: "gwforge: a user-friendly package to generate gravitational-wave mock data"
+  journal: Classical and Quantum Gravity
+  volume: 42
+  issue: 2
+  start: "025003"
+  year: 2025
+  doi: 10.1088/1361-6382/ad9b68
+  identifiers:
+    - type: other
+      value: arXiv:2407.21109
+      description: arXiv preprint

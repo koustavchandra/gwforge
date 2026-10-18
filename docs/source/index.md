@@ -25,6 +25,15 @@ usage
 ```
 
 ```{toctree}
+:caption: 'Tutorials:'
+:maxdepth: 1
+
+tutorials/population
+tutorials/mock_data
+tutorials/fisher
+```
+
+```{toctree}
 :caption: 'API:'
 :maxdepth: 1
 

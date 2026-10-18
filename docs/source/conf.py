@@ -3,19 +3,23 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from importlib.metadata import version as _version
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "GWForge"
 copyright = "2023, Koustav Chandra"
 author = "Koustav Chandra"
-release = "0.0.dev1"
+# Single source of truth is setup.cfg; the Pages build installs the package first.
+release = _version("gwforge")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "myst_parser",
+    # myst_nb renders the tutorial notebooks and bundles myst_parser for the pages.
+    "myst_nb",
     "sphinx.ext.duration",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.mathjax",
@@ -38,8 +42,13 @@ autoapi_options = ["members", "undoc-members", "show-inheritance", "show-module-
 # before the Markdown parser can touch the LaTeX inside them.
 myst_enable_extensions = ["dollarmath", "amsmath"]
 myst_heading_anchors = 3
+# The tutorials are executed locally and committed with their outputs: they
+# need lalsuite and minutes of runtime, which the Pages build does not have.
+nb_execution_mode = "off"
+# Logging and leap-second warnings are stderr noise on a rendered page.
+nb_output_stderr = "remove"
 autosectionlabel_prefix_document = True
-exclude_patterns = []
+exclude_patterns = ["**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

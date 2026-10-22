@@ -52,7 +52,7 @@ PARAMETER_CONVERSIONS = {
     "lal_binary_neutron_star": bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters,
     "EFPEHM_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "EFPE_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
-    }
+}
 
 
 def parse_collection(config, section, option, fallback=None):
@@ -159,12 +159,13 @@ def waveform_settings(config, section="Waveform_Generator"):
     -------
     dict
         With keys ``waveform_arguments``, ``frequency_domain_source_model``,
-        ``parameter_conversion``, ``minimum_frequency`` and ``f22_start``.
+        ``parameter_conversion`` and ``minimum_frequency``.
 
     Raises
     ------
     ValueError
-        If the named source model is unknown or unavailable in this bilby.
+        If ``waveform-approximant`` is missing, or the named source model is
+        unknown or unavailable in this bilby.
     """
     minimum_frequency = config.getfloat(
         section, "waveform-minimum-frequency", fallback=20.0
@@ -173,7 +174,11 @@ def waveform_settings(config, section="Waveform_Generator"):
         section, "waveform-reference-frequency", fallback=minimum_frequency
     )
     f22_start = config.getfloat(section, "waveform-f22-start", fallback=None)
-    approximant = config.get(section, "waveform-approximant", fallback="IMRPhenomXPHM")
+    # No default: the approximant also sizes the segment, and the wrong one
+    # silently truncates the signal.
+    approximant = config.get(section, "waveform-approximant", fallback=None)
+    if not approximant:
+        raise ValueError("[{}] waveform-approximant is required".format(section))
     name = config.get(
         section, "frequency-domain-source-model", fallback="lal_binary_black_hole"
     )
@@ -192,11 +197,14 @@ def waveform_settings(config, section="Waveform_Generator"):
         )
 
     waveform_arguments = {
-            "waveform_approximant": approximant,
-            "reference_frequency": reference_frequency,
-            "minimum_frequency": minimum_frequency,
-            "f22_start": f22_start,
-        }
+        "waveform_approximant": approximant,
+        "reference_frequency": reference_frequency,
+        "minimum_frequency": minimum_frequency,
+    }
+    # Only pyEFPE/pyEFPEHM read f22_start, and they take an explicit None
+    # over their own default, so pass it only when set.
+    if f22_start is not None:
+        waveform_arguments["f22_start"] = f22_start
     custom_args = parse_collection(config, section, "waveform-arguments-extra")
     if custom_args:
         waveform_arguments.update(custom_args)
@@ -205,7 +213,6 @@ def waveform_settings(config, section="Waveform_Generator"):
         "frequency_domain_source_model": model,
         "parameter_conversion": PARAMETER_CONVERSIONS[name],
         "minimum_frequency": minimum_frequency,
-        "f22_start": f22_start,
     }
 
 
@@ -332,11 +339,8 @@ def segment_duration(parameters, minimum_frequency, approximant, f22_start=None,
     converted, _ = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters(
         dict(parameters)
     )
-    approximant = 'IMRPhenomXAS' if approximant is None else approximant
-    
-    # For EFPE/EFPEHM waveforms, use f22_start if available; otherwise use minimum_frequency
+    # pyEFPE/pyEFPEHM start the quadrupole at f22_start, below the analysis band.
     duration_frequency = f22_start if f22_start is not None else minimum_frequency
-    
     try:
         duration = get_safe_signal_durations(
             mass_1=numpy.atleast_1d(float(converted["mass_1"])),

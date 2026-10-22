@@ -1,4 +1,4 @@
-#!/home/johann.fernandes/.conda/envs/pyefpe_plus_hm/bin/python3.11
+#!/usr/bin/env python
 """
 Forecast parameter-estimation uncertainties with the Fisher matrix, optionally
 with the second-order DALI correction.
@@ -55,6 +55,7 @@ def forecast(injection_parameters, index, config_settings):
         injection_parameters,
         waveform["minimum_frequency"],
         waveform["waveform_arguments"]["waveform_approximant"],
+        f22_start=waveform["waveform_arguments"].get("f22_start"),
         maximum=config_settings["maximum_duration"],
         minimum=config_settings["minimum_duration"],
     )
@@ -81,7 +82,7 @@ def forecast(injection_parameters, index, config_settings):
         parameter_conversion=waveform["parameter_conversion"],
         waveform_arguments=waveform["waveform_arguments"],
     )
-    logging.info(f'Parameters are {injection_parameters}')
+
     fisher = FisherMatrix(
         ifos,
         waveform_generator,
@@ -209,17 +210,8 @@ def _forecast_parallel(injections, config_settings, start_index, num_workers):
         for future in track(
             as_completed(future_to_position), total=len(tasks), description="Forecasting"
         ):
-            position = future_to_position[future]
-            try:
-                results[position] = future.result()
-            except Exception as error:
-                index = (start_index or 0) + position
-                logging.error("Source %d failed with exception: %s", index, error)
-                results[position] = {
-                    "index": index,
-                    "parameters": dict(injections[position]),
-                    "error": str(error),
-                }
+            # _forecast_wrapper already turns any failure into an error record.
+            results[future_to_position[future]] = future.result()
     return results
 
 
@@ -309,13 +301,13 @@ def main():
         pickle.dump(results, handle)
 
     if config.getboolean("Output", "plot-corner", fallback=True):
-        _plot(results, output_directory, fisher_options)
+        _plot(results, output_directory)
 
     _summarise(results)
     logging.info("Done!")
 
 
-def _plot(results, output_directory, fisher_options):
+def _plot(results, output_directory):
     """Write one corner plot per successful source."""
     from GWForge.fisher.plot import overlay_corner, samples_from_covariance
 

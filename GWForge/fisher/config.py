@@ -37,8 +37,11 @@ SOURCE_MODELS = {
         bilby.gw.source, "gwsignal_binary_black_hole", None
     ),
     "lal_eccentric_binary_black_hole_no_spins": bilby.gw.source.lal_eccentric_binary_black_hole_no_spins,
-    "EFPE_binary_black_hole": _optional_source_model(
+    "EFPEHM_binary_black_hole": _optional_source_model(
         "pyEFPEHM", "EFPE_binary_black_hole"
+    ),
+    "EFPE_binary_black_hole": _optional_source_model(
+        "pyEFPE", "EFPE_binary_black_hole"
     ),
 }
 
@@ -47,6 +50,7 @@ PARAMETER_CONVERSIONS = {
     "gwsignal_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "lal_eccentric_binary_black_hole_no_spins": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "lal_binary_neutron_star": bilby.gw.conversion.convert_to_lal_binary_neutron_star_parameters,
+    "EFPEHM_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
     "EFPE_binary_black_hole": bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters,
 }
 
@@ -160,7 +164,8 @@ def waveform_settings(config, section="Waveform_Generator"):
     Raises
     ------
     ValueError
-        If the named source model is unknown or unavailable in this bilby.
+        If ``waveform-approximant`` is missing, or the named source model is
+        unknown or unavailable in this bilby.
     """
     minimum_frequency = config.getfloat(
         section, "waveform-minimum-frequency", fallback=20.0
@@ -168,7 +173,12 @@ def waveform_settings(config, section="Waveform_Generator"):
     reference_frequency = config.getfloat(
         section, "waveform-reference-frequency", fallback=minimum_frequency
     )
-    approximant = config.get(section, "waveform-approximant", fallback="IMRPhenomXPHM")
+    f22_start = config.getfloat(section, "waveform-f22-start", fallback=None)
+    # No default: the approximant also sizes the segment, and the wrong one
+    # silently truncates the signal.
+    approximant = config.get(section, "waveform-approximant", fallback=None)
+    if not approximant:
+        raise ValueError("[{}] waveform-approximant is required".format(section))
     name = config.get(
         section, "frequency-domain-source-model", fallback="lal_binary_black_hole"
     )
@@ -186,12 +196,20 @@ def waveform_settings(config, section="Waveform_Generator"):
             "installation of bilby ({})".format(name, bilby.__version__)
         )
 
+    waveform_arguments = {
+        "waveform_approximant": approximant,
+        "reference_frequency": reference_frequency,
+        "minimum_frequency": minimum_frequency,
+    }
+    # Only pyEFPE/pyEFPEHM read f22_start, and they take an explicit None
+    # over their own default, so pass it only when set.
+    if f22_start is not None:
+        waveform_arguments["f22_start"] = f22_start
+    custom_args = parse_collection(config, section, "waveform-arguments-extra")
+    if custom_args:
+        waveform_arguments.update(custom_args)
     return {
-        "waveform_arguments": {
-            "waveform_approximant": approximant,
-            "reference_frequency": reference_frequency,
-            "minimum_frequency": minimum_frequency,
-        },
+        "waveform_arguments": waveform_arguments,
         "frequency_domain_source_model": model,
         "parameter_conversion": PARAMETER_CONVERSIONS[name],
         "minimum_frequency": minimum_frequency,
@@ -290,7 +308,7 @@ def _aligned_spin(parameters, component):
     return float(magnitude) * float(cosine)
 
 
-def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
+def segment_duration(parameters, minimum_frequency, approximant, f22_start=None, maximum=None, minimum=None):
     """Segment length long enough to hold the signal.
 
     Getting this wrong is not a subtle error: a segment shorter than the inspiral wraps it, and the
@@ -302,10 +320,16 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
         Source parameters; needs component masses and aligned spins, which are
         derived from whatever mass parametrisation is present.
     minimum_frequency : float
-        Waveform starting frequency in Hz.
+        Waveform starting frequency in Hz (used for non-EFPE waveforms).
     approximant : str
+    f22_start : float or None
+        For pyEFPE and pyEFPEHM waveforms, the frequency where the quadrupole
+        mode begins. When provided, used instead of minimum_frequency for
+        duration calculation. Default: None.
     maximum : float or None
         Cap on the returned duration, in seconds.
+    minimum : float or None
+        Floor on the returned duration, in seconds.
 
     Returns
     -------
@@ -315,13 +339,15 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
     converted, _ = bilby.gw.conversion.convert_to_lal_binary_black_hole_parameters(
         dict(parameters)
     )
+    # pyEFPE/pyEFPEHM start the quadrupole at f22_start, below the analysis band.
+    duration_frequency = f22_start if f22_start is not None else minimum_frequency
     try:
         duration = get_safe_signal_durations(
             mass_1=numpy.atleast_1d(float(converted["mass_1"])),
             mass_2=numpy.atleast_1d(float(converted["mass_2"])),
             spin_1z=numpy.atleast_1d(_aligned_spin(converted, 1)),
             spin_2z=numpy.atleast_1d(_aligned_spin(converted, 2)),
-            waveform_minimum_frequency=minimum_frequency,
+            waveform_minimum_frequency=duration_frequency,
             approximant=approximant,
         )
         duration = float(numpy.atleast_1d(duration)[0])
@@ -335,7 +361,7 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
                 )
             ) from error
         duration = float(
-            numpy.atleast_1d(time_to_coalescence(minimum_frequency, *masses))[0]
+            numpy.atleast_1d(time_to_coalescence(duration_frequency, *masses))[0]
         )
         logging.debug(
             "%s could not size %s (%s); using the 3.5PN estimate of %.1f s",
@@ -348,4 +374,6 @@ def segment_duration(parameters, minimum_frequency, approximant, maximum=None):
     duration = 2.0 ** numpy.ceil(numpy.log2(max(duration, 4.0)))
     if maximum is not None:
         duration = min(duration, maximum)
+    if minimum is not None:
+        duration = max(duration, minimum)
     return float(duration)

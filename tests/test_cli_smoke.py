@@ -41,3 +41,8 @@ def test_nsbh_is_still_accepted_on_the_command_line(script, option):
     """``bhns`` is the spelling; the ``nsbh`` alias must not disappear from the CLIs."""
     result = subprocess.run([sys.executable, str(BIN / script), "--help"], capture_output=True, text=True)
     assert option in result.stdout and "bhns" in result.stdout
+
+
+def test_fisher_exposes_the_worker_count():
+    result = subprocess.run([sys.executable, str(BIN / "gwforge_fisher"), "--help"], capture_output=True, text=True)
+    assert "--num-workers" in result.stdout

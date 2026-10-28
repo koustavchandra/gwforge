@@ -13,7 +13,7 @@ waveform             source model                    what it breaks
 ``IMRPhenomXHM``     ``lal_binary_black_hole``       nothing — the control
 ``SEOBNRv5HM``       ``gwsignal_binary_black_hole``  a second, non-LAL backend
 ``SEOBNRv5PHM``      ``gwsignal_binary_black_hole``  precession
-``pyEFPEHM``         ``EFPE_binary_black_hole``      precession + eccentricity,
+``pyEFPEHM``         ``EFPEHM_binary_black_hole``    precession + eccentricity,
                                                      inspiral only
 ===================  ==============================  ===============================
 
@@ -130,7 +130,7 @@ CONFIGURATIONS = [
     _configuration(
         "pyEFPEHM",
         "pyEFPEHM",
-        "EFPE_binary_black_hole",
+        "EFPEHM_binary_black_hole",
         dict(
             chirp_mass=28.0,
             symmetric_mass_ratio=0.24,
@@ -249,7 +249,7 @@ def test_waveform_generates_with_support_in_band(setup):
 def test_waveform_errors_are_not_swallowed(setup):
     """``catch_waveform_errors`` must stay off.
 
-    Both ``gwsignal_binary_black_hole`` and ``EFPE_binary_black_hole`` return
+    Both ``gwsignal_binary_black_hole`` and ``EFPEHM_binary_black_hole`` return
     ``None`` for a caught failure. In a likelihood that becomes ``-inf``; in a
     finite-difference stencil it would quietly corrupt a derivative, so the
     Fisher must see the exception instead.

@@ -1,0 +1,11 @@
+GWForge.population.pairing
+==========================
+
+.. py:module:: GWForge.population.pairing
+
+.. autoapi-nested-parse::
+
+   Base classes to implement models with pairing functions.
+
+
+

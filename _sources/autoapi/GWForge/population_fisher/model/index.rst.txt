@@ -1,0 +1,378 @@
+GWForge.population_fisher.model
+===============================
+
+.. py:module:: GWForge.population_fisher.model
+
+.. autoapi-nested-parse::
+
+   The population models GWForge forecasts on, with their analytic scores.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.model.MASS_GRID_NODES
+   GWForge.population_fisher.model.POWER_LAW_SERIES_THRESHOLD
+   GWForge.population_fisher.model.DEFAULT_MAXIMUM_SPIN
+   GWForge.population_fisher.model.DEFAULT_MINIMUM_COSINE_TILT
+   GWForge.population_fisher.model.NORMALISATION_NODES
+   GWForge.population_fisher.model.OBSERVABLE_KEYS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.model.BrokenPowerLawTwoPeakMass
+   GWForge.population_fisher.model.DefaultSpin
+   GWForge.population_fisher.model.MadauDickinsonRedshift
+   GWForge.population_fisher.model.SpectralSirenModel
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.model.mass_grid
+   GWForge.population_fisher.model.broken_power_law_norm
+   GWForge.population_fisher.model.broken_power_law_norm_derivatives
+   GWForge.population_fisher.model.left_truncated_normal_dlog
+   GWForge.population_fisher.model.smoothing_ddelta_m
+   GWForge.population_fisher.model.smoothing_dmass
+
+
+Module Contents
+---------------
+
+.. py:data:: MASS_GRID_NODES
+   :value: 20000
+
+
+.. py:data:: POWER_LAW_SERIES_THRESHOLD
+   :value: 1e-08
+
+
+.. py:function:: mass_grid(mmin, maximum_mass, nodes=MASS_GRID_NODES)
+
+   The shared normalisation grid: quadratically clustered towards ``mmin``.
+
+   :param mmin:
+   :type mmin: float
+   :param maximum_mass:
+   :type maximum_mass: float
+   :param nodes:
+   :type nodes: int
+
+   :rtype: numpy.ndarray
+
+
+.. py:function:: broken_power_law_norm(alpha_1, alpha_2, m_break, mmin, m_high)
+
+   Normalisation of :func:`GWForge.population._smoothed_mass.broken_power_law`.
+
+   :rtype: float
+
+
+.. py:function:: broken_power_law_norm_derivatives(alpha_1, alpha_2, m_break, mmin, m_high)
+
+   ``dN/dLambda`` for the broken power law, as a dict.
+
+   :returns: Keys ``"alpha_1"``, ``"alpha_2"``, ``"m_break"``.
+   :rtype: dict
+
+
+.. py:function:: left_truncated_normal_dlog(mass, mu, sigma, mmin)
+
+   ``d ln N_lt / d(mu, sigma)`` for the left-truncated normal.
+
+   :returns: Keys ``"mu"``, ``"sigma"``, each an array shaped like ``mass``.
+   :rtype: dict
+
+
+.. py:function:: smoothing_ddelta_m(mass, mmin, mmax, delta_m)
+
+   ``dS/d(delta_m)`` for the Planck taper.
+
+   :rtype: numpy.ndarray
+
+
+.. py:function:: smoothing_dmass(mass, mmin, mmax, delta_m)
+
+   ``dS/dm`` for the Planck taper, at fixed hyper-parameters.
+
+   :rtype: numpy.ndarray
+
+
+.. py:class:: BrokenPowerLawTwoPeakMass(mmin=BGP_PARAMETERS['mmin'], m_high=BGP_PARAMETERS['m_high'], maximum_mass=BGP_PARAMETERS['maximum_mass'], mmin_2=BGP_PARAMETERS['mmin_2'], delta_m_2=BGP_PARAMETERS['delta_m_2'], fiducial=None, nodes=MASS_GRID_NODES)
+
+   Bases: :py:obj:`GWForge.population_fisher.base.PopulationModel`
+
+
+   BGP primary mass and power-law mass ratio, with analytic scores.
+
+   :ivar parameter_names: The eleven free hyper-parameters, using
+                          :class:`GWForge.population.mass.Mass`'s spelling so that a generation
+                          config and a Fisher config read the same.
+   :vartype parameter_names: list of str
+   :ivar mmin, m_high, maximum_mass: Support parameters, fixed by construction: hard cutoffs have a
+                                     constant score, so their centred score vanishes and they are not
+                                     measurable within Term I.
+
+   :vartype mmin, m_high, maximum_mass: float
+
+
+   .. py:attribute:: parameter_names
+      :value: ['alpha_1', 'alpha_2', 'm_break', 'lam_0', 'lam_1', 'mpp_1', 'sigpp_1', 'mpp_2', 'sigpp_2',...
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['mass_1_source']
+
+
+
+   .. py:attribute:: mmin
+
+
+   .. py:attribute:: mmin_2
+
+
+   .. py:attribute:: m_high
+
+
+   .. py:attribute:: maximum_mass
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: delta_m_2
+
+
+   .. py:attribute:: grid
+
+
+   .. py:method:: dlog_prob_dmasses(events, parameters)
+
+      ``(d ln p / d m_1, d ln p / d m_2)`` at fixed hyper-parameters.
+
+      :returns: ``(d ln p / d m_1, d ln p / d m_2)``, ``nan`` outside the support.
+      :rtype: tuple of numpy.ndarray
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 11)``.
+
+
+
+.. py:data:: DEFAULT_MAXIMUM_SPIN
+   :value: 1.0
+
+
+.. py:data:: DEFAULT_MINIMUM_COSINE_TILT
+   :value: -1.0
+
+
+.. py:class:: DefaultSpin(fiducial=None, maximum_spin=DEFAULT_MAXIMUM_SPIN, minimum_cosine_tilt=DEFAULT_MINIMUM_COSINE_TILT)
+
+   Bases: :py:obj:`GWForge.population_fisher.base.PopulationModel`
+
+
+   GWTC-5.0 Default BBH spins: truncated-Gaussian magnitudes, mixture tilts.
+
+   :ivar parameter_names: ``["mu_chi", "sigma_chi", "mu_t", "sigma_t", "xi_spin"]`` -- the names
+                          ``GWForge.population.spin.Spin`` takes in ``spin-parameters``. The
+                          posterior files call ``mu_t``/``sigma_t`` ``mu_spin``/``sigma_spin``.
+
+   :vartype parameter_names: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: ['mu_chi', 'sigma_chi', 'mu_t', 'sigma_t', 'xi_spin']
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['a_1', 'a_2']
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: maximum_spin
+
+
+   .. py:attribute:: minimum_cosine_tilt
+
+
+   .. py:attribute:: isotropic_density
+
+
+   .. py:method:: check_events(events)
+
+      Raise if the magnitudes or either spelling of the tilts is missing.
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 5)``.
+
+
+
+.. py:data:: NORMALISATION_NODES
+   :value: 4000
+
+
+.. py:class:: MadauDickinsonRedshift(maximum_redshift=10.0, cosmology=None, fiducial=None, nodes=NORMALISATION_NODES)
+
+   Bases: :py:obj:`GWForge.population_fisher.base.PopulationModel`
+
+
+   Merger-rate density following the Madau-Dickinson shape.
+
+   :ivar parameter_names: ``["gamma", "kappa", "z_peak"]`` -- the names
+                          :class:`GWForge.population.redshift.Redshift` uses, so a generation
+                          config and a Fisher config read the same.
+
+   :vartype parameter_names: list of str
+
+
+   .. py:attribute:: parameter_names
+      :value: ['gamma', 'kappa', 'z_peak']
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['redshift']
+
+
+
+   .. py:attribute:: maximum_redshift
+
+
+   .. py:attribute:: cosmology
+      :value: None
+
+
+
+   .. py:attribute:: fiducial
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:method:: log_shape(redshift, parameters)
+
+      ``ln psi(z)``: the Madau-Dickinson shape alone, without the measure.
+
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: shape_gradient(redshift, parameters)
+
+      ``d ln psi / dLambda``, shape ``(n, 3)``.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, 3)``.
+
+
+
+.. py:data:: OBSERVABLE_KEYS
+   :value: ('mass_1', 'mass_2', 'luminosity_distance')
+
+
+.. py:class:: SpectralSirenModel(mass_model, redshift_model, spin_model=None, cosmology=None, cosmology_parameters=COSMOLOGY_PARAMETERS, nodes=None)
+
+   Bases: :py:obj:`GWForge.population_fisher.base.PopulationModel`
+
+
+   Source-frame population observed in the detector frame, cosmology free.
+
+   :ivar parameter_names: Mass, then redshift, then spin, then the cosmology parameters.
+   :vartype parameter_names: list of str
+   :ivar maximum_redshift: Upper edge of the redshift support, taken from the redshift model.
+
+   :vartype maximum_redshift: float
+
+
+   .. py:attribute:: mass_model
+
+
+   .. py:attribute:: redshift_model
+
+
+   .. py:attribute:: spin_model
+      :value: None
+
+
+
+   .. py:attribute:: cosmology_parameters
+      :value: ['H0', 'Om0', 'w0']
+
+
+
+   .. py:attribute:: maximum_redshift
+
+
+   .. py:attribute:: blocks
+
+
+   .. py:attribute:: parameter_names
+      :value: []
+
+
+
+   .. py:attribute:: event_keys
+      :value: ['mass_1', 'mass_2', 'luminosity_distance']
+
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:property:: fiducial
+
+      Block fiducials plus the cosmology, merged live.
+
+
+   .. py:method:: log_prob(events, parameters)
+
+      See :meth:`GWForge.population_fisher.base.PopulationModel.log_prob`.
+
+
+
+   .. py:method:: analytic_score(events, parameters)
+
+      Closed-form score, ``(n_events, len(parameter_names))``.
+
+
+

@@ -1,0 +1,86 @@
+GWForge.population_fisher.fit
+=============================
+
+.. py:module:: GWForge.population_fisher.fit
+
+.. autoapi-nested-parse::
+
+   Maximum-likelihood fits of a population model to a set of samples.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.fit.SIMPLEX_PARAMETERS
+   GWForge.population_fisher.fit.FIT_OPTIONS
+   GWForge.population_fisher.fit.OUT_OF_SUPPORT_PENALTY
+   GWForge.population_fisher.fit.DEFAULT_BOUNDS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.population_fisher.fit.fit_model
+   GWForge.population_fisher.fit.compare_to
+
+
+Module Contents
+---------------
+
+.. py:data:: SIMPLEX_PARAMETERS
+   :value: ('lam_0', 'lam_1')
+
+
+.. py:data:: FIT_OPTIONS
+
+.. py:data:: OUT_OF_SUPPORT_PENALTY
+   :value: 100000000.0
+
+
+.. py:data:: DEFAULT_BOUNDS
+
+.. py:function:: fit_model(model, samples, free_parameters=None, start=None, bounds=None, fixed_parameters=None)
+
+   Fit a population model to samples by maximum likelihood.
+
+   :param model:
+   :type model: GWForge.population_fisher.base.PopulationModel
+   :param samples: Event parameters to fit to. For a fiducial, these should be *all*
+                   injections, not just the detected ones: the population model describes
+                   the astrophysical population, and fitting to the detected subset would
+                   absorb the selection function into the hyper-parameters.
+   :type samples: dict
+   :param free_parameters: Defaults to every hyper-parameter not in ``fixed_parameters``.
+   :type free_parameters: sequence of str or None
+   :param start: Starting point. Defaults to ``model.fiducial``.
+   :type start: dict or None
+   :param bounds: Name to ``(low, high)``. Merged onto :data:`DEFAULT_BOUNDS`.
+   :type bounds: dict or None
+   :param fixed_parameters:
+   :type fixed_parameters: dict or None
+
+   :returns: The fitted values, merged onto the starting point, with the keys
+             ``"_success"``, ``"_message"`` and ``"_mean_log_prob"`` describing the
+             optimisation.
+   :rtype: dict
+
+
+.. py:function:: compare_to(fitted, reference, names)
+
+   A plain-text table of fitted values against the values used to generate.
+
+   :param fitted:
+   :type fitted: dict
+   :param reference:
+   :type reference: dict
+   :param names:
+   :type names: sequence of str
+
+   :rtype: str
+
+

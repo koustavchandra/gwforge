@@ -1,0 +1,107 @@
+GWForge.conversion
+==================
+
+.. py:module:: GWForge.conversion
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.conversion.generate_detector_frame_parameters
+   GWForge.conversion.get_lambda
+   GWForge.conversion.get_safe_signal_durations
+   GWForge.conversion.time_to_coalescence
+   GWForge.conversion.chirp_mass_and_symmetric_mass_ratio
+
+
+Module Contents
+---------------
+
+.. py:function:: generate_detector_frame_parameters(samples)
+
+   Generate detector frame parameters
+   :param sample:
+   :type sample: dict, pandas.DataFrame
+
+   :returns: **output_sample**
+   :rtype: dict, pandas.DataFrame
+
+
+.. py:function:: get_lambda(file, source_mass)
+
+   Retrieve Lambda (tidal deformability) for a given source mass from a data file.
+
+   :param file: The path to the data file containing mass and Lambda information.
+   :type file: str
+   :param source_mass: The mass for which to retrieve the corresponding Lambda.
+   :type source_mass: float
+
+   :returns: The Lambda value interpolated for the given source mass.
+   :rtype: float
+
+
+.. py:function:: get_safe_signal_durations(mass_1, mass_2, spin_1z, spin_2z, waveform_minimum_frequency, safety=1.1, approximant='IMRPhenomXPHM')
+
+   Calculate the safe signal durations for gravitational waveforms.
+
+   :param mass_1: The mass of the primary compact object(s) in solar masses.
+   :type mass_1: float or array-like
+   :param mass_2: The mass of the secondary compact object(s) in solar masses.
+   :type mass_2: float or array-like
+   :param spin_1z: The z-component of the spin of the primary compact object(s).
+   :type spin_1z: float or array-like
+   :param spin_2z: The z-component of the spin of the secondary compact object(s).
+   :type spin_2z: (float or array-like)
+   :param waveform_minimum_frequency (float): The minimum frequency of the gravitational waveform.
+   :param safety (float: A safety factor to adjust the calculated durations. [Default: 1.1]
+   :param optional): A safety factor to adjust the calculated durations. [Default: 1.1]
+   :param approximant (str: The waveform approximant to use. [Default: 'IMRPhenomXPHM']
+   :param optional): The waveform approximant to use. [Default: 'IMRPhenomXPHM']
+
+   :returns: The safe signal durations in seconds.
+   :rtype: float or array-like
+
+   :raises ValueError:: If any of the input arrays (mass_1, mass_2, spin_1z, spin_2z) is not a float array.
+   :raises RuntimeError:: If the provided waveform approximant is not supported.
+
+
+.. py:function:: time_to_coalescence(frequency, chirp_mass, symmetric_mass_ratio, mode=2)
+
+   Time remaining to merger at a given frequency, to 3.5PN.
+
+   This is the time-frequency relation that turns the frequency-domain response
+   into a time-dependent one: the bin at frequency :math:`f` is emitted
+   :math:`\tau(f)` seconds before merger, so the Earth's orientation there is
+   the orientation at ``geocent_time - tau(f)``.
+
+   Uses eq. (3.8b) of `arXiv:0907.0700 <https://arxiv.org/abs/0907.0700>`_.
+
+   :param frequency: Frequency in Hz.
+   :type frequency: array_like
+   :param chirp_mass: Detector-frame chirp mass in solar masses.
+   :type chirp_mass: float
+   :param symmetric_mass_ratio: :math:`\eta = m_1 m_2 / (m_1+m_2)^2`.
+   :type symmetric_mass_ratio: float
+   :param mode: Harmonic mode number. Mode ``m`` reaches a given frequency when the
+                dominant quadrupole is at :math:`2f/m`, so ``tau_m(f) = tau_2(2f/m)``.
+   :type mode: int
+
+   :returns: Seconds before coalescence, positive and decreasing with frequency.
+   :rtype: numpy.ndarray
+
+
+.. py:function:: chirp_mass_and_symmetric_mass_ratio(parameters)
+
+   Extract ``(chirp_mass, symmetric_mass_ratio)`` from a parameter dict.
+
+   Accepts any of the mass parameterisations GWForge and bilby pass around:
+   component masses, chirp mass with mass ratio, or chirp mass with symmetric
+   mass ratio.
+
+   :returns: ``None`` when the masses cannot be determined -- e.g. a custom non-CBC
+             source model -- in which case the caller falls back to a static response.
+   :rtype: tuple of float, or None
+
+

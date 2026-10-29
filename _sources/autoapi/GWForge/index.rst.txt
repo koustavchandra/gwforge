@@ -1,0 +1,24 @@
+GWForge
+=======
+
+.. py:module:: GWForge
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/conversion/index
+   /autoapi/GWForge/cosmology/index
+   /autoapi/GWForge/fisher/index
+   /autoapi/GWForge/glitch/index
+   /autoapi/GWForge/ifo/index
+   /autoapi/GWForge/inject/index
+   /autoapi/GWForge/plotting/index
+   /autoapi/GWForge/population/index
+   /autoapi/GWForge/population_fisher/index
+   /autoapi/GWForge/utils/index
+
+

@@ -1,0 +1,27 @@
+GWForge.population_fisher
+=========================
+
+.. py:module:: GWForge.population_fisher
+
+.. autoapi-nested-parse::
+
+   Population (hyper-parameter) Fisher forecasting for GWForge.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/population_fisher/base/index
+   /autoapi/GWForge/population_fisher/catalogue/index
+   /autoapi/GWForge/population_fisher/compare/index
+   /autoapi/GWForge/population_fisher/config/index
+   /autoapi/GWForge/population_fisher/fit/index
+   /autoapi/GWForge/population_fisher/model/index
+   /autoapi/GWForge/population_fisher/plot/index
+   /autoapi/GWForge/population_fisher/population_fisher_term_I/index
+
+

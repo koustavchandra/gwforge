@@ -1,0 +1,150 @@
+GWForge.utils
+=============
+
+.. py:module:: GWForge.utils
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   GWForge.utils.GWLATEX_LABELS
+   GWForge.utils.pycbc_labels
+   GWForge.utils.reference_prior_dict
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   GWForge.utils.remove_special_characters
+   GWForge.utils.hdf_append
+   GWForge.utils.split_duration
+   GWForge.utils.find_frame_files
+   GWForge.utils.source_type
+   GWForge.utils.split_odd_even
+   GWForge.utils.generate_frame_file_sublists
+   GWForge.utils.update_ET_channels
+   GWForge.utils.save_frame_files
+
+
+Module Contents
+---------------
+
+.. py:function:: remove_special_characters(input_string, characters_to_remove=['+', '-', '_', ' ', '#'])
+
+   Remove specified special characters from a given input string.
+
+   :param input_string: The input string from which to remove special characters.
+   :type input_string: str
+   :param characters_to_remove: A list of special characters to remove from the input string. Defaults to ["+", "-", "_", " "].
+   :type characters_to_remove: list of str, optional
+
+   :returns: The input string with specified special characters removed.
+   :rtype: str
+
+
+.. py:function:: hdf_append(f, key, value)
+
+   Append a value to an HDF5 dataset or create a new dataset if the key does not exist.
+
+   :param f: An HDF5 file object.
+   :type f: (h5py.File)
+   :param key: The key to identify the dataset within the HDF5 file.
+   :type key: (str)
+   :param value: The value to be appended to the dataset.
+   :type value: (float or numpy.ndarray)
+   :param If the dataset with the specified key already exists:
+   :param the function appends the given value to the existing dataset.:
+   :param If the dataset does not exist:
+   :param a new dataset is created with the specified key:
+   :param and the value is stored.:
+   :param Note:
+   :type Note: The function ensures that the stored value is a 1-dimensional array.
+
+
+.. py:data:: GWLATEX_LABELS
+
+.. py:function:: split_duration(duration, size=4096.0)
+
+   Split a duration into chunks of a specified size.
+
+   :param - duration: The total duration to split
+   :type - duration: int
+   :param - size: The size of each chunk [Default:4096]
+   :type - size: int
+   :param Returns:
+   :param list:
+   :type list: A list containing chunks of the specified size.
+
+
+.. py:function:: find_frame_files(directory, filePattern='*gwf', start_time=None, end_time=None)
+
+   Get a list of frame files within a given directory optionally filtered by time range
+   :param directory: Path to frames directory
+   :type directory: str
+   :param filepattern: A Unix shell-style wildcard pattern to match files. [Default ``*gwf``]
+   :type filepattern: str
+   :param start_time: GPS start time for time range filter
+   :type start_time: float
+   :param end_time: GPS end time for time range filter
+   :type end_time: float
+
+
+.. py:function:: source_type(name)
+
+   Canonical source-type token: ``bhns`` for a neutron-star--black-hole binary.
+
+   ``nsbh`` is accepted everywhere as an alias; everything else is lowercased.
+
+
+.. py:function:: split_odd_even(items)
+
+   Split a list into its odd-indexed and even-indexed sublists.
+
+   Used by the workflow generator to schedule injection jobs for adjacent data
+   segments in two non-overlapping passes: because neighbouring segments share
+   frame files (window overlap), the even-indexed segments are made to depend on
+   the odd-indexed ones so that no two adjacent segments are written concurrently.
+
+   :param items: The list to split.
+   :type items: list
+
+   :returns: **tuple(list, list)**
+   :rtype: (odd-indexed items, even-indexed items)
+
+   .. rubric:: Example
+
+   >>> split_odd_even(['a', 'b', 'c', 'd', 'e'])
+   (['b', 'd'], ['a', 'c', 'e'])
+
+
+.. py:function:: generate_frame_file_sublists(frame_files, window_size=3)
+
+   Generate sublists of frame files with a specified window size.
+
+   :param frame_files: A list of file paths representing frame files.
+   :type frame_files: list
+   :param window_size: The size of the sliding window to create sublists. [Defaults: 3]
+   :type window_size: int, optional
+
+   :returns: **list**
+   :rtype: A list of sublists containing frame file paths.
+
+   .. rubric:: Example
+
+   >>> frame_files = ['file1.gwf', 'file2.gwf', 'file3.gwf', 'file4.gwf']
+   >>> generate_frame_file_sublists(frame_files, window_size=2)
+   [['file1.gwf', 'file2.gwf'], ['file2.gwf', 'file3.gwf'], ['file3.gwf', 'file4.gwf']]
+
+
+.. py:function:: update_ET_channels(channel_dict)
+
+.. py:function:: save_frame_files(ifo, start_time, duration, ifo_directory)
+
+.. py:data:: pycbc_labels
+
+.. py:data:: reference_prior_dict
+

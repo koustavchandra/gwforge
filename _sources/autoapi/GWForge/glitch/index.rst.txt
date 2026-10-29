@@ -1,0 +1,15 @@
+GWForge.glitch
+==============
+
+.. py:module:: GWForge.glitch
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/GWForge/glitch/sine_gaussian/index
+
+

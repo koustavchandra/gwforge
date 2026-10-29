@@ -5,6 +5,7 @@ matplotlib
 pandas>=2.1.4
 astropy>=6.0.0
 bilby>=2.7.0
+bilby_cython
 lalsuite
 emcee>=3.1.6
 corner>=2.2.0

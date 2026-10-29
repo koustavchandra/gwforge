@@ -7,5 +7,24 @@ To install this library for development or use, follow the instructions [here](h
 
 Heavily under-development documentation is accessible [here](https://koustavchandra.github.io/gwforge/index.html)
 
+# Citation
+If you use `gwforge`, please cite:
+
+```bibtex
+@article{Chandra:2024dhf,
+    author = "Chandra, Koustav",
+    title = "{gwforge: a user-friendly package to generate gravitational-wave mock data}",
+    eprint = "2407.21109",
+    archivePrefix = "arXiv",
+    primaryClass = "gr-qc",
+    doi = "10.1088/1361-6382/ad9b68",
+    journal = "Class. Quant. Grav.",
+    volume = "42",
+    number = "2",
+    pages = "025003",
+    year = "2025"
+}
+```
+
 # License
-`gwforge` is released under the MIT License. (see [here](https://opensource.org/license/mit/) for a description of the license).
+`gwforge` is released under the MIT License. (see [LICENSE](LICENSE)).
